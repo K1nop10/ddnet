@@ -484,7 +484,7 @@ private:
 	/**
 	 * The activation states of the different extra menus which are toggle by the extra menu button behavior.
 	 */
-	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_5 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
+	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_6 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
 
 	/**
 	 * The currently selected action which is used for direct touch and is changed and used by some button behaviors.
