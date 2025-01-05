@@ -40,8 +40,8 @@ static constexpr std::chrono::nanoseconds BIND_REPEAT_RATE = std::chrono::nanose
 
 static constexpr const char *const CONFIGURATION_FILENAME = "touch_controls.json";
 static constexpr int BUTTON_SIZE_SCALE = 1000000;
-static constexpr int BUTTON_SIZE_MINIMUM = 50000;
-static constexpr int BUTTON_SIZE_MAXIMUM = 500000;
+static constexpr int BUTTON_SIZE_MINIMUM = 0;
+static constexpr int BUTTON_SIZE_MAXIMUM = 1000000;
 
 /* This is required for the localization script to find the labels of the default bind buttons specified in the configuration file:
 Localizable("Move left") Localizable("Move right") Localizable("Jump") Localizable("Prev. weapon") Localizable("Next weapon")
