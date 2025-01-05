@@ -93,6 +93,7 @@ private:
 		EXTRA_MENU_3,
 		EXTRA_MENU_4,
 		EXTRA_MENU_5,
+		EXTRA_MENU_6,
 		NUM_VISIBILITIES
 	};
 
