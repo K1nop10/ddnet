@@ -860,6 +860,10 @@ void CTouchControls::InitVisibilityFunctions()
 	m_aVisibilityFunctions[(int)EButtonVisibility::EXTRA_MENU_5].m_Function = [&]() {
 		return m_aExtraMenuActive[4];
 	};
+	m_aVisibilityFunctions[(int)EButtonVisibility::EXTRA_MENU_6].m_pId = "extra-menu-6";
+	m_aVisibilityFunctions[(int)EButtonVisibility::EXTRA_MENU_6].m_Function = [&]() {
+		return m_aExtraMenuActive[5];
+	};
 }
 
 int CTouchControls::NextActiveAction(int Action) const
@@ -1434,7 +1438,7 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 	const json_value &BehaviorObject = *pBehaviorObject;
 	const json_value &MenuNumber = BehaviorObject["number"];
 	// TODO: Remove json_none backwards compatibility
-	const int MaxNumber = (int)EButtonVisibility::EXTRA_MENU_5 - (int)EButtonVisibility::EXTRA_MENU_1 + 1;
+	const int MaxNumber = (int)EButtonVisibility::EXTRA_MENU_6 - (int)EButtonVisibility::EXTRA_MENU_1 + 1;
 	if(MenuNumber.type != json_none && (MenuNumber.type != json_integer || !in_range<json_int_t>(MenuNumber.u.integer, 1, MaxNumber)))
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s' and ID '%s': attribute 'number' must specify an integer between '%d' and '%d'",
