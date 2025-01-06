@@ -447,7 +447,7 @@ void CTouchControls::CExtraMenuTouchButtonBehavior::WriteToConfiguration(CJsonWr
 // Close All Extra Menus button : You know what I mean.
 CTouchControls::CButtonLabel CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::GetLabel() const
 {
-	return {CButtonLabel::EType::Localizable, localizable("Reset")};
+	return {CButtonLabel::EType::Localizable, Localizable("Reset")};
 }
 void CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::OnDeactivate()
 {
