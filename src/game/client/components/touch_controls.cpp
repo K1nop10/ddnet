@@ -679,7 +679,6 @@ void CTouchControls::CBindTouchButtonBehavior::WriteToConfiguration(CJsonWriter 
 CTouchControls::CButtonLabel CTouchControls::CBindToggleTouchButtonBehavior::GetLabel() const
 {
 	const auto &ActiveCommand = m_vCommands[m_ActiveCommandIndex];
-	};
 	return {ActiveCommand.m_LabelType, ActiveCommand.m_Label.c_str()};
 }
 
