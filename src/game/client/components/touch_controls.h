@@ -1283,7 +1283,7 @@ private:
 		
 		CButtonLabel GetLabel() const override;
 		void OnDeactivate() override;
-	}
+	};
 
 	class CEmoticonTouchButtonBehavior : public CPredefinedTouchButtonBehavior
 	{
