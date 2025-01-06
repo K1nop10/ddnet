@@ -451,7 +451,7 @@ CTouchControls::CButtonLabel CTouchControls::CCloseAllExtraMenuTouchButtonBehavi
 }
 void CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::OnDeactivate()
 {
-	for(int tmp_i = 0;tmp_i < 6;tmp_i++)
+	for(int tmp_i = 0;tmp_i < 999;tmp_i++)
 	m_pTouchControls->m_aExtraMenuActive[tmp_i] = false;
 }
 
