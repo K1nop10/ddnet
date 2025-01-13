@@ -4,9 +4,7 @@
 #define GAME_SERVER_PLAYER_H
 
 #include <base/vmath.h>
-
 #include <engine/shared/protocol.h>
-
 #include <game/alloc.h>
 #include <game/server/save.h>
 
@@ -20,13 +18,6 @@ class CGameContext;
 class IServer;
 struct CNetObj_PlayerInput;
 struct CScorePlayerResult;
-
-enum
-{
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
 
 // player object
 class CPlayer
@@ -147,6 +138,7 @@ private:
 	int64_t m_ForcePauseTime;
 	int64_t m_LastPause;
 	bool m_Afk;
+	int64_t m_ForceAfkTime;
 
 	int m_DefEmote;
 	int m_OverrideEmote;
@@ -214,6 +206,7 @@ public:
 	void AfkTimer();
 	void SetAfk(bool Afk);
 	void SetInitialAfk(bool Afk);
+	void ForceAfk();
 	bool IsAfk() const { return m_Afk; }
 
 	int64_t m_LastPlaytime;
