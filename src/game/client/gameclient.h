@@ -223,6 +223,7 @@ private:
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConReadyChange7(IConsole::IResult *pResult, void *pUserData);
+	static void Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
