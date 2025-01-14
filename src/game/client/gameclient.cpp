@@ -173,6 +173,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
+	Console()->Register("extra_menu_visibility", "i[extra-menu-number] i[0,1]", CFGFLAG_CLIENT, Con_ExtraMenuVisibility, this, "Open&Close the certain extra menu.");
 
 	// register tune zone command to allow the client prediction to load tunezones from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
@@ -2836,6 +2837,17 @@ void CGameClient::ConReadyChange7(IConsole::IResult *pResult, void *pUserData)
 	CGameClient *pClient = static_cast<CGameClient *>(pUserData);
 	if(pClient->Client()->State() == IClient::STATE_ONLINE)
 		pClient->SendReadyChange7();
+}
+
+void CGameClient::Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int tmp_n = pResult->GetInteger(0);
+	int tmp_b = pResult->GetInteger(1);
+	if(tmp_b)
+		pSelf->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = true;
+	else
+		pSelf->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = false;
 }
 
 void CGameClient::ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
