@@ -25,6 +25,8 @@
 #include <engine/textrender.h>
 #include <engine/warning.h>
 
+#include <game/client/components/touch_controls.h>
+
 #include "graph.h"
 #include "smooth_time.h"
 
@@ -446,6 +448,8 @@ public:
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
 	static void Con_SaveReplay(IConsole::IResult *pResult, void *pUserData);
+
+	static void Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUserData);
 
 	void RegisterCommands();
 
