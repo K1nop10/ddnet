@@ -1489,6 +1489,7 @@ private:
 	/**
 	 * The activation states of the different extra menus which are toggle by the extra menu button behavior.
 	 */
+	public: 
 	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_999 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
 
 	/**
