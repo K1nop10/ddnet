@@ -4107,9 +4107,9 @@ void CClient::Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUserDat
 	int tmp_n = pResult->GetInteger(0);
 	int tmp_b = pResult->GetInteger(1);
 	if(tmp_b)
-		m_pTouchControls->m_aExtraMenuActive[tmp_n - 1] = true;
+		pSelf->GameClient()->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = true;
 	else
-		m_pTouchControls->m_aExtraMenuActive[tmp_n - 1] = false;
+		pSelf->GameClient()->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = false;
 }
 
 void CClient::UpdateAndSwap()
