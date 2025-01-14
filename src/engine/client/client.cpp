@@ -52,9 +52,6 @@
 #include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/components/touch_controls.h>
-#include <game/client/gameclient.h>
-
 #include "client.h"
 #include "demoedit.h"
 #include "friends.h"
@@ -4101,17 +4098,6 @@ void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
 
-void CClient::Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUserData)
-{
-	CClient *pSelf = (CClient *)pUserData;
-	int tmp_n = pResult->GetInteger(0);
-	int tmp_b = pResult->GetInteger(1);
-	if(tmp_b)
-		pSelf->GameClient()->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = true;
-	else
-		pSelf->GameClient()->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = false;
-}
-
 void CClient::UpdateAndSwap()
 {
 	Input()->Update();
@@ -4456,7 +4442,6 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Register("save_replay", "?i[length] ?r[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
-	m_pConsole->Register("extra_menu_visibility", "i[extra-menu-number] i[0,1]", CFGFLAG_CLIENT, Con_ExtraMenuVisibility, this, "Open&Close the certain extra menu.");
 
 	RustVersionRegister(*m_pConsole);
 
