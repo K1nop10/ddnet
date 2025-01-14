@@ -53,7 +53,7 @@
 #include <game/version.h>
 
 #include <game/client/components/touch_controls.h>
-#include <game/client/components/gameclient.h>
+#include <game/client/gameclient.h>
 
 #include "client.h"
 #include "demoedit.h"
