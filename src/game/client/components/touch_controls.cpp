@@ -315,7 +315,7 @@ void CTouchControls::CTouchButton::Render() const
 			}
 		}
 	}
-	
+	const char* manwhatcanisay = &e;
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
 		m_pTouchControls->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
@@ -327,7 +327,7 @@ void CTouchControls::CTouchButton::Render() const
 	else
 	{
 		const char *pLabel = LabelData.m_Type == CButtonLabel::EType::LOCALIZED ? Localize(LabelData.m_pLabel) : LabelData.m_pLabel;
-		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?&e:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
+		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?manwhatcanisay:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
 }
 
