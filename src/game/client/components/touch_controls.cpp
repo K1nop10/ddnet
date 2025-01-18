@@ -268,6 +268,53 @@ void CTouchControls::CTouchButton::Render() const
 	m_ScreenRect.Margin(10.0f, &LabelRect);
 	SLabelProperties LabelProps;
 	LabelProps.m_MaxWidth = LabelRect.w;
+//ForgottenCat Gonna Do Sonething Unique!
+	int j=0;
+	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='§')
+	{
+		int tmp_length = str_length(LabelData.m_pLabel);
+		int a[1000]={},char d[1000],char e[1000];
+		char *b = LabelData.m_pLabel;
+		for(int i=0;i<tmp_length;i++)
+		{
+			if(*(b+i) == '§' && i < tmp_length-1)
+			{
+				a[j] = i - 2*j;
+				d[j] = *(b+i+1);
+				j++;i++;
+			}
+		}
+		if(j!=0)
+		{
+			for(int i=0;i<j;i++)
+			{
+				int tmpf=0;
+				if(a[i+1])
+					tmpf=1;
+				switch(d[i])
+				{
+					case 'c':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(1.0f,0.0f,0.0f,1.0f));break;
+					case 'a':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(0.6f,1.0f,0.6f,1.0f));break;
+					case 'b':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(0.0f,1.0f,1.0f,1.0f));break;
+					case 'd':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(1.0f,0.8f,1.0f,1.0f));break;
+					case 'e':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(1.0f,1.0f,0.0f,1.0f));break;
+					case 'f':LabelProps.m_vColorSplits.emplace_back(a[i],(tmpf)?a[i+1]-a[i]:tmp_length-2*j-a[i],ColorRGBA(1.0f,1.0f,1.0f,1.0f));break;
+				}
+			}
+			int k=0;
+			for(int i=0;i<tmp_length;i++)
+			{
+				if(*(b+i) == '§')
+				{
+					i++;
+					continue;
+				}
+				e[k] = *(b+i);
+				k++;
+			}
+		}
+	}
+	
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
 		m_pTouchControls->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
@@ -279,7 +326,7 @@ void CTouchControls::CTouchButton::Render() const
 	else
 	{
 		const char *pLabel = LabelData.m_Type == CButtonLabel::EType::LOCALIZED ? Localize(LabelData.m_pLabel) : LabelData.m_pLabel;
-		m_pTouchControls->Ui()->DoLabel(&LabelRect, pLabel, FontSize, TEXTALIGN_MC, LabelProps);
+		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?&e:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
 }
 
@@ -447,7 +494,7 @@ void CTouchControls::CExtraMenuTouchButtonBehavior::WriteToConfiguration(CJsonWr
 // Close All Extra Menus button : You know what I mean.
 CTouchControls::CButtonLabel CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::GetLabel() const
 {
-	return {CButtonLabel::EType::LOCALIZED, Localizable("Reset")};
+	return {CButtonLabel::EType::PLAIN, "Reset"};
 }
 void CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::OnDeactivate()
 {
