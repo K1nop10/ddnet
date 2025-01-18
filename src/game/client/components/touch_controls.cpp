@@ -315,7 +315,7 @@ void CTouchControls::CTouchButton::Render() const
 			}
 		}
 	}
-	const char* manwhatcanisay = &e;
+	const char* manwhatcanisay = reinterpret_cast<const char*>(e);
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
 		m_pTouchControls->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
