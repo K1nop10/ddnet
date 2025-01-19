@@ -331,7 +331,9 @@ void CTouchControls::CTouchButton::Render()
 			m_RainbowTimer = time_get_nanoseconds();
 			m_Rainbow += 1.0f;
 		}
-		float ar,ag,ab;
+		float ar;
+		float ag;
+		float ab;
 		m_Rainbow = (m_Rainbow >= 600.0f) ? 0.0f:m_Rainbow;
 		if(m_Rainbow <= 100 && m_Rainbow >= 0)
 		{
