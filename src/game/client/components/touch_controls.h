@@ -1197,7 +1197,7 @@ private:
 		bool IsInside(vec2 TouchPosition) const;
 		void UpdateVisibility();
 		bool IsVisible() const;
-		void Render() const;
+		void Render();
 		void WriteToConfiguration(CJsonWriter *pWriter);
 	};
 
