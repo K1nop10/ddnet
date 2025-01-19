@@ -336,7 +336,7 @@ void CTouchControls::CTouchButton::Render()
 		float ar;
 		float ag;
 		float ab;
-		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 1000000 * 600;
+		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 2000000 * 600;
 		m_pTouchControls->m_Rainbow = (m_pTouchControls->m_Rainbow >= 600.0f) ? m_pTouchControls->m_Rainbow - 600.0f:m_pTouchControls->m_Rainbow;
 		rainbownum = (rainbownum >= 600.0f) ? rainbownum - 600.0f : rainbownum;
 		if(rainbownum <= 100 && rainbownum >= 0)
