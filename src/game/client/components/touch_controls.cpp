@@ -273,6 +273,8 @@ void CTouchControls::CTouchButton::Render()
 	int j=0;
 	char e[1000]="";
 	LabelProps.m_vColorSplits.clear();
+	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
+	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
 	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%' && LabelData.m_Type != CButtonLabel::EType::RAINBOW && !m_pTouchControls->m_AllRainbow)
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
@@ -322,54 +324,56 @@ void CTouchControls::CTouchButton::Render()
 	{
 		if(!fknano)
 		{
-			m_RainbowTimer = time_get_nanoseconds();
-			fknano = 1;
-			m_Rainbow = 0.0f;
+			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
+			m_pTouchControls->fknano = 1;
+			m_pTouchControls->m_Rainbow = 0.0f;
 		}
-		if(time_get_nanoseconds() - m_RainbowTimer >= RAINBOW_SPEED)
+		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimer >= RAINBOW_SPEED)
 		{
-			m_RainbowTimer = time_get_nanoseconds();
-			m_Rainbow += 1.0f;
+			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
+			m_pTouchControls->m_Rainbow += 1.0f;
 		}
 		float ar;
 		float ag;
 		float ab;
-		m_Rainbow = (m_Rainbow >= 600.0f) ? 0.0f:m_Rainbow;
-		if(m_Rainbow <= 100 && m_Rainbow >= 0)
+		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 1000000 * 600;
+		m_pTouchControls->m_Rainbow = (m_pTouchControls->m_Rainbow >= 600.0f) ? m_pTouchControls->m_Rainbow - 600.0f:m_pTouchControls->m_Rainbow;
+		rainbownum = (rainbownum >= 600.0f) ? rainbownum - 600.0f : rainbownum;
+		if(rainbownum <= 100 && rainbownum >= 0)
 		{
 			ar = 1.0f;
-			ag = m_Rainbow / 100.0f;
+			ag = rainbownum / 100.0f;
 			ab = 0.0f;
 		}
-		if(m_Rainbow > 100 && m_Rainbow <= 200)
+		if(rainbownum > 100 && rainbownum <= 200)
 		{
-			ar = (200 - m_Rainbow) / 100.0f;
+			ar = (200 - rainbownum) / 100.0f;
 			ag = 1.0f;
 			ab = 0.0f;
 		}
-		if(m_Rainbow > 200 && m_Rainbow <= 300)
+		if(rainbownum > 200 && rainbownum <= 300)
 		{
 			ar = 0.0f;
 			ag = 1.0f;
-			ab = (m_Rainbow - 200) / 100.0f;
+			ab = (rainbownum - 200) / 100.0f;
 		}
-		if(m_Rainbow > 300 && m_Rainbow <= 400)
+		if(rainbownum > 300 && rainbownum <= 400)
 		{
 			ar = 0.0f;
-			ag = (400 - m_Rainbow) / 100.0f;
+			ag = (400 - rainbownum) / 100.0f;
 			ab = 1.0f;
 		}
-		if(m_Rainbow > 400 && m_Rainbow <= 500)
+		if(rainbownum > 400 && rainbownum <= 500)
 		{
-			ar = (m_Rainbow - 400) / 100.0f;
+			ar = (rainbownum - 400) / 100.0f;
 			ag = 0.0f;
 			ab = 1.0f;
 		}
-		if(m_Rainbow > 500 && m_Rainbow <= 600)
+		if(rainbownum > 500 && rainbownum <= 600)
 		{
 			ar = 1.0f;
 			ag = 0.0f;
-			ab = (m_Rainbow - 600) / 100.0f;
+			ab = (600 - rainbownum) / 100.0f;
 		}
 		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),ColorRGBA(ar,ag,ab,1.0f));
 		j = 0;
