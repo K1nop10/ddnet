@@ -271,7 +271,8 @@ void CTouchControls::CTouchButton::Render() const
 //ForgottenCat Gonna Do Sonething Unique!
 	int j=0;
 	char e[1000]="";
-	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%')
+	LabelProps.m_vColorSplits.clear();
+	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%' && LabelData.m_Type != CButtonLabel::EType::RAINBOW)
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
 		int a[1000]={};char d[1000]="";
@@ -287,7 +288,6 @@ void CTouchControls::CTouchButton::Render() const
 		}
 		if(j!=0)
 		{
-			LabelProps.m_vColorSplits.clear();
 			for(int i=0;i<j;i++)
 			{
 				int tmpf=0;
