@@ -236,7 +236,7 @@ bool CTouchControls::CTouchButton::IsVisible() const
 }
 
 // TODO: Optimization: Use text and quad containers for rendering
-void CTouchControls::CTouchButton::Render() const
+void CTouchControls::CTouchButton::Render()
 {
 	const ColorRGBA ButtonColor = m_pBehavior->IsActive() ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 
@@ -320,6 +320,12 @@ void CTouchControls::CTouchButton::Render() const
 	const char* manwhatcanisay = static_cast<const char*>(e);
 	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW)
 	{
+		if(!fknano)
+		{
+			m_RainbowTimer = time_get_nanoseconds();
+			fknano = 1;
+			m_Rainbow = 0.0f;
+		}
 		if(time_get_nanoseconds() - m_RainbowTimer >= RAINBOW_SPEED)
 		{
 			m_RainbowTimer = time_get_nanoseconds();
