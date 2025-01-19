@@ -322,7 +322,7 @@ void CTouchControls::CTouchButton::Render()
 	const char* manwhatcanisay = static_cast<const char*>(e);
 	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW || m_pTouchControls->m_AllRainbow)
 	{
-		if(!fknano)
+		if(!m_pTouchControls->fknano)
 		{
 			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
 			m_pTouchControls->fknano = 1;
