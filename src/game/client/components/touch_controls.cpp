@@ -270,11 +270,11 @@ void CTouchControls::CTouchButton::Render() const
 	LabelProps.m_MaxWidth = LabelRect.w;
 //ForgottenCat Gonna Do Sonething Unique!
 	int j=0;
-	char e[1000];
+	char e[1000]="";
 	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%')
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
-		int a[1000]={};char d[1000];
+		int a[1000]={};char d[1000]="";
 		const char *b = LabelData.m_pLabel;
 		for(int i=0;i<tmp_length;i++)
 		{
