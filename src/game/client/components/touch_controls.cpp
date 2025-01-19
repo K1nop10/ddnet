@@ -273,7 +273,7 @@ void CTouchControls::CTouchButton::Render()
 	int j=0;
 	char e[1000]="";
 	LabelProps.m_vColorSplits.clear();
-	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%' && LabelData.m_Type != CButtonLabel::EType::RAINBOW)
+	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%' && LabelData.m_Type != CButtonLabel::EType::RAINBOW && !m_AllRainbow)
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
 		int a[1000]={};char d[1000]="";
@@ -318,7 +318,7 @@ void CTouchControls::CTouchButton::Render()
 		}
 	}
 	const char* manwhatcanisay = static_cast<const char*>(e);
-	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW)
+	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW || m_AllRainbow)
 	{
 		if(!fknano)
 		{
