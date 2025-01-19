@@ -36,6 +36,7 @@ static constexpr const char *const ACTION_COMMANDS[] = {/* unused */ "", "+fire"
 
 static constexpr std::chrono::milliseconds LONG_TOUCH_DURATION = 500ms;
 static constexpr std::chrono::milliseconds BIND_REPEAT_INITIAL_DELAY = 250ms;
+static constexpr std::chrono::milliseconds RAINBOW_SPEED = 6ms;
 static constexpr std::chrono::nanoseconds BIND_REPEAT_RATE = std::chrono::nanoseconds(1s) / 15;
 
 static constexpr const char *const CONFIGURATION_FILENAME = "touch_controls.json";
@@ -317,6 +318,59 @@ void CTouchControls::CTouchButton::Render() const
 		}
 	}
 	const char* manwhatcanisay = static_cast<const char*>(e);
+	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW)
+	{
+		if(!m_RainbowTimer)
+		{
+			m_RainbowTimer = time_get_nanoseconds();
+			m_Rainbow = 0.0f;
+		}
+		else if(time_get_nanoseconds() - m_RainbowTimer >= RAINBOW_SPEED)
+		{
+			m_RainbowTimer = time_get_nanoseconds();
+			m_Rainbow += 1.0f;
+		}
+		float ar,ag,ab;
+		m_Rainbow = (m_Rainbow >= 600.0f) ? 0.0f:m_Rainbow;
+		if(m_Rainbow <= 100 && m_Rainbow >= 0)
+		{
+			ar = 1.0f;
+			ag = m_Rainbow / 100.0f;
+			ab = 0.0f;
+		}
+		if(m_Rainbow > 100 && m_Rainbow <= 200)
+		{
+			ar = (200 - m_Rainbow) / 100.0f;
+			ag = 1.0f;
+			ab = 0.0f;
+		}
+		if(m_Rainbow > 200 && m_Rainbow <= 300)
+		{
+			ar = 0.0f;
+			ag = 1.0f;
+			ab = (m_Rainbow - 200) / 100.0f;
+		}
+		if(m_Rainbow > 300 && m_Rainbow <= 400)
+		{
+			ar = 0.0f;
+			ag = (400 - m_Rainbow) / 100.0f;
+			ab = 1.0f;
+		}
+		if(m_Rainbow > 400 && m_Rainbow <= 500)
+		{
+			ar = (m_Rainbow - 400) / 100.0f;
+			ag = 0.0f;
+			ab = 1.0f;
+		}
+		if(m_Rainbow > 500 && m_Rainbow <= 600)
+		{
+			ar = 1.0f;
+			ag = 0.0f;
+			ab = (m_Rainbow - 600) / 100.0f;
+		}
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),ColorRGBA(ar,ag,ab,1.0f));
+		j = 0;
+	}
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
 		m_pTouchControls->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
