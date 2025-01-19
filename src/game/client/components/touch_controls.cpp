@@ -287,7 +287,7 @@ void CTouchControls::CTouchButton::Render() const
 		}
 		if(j!=0)
 		{
-			LabelProps.m_vColorSplits = {};
+			LabelProps.m_vColorSplits.clear();
 			for(int i=0;i<j;i++)
 			{
 				int tmpf=0;
