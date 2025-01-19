@@ -320,12 +320,7 @@ void CTouchControls::CTouchButton::Render() const
 	const char* manwhatcanisay = static_cast<const char*>(e);
 	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW)
 	{
-		if(!m_RainbowTimer)
-		{
-			m_RainbowTimer = time_get_nanoseconds();
-			m_Rainbow = 0.0f;
-		}
-		else if(time_get_nanoseconds() - m_RainbowTimer >= RAINBOW_SPEED)
+		if(time_get_nanoseconds() - m_RainbowTimer >= RAINBOW_SPEED)
 		{
 			m_RainbowTimer = time_get_nanoseconds();
 			m_Rainbow += 1.0f;
