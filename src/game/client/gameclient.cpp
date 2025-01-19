@@ -2856,9 +2856,9 @@ void CGameClient::Con_RainbowOn(IConsole::IResult *pResult, void *pUserData)
 	CGameClient *pSelf = (CGameClient *)pUserData;
 	int fk = pResult->GetInteger(0);
 	if(fk == 2)
-		pSelf->m_TouchControls.m_RainbowOn = !pSelf->m_TouchControls.m_RainbowOn;
+		pSelf->m_TouchControls.m_AllRainbow = !pSelf->m_TouchControls.m_AllRainbow;
 	else
-		pSelf->m_TouchControls.m_RainbowOn = (fk)?true:false;
+		pSelf->m_TouchControls.m_AllRainbow = (fk)?true:false;
 }
 void CGameClient::ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
