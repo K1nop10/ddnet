@@ -1180,7 +1180,8 @@ private:
 		EButtonShape m_Shape;
 		int m_BackgroundCorners; // only used with EButtonShape::RECT
 		float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
-		std::chrono::nanoseconds m_RainbowTimer = time_get_nanoseconds();
+		int fknano = 0;
+		std::chrono::nanoseconds m_RainbowTimer;
 
 		std::vector<CButtonVisibility> m_vVisibilities;
 		std::unique_ptr<CTouchButtonBehavior> m_pBehavior;
