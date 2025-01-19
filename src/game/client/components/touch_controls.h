@@ -1179,9 +1179,6 @@ private:
 
 		EButtonShape m_Shape;
 		int m_BackgroundCorners; // only used with EButtonShape::RECT
-		float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
-		int fknano = 0;
-		std::chrono::nanoseconds m_RainbowTimer;
 
 		std::vector<CButtonVisibility> m_vVisibilities;
 		std::unique_ptr<CTouchButtonBehavior> m_pBehavior;
@@ -1499,6 +1496,9 @@ private:
 	public: 
 	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_999 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
 	bool m_AllRainbow = false;
+	float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
+	int fknano = 0;
+	std::chrono::nanoseconds m_RainbowTimer;
 
 	/**
 	 * The currently selected action which is used for direct touch and is changed and used by some button behaviors.
