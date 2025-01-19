@@ -1136,6 +1136,10 @@ private:
 			 */
 			ICON,
 			/**
+   			* RAINBOW COLOR PLAIN LABELS
+      			*/
+			RAINBOW,
+			/**
 			 * Number of label types.
 			 */
 			NUM_TYPES
@@ -1145,7 +1149,7 @@ private:
 		const char *m_pLabel;
 	};
 
-	static constexpr const char *const LABEL_TYPE_NAMES[(int)CButtonLabel::EType::NUM_TYPES] = {"plain", "localized", "icon"};
+	static constexpr const char *const LABEL_TYPE_NAMES[(int)CButtonLabel::EType::NUM_TYPES] = {"plain", "localized", "icon", "rainbow"};
 
 	class CUnitRect
 	{
