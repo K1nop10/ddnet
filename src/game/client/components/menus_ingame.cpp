@@ -270,6 +270,41 @@ void CMenus::RenderGame(CUIRect MainView)
 			TouchControlsEditor.HMargin((TouchControlsEditor.h - 230.0f) / 2.0f, &TouchControlsEditor);
 			RenderTouchControlsEditor(TouchControlsEditor);
 		}
+		else
+		{
+			char aBuf[256];
+			CUIRect a, b;
+			MainView.HMargin((MainView.h - 230.0f) / 2.0f, &MainView);
+			MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+			MainView.Margin(10.0f, &MainView);
+
+			MainView.HSplitTop(25.0f, &a, &MainView);
+			MainView.HSplitTop(5.0f, nullptr, &MainView);
+			Ui()->DoLabel(&a, Localize("Edit color settings"), 20.0f, TEXTALIGN_MC);
+
+			MainView.HSplitTop(25.0f, &a, &MainView);
+			MainView.HSplitTop(5.0f, nullptr, &MainView);
+			a.VMargin(5.0f, &a);
+			a.VSplitLeft(a.w / 2.0f, &a, &b);
+			Ui()->DoLabel(&a, Localize("Button"), 18.0f, TEXTALIGN_MC);
+			Ui()->DoLabel(&b, Localize("Label"), 18.0f, TEXTALIGN_MC);
+
+			MainView.HSplitTop(25.0f, &a, &MainView);
+			MainView.HSplitTop(5.0f, nullptr, &MainView);
+			a.VSplitLeft(a.w / 2.0f, &a, &b);
+			int BType = DoButton_CheckBox_Number(&g_Config.m_ClButtonColorType, aBuf, g_Config.m_ClButtonColorType, &a);
+			if(BType == 3)
+				g_Config.m_ClButtonColorType = 0;
+			int LType = DoButton_CheckBox_Number(&g_Config.m_ClLabelColorType, aBuf, g_Config.m_ClLabelColorType, &b);
+			if(LType == 3)
+				g_Config.m_ClLabelColorType = 0;
+
+			MainView.HSplitTop(25.0f, &a, &MainView);
+			MainView.HSplitTop(5.0f, nullptr, &MainView);
+			a.VSplitLeft(a.w / 2.0f, &a, &b);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowSpeed, &g_Config.m_ClButtonRainbowSpeed, &a, Localize("Rainbow Speed"), 10, 1000, &CUi::ms_LinearScrollbarScale, 0, "ms");
+
+		}
 	}
 }
 
