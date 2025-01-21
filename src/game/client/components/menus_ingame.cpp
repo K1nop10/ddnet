@@ -273,9 +273,11 @@ void CMenus::RenderGame(CUIRect MainView)
 		else
 		{
 			char aBuf[256];
-			CUIRect a, b;
+			CUIRect a, b, c;
 			MainView.HMargin((MainView.h - 230.0f) / 2.0f, &MainView);
+			MainView.h += 35.0f;
 			MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+			MainView.h -= 35.0f;
 			MainView.Margin(10.0f, &MainView);
 
 			MainView.HSplitTop(25.0f, &a, &MainView);
@@ -338,6 +340,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowLig, &g_Config.m_ClButtonRainbowLig, &a, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowLig, &g_Config.m_ClLabelRainbowLig, &b, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 
+			c = MainView;
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			MainView.HSplitBottom(5.0f, &MainView, nullptr);
 			MainView.VSplitLeft(MainView.w / 2.0f, &a, &b);
@@ -345,6 +348,13 @@ void CMenus::RenderGame(CUIRect MainView)
 			DoLine_ColorPicker(&s_ButtonColorId, 25.0f, 13.0f, 2.0f, &a, Localize("Button Color"), &g_Config.m_ClButtonColorStatic, color_cast<ColorRGBA>(ColorHSLA(0xFFFFFFFF, true)), false, nullptr, true);
 			static CButtonContainer s_LabelColorId;
 			DoLine_ColorPicker(&s_LabelColorId, 25.0f, 13.0f, 2.0f, &b, Localize("Label Color"), &g_Config.m_ClLabelColorStatic, color_cast<ColorRGBA>(ColorHSLA(0xFFFFFFFF, true)), false, nullptr, true);
+
+			c.y += 35.0f;
+			c.HMargin(5.0f, &c);
+			c.VSplitLeft(c.w / 2.0f, &a, &b);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonAlpha, &g_Config.m_ClButtonAlpha, &a, Localize("Button's Alpha."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelAlpha, &g_Config.m_ClLabelAlpha, &b, Localize("Label's Alpha."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+
 		}
 	}
 }
