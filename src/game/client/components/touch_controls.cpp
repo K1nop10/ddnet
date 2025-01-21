@@ -327,7 +327,7 @@ void CTouchControls::CTouchButton::Render()
 			m_pTouchControls->fknano = 1;
 			m_pTouchControls->m_Rainbow = 0.0f;
 		}
-		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimer >= static_cast<std::chrono::milliseconds>(g_Config.m_ClLabelRainbowSpeed / 10.0f))
+		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimer >= static_cast<std::chrono::milliseconds>((int)(g_Config.m_ClLabelRainbowSpeed / 10.0f)))
 		{
 			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
 			m_pTouchControls->m_Rainbow += 1.0f;
