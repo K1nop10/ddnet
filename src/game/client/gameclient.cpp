@@ -174,7 +174,6 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 	Console()->Register("extra_menu_visibility", "i[extra-menu-number] i[0,1]", CFGFLAG_CLIENT, Con_ExtraMenuVisibility, this, "Open&Close the certain extra menu.");
-	Console()->Register("rainbow_on","i[0,1,2]", CFGFLAG_CLIENT, Con_RainbowOn, this, "Open rainbow mode. Choose 2 to toggle on and off.");
 
 	// register tune zone command to allow the client prediction to load tunezones from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
@@ -2851,15 +2850,6 @@ void CGameClient::Con_ExtraMenuVisibility(IConsole::IResult *pResult, void *pUse
 		pSelf->m_TouchControls.m_aExtraMenuActive[tmp_n - 1] = false;
 }
 
-void CGameClient::Con_RainbowOn(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameClient *pSelf = (CGameClient *)pUserData;
-	int fk = pResult->GetInteger(0);
-	if(fk == 2)
-		pSelf->m_TouchControls.m_AllRainbow = !pSelf->m_TouchControls.m_AllRainbow;
-	else
-		pSelf->m_TouchControls.m_AllRainbow = (fk)?true:false;
-}
 void CGameClient::ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CGameClient *pThis = static_cast<CGameClient *>(pUserData);
