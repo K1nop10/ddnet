@@ -239,7 +239,7 @@ void CTouchControls::CTouchButton::Render()
 {
 	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
 	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
-	float alpha = m_pBehavior->IsActive()?g_Config.m_ClButtonAlphaActive:g_Config.m_ClButtonAlpha;
+	float alpha = m_pBehavior->IsActive()?g_Config.m_ClButtonAlphaActive / 255.0f:g_Config.m_ClButtonAlpha / 255.0f;
 	ColorRGBA ButtonColor;
 	auto rainbow = [&](){
 		if(!m_pTouchControls->fknanos)
@@ -293,7 +293,7 @@ void CTouchControls::CTouchButton::Render()
 	m_ScreenRect.Margin(10.0f, &LabelRect);
 	SLabelProperties LabelProps;
 	LabelProps.m_MaxWidth = LabelRect.w;
-	alpha = m_pBehavior->IsActive()?g_Config.m_ClLabelAlphaActive:g_Config.m_ClLabelAlpha;
+	alpha = m_pBehavior->IsActive()?g_Config.m_ClLabelAlphaActive / 255.0f:g_Config.m_ClLabelAlpha / 255.0f;
 //ForgottenCat Gonna Do Sonething Unique!
 	int j=0;
 	char e[1000]="";
