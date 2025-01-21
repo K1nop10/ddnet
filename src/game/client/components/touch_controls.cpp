@@ -239,7 +239,7 @@ void CTouchControls::CTouchButton::Render()
 {
 	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
 	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
-	float alpha = m_pBehavior->IsActive()?0.6f:0.3f;
+	float alpha = m_pBehavior->IsActive()?g_Config.m_ClButtonAlphaActive:g_Config.m_ClButtonAlpha;
 	ColorRGBA ButtonColor;
 	auto rainbow = [&](){
 		if(!m_pTouchControls->fknanos)
@@ -293,6 +293,7 @@ void CTouchControls::CTouchButton::Render()
 	m_ScreenRect.Margin(10.0f, &LabelRect);
 	SLabelProperties LabelProps;
 	LabelProps.m_MaxWidth = LabelRect.w;
+	alpha = m_pBehavior->IsActive()?g_Config.m_ClLabelAlphaActive:g_Config.m_ClLabelAlpha;
 //ForgottenCat Gonna Do Sonething Unique!
 	int j=0;
 	char e[1000]="";
@@ -358,12 +359,14 @@ void CTouchControls::CTouchButton::Render()
 		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 2000000 * 600;
 		m_pTouchControls->m_Rainbow = (m_pTouchControls->m_Rainbow >= 600.0f) ? m_pTouchControls->m_Rainbow - 600.0f:m_pTouchControls->m_Rainbow;
 		rainbownum = (rainbownum >= 600.0f) ? rainbownum - 600.0f : rainbownum;
-		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(rainbownum / 600.0f,g_Config.m_ClLabelRainbowSat / 255.0f,g_Config.m_ClLabelRainbowLig / 255.0f)));
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(rainbownum / 600.0f,g_Config.m_ClLabelRainbowSat / 255.0f,g_Config.m_ClLabelRainbowLig / 255.0f, alpha)));
 		j = 0;
 	}
 	if(LabelData.m_Type != CButtonLabel::EType::RAINBOW && g_Config.m_ClLabelColorType == 1)
 	{
-		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLabelColorStatic)));
+		ColorRGBA abcd = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLabelColorStatic));
+		abcd.a = alpha;
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),abcd);
 	}
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
