@@ -6,6 +6,7 @@
 #include <engine/client.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
+#include <engine/shared/config_variable.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/localization.h>
 
@@ -275,7 +276,7 @@ void CTouchControls::CTouchButton::Render()
 	LabelProps.m_vColorSplits.clear();
 	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
 	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
-	if(LabelData.m_Type != CButtonLabel::EType::ICON && *LabelData.m_pLabel=='%' && LabelData.m_Type != CButtonLabel::EType::RAINBOW && !m_pTouchControls->m_AllRainbow)
+	if((LabelData.m_Type == CButtonLabel::EType::PLAIN || LabelData.m_Type == CButtonLabel::EType::LOCALIZED) && *LabelData.m_pLabel=='%' && g_Config.m_ClLabelColorType == 0)
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
 		int a[1000]={};char d[1000]="";
@@ -320,7 +321,7 @@ void CTouchControls::CTouchButton::Render()
 		}
 	}
 	const char* manwhatcanisay = static_cast<const char*>(e);
-	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW || m_pTouchControls->m_AllRainbow)
+	if(LabelData.m_Type == CButtonLabel::EType::RAINBOW || g_Config.m_ClLabelColorType == 2)
 	{
 		if(!m_pTouchControls->fknano)
 		{
@@ -333,50 +334,15 @@ void CTouchControls::CTouchButton::Render()
 			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
 			m_pTouchControls->m_Rainbow += 1.0f;
 		}
-		float ar;
-		float ag;
-		float ab;
 		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 2000000 * 600;
 		m_pTouchControls->m_Rainbow = (m_pTouchControls->m_Rainbow >= 600.0f) ? m_pTouchControls->m_Rainbow - 600.0f:m_pTouchControls->m_Rainbow;
 		rainbownum = (rainbownum >= 600.0f) ? rainbownum - 600.0f : rainbownum;
-		if(rainbownum <= 100 && rainbownum >= 0)
-		{
-			ar = 1.0f;
-			ag = rainbownum / 100.0f;
-			ab = 0.0f;
-		}
-		if(rainbownum > 100 && rainbownum <= 200)
-		{
-			ar = (200 - rainbownum) / 100.0f;
-			ag = 1.0f;
-			ab = 0.0f;
-		}
-		if(rainbownum > 200 && rainbownum <= 300)
-		{
-			ar = 0.0f;
-			ag = 1.0f;
-			ab = (rainbownum - 200) / 100.0f;
-		}
-		if(rainbownum > 300 && rainbownum <= 400)
-		{
-			ar = 0.0f;
-			ag = (400 - rainbownum) / 100.0f;
-			ab = 1.0f;
-		}
-		if(rainbownum > 400 && rainbownum <= 500)
-		{
-			ar = (rainbownum - 400) / 100.0f;
-			ag = 0.0f;
-			ab = 1.0f;
-		}
-		if(rainbownum > 500 && rainbownum <= 600)
-		{
-			ar = 1.0f;
-			ag = 0.0f;
-			ab = (600 - rainbownum) / 100.0f;
-		}
-		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),ColorRGBA(ar,ag,ab,1.0f));
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>ColorHSLA(rainbownum / 600.0f,g_Config.m_ClLabelRainbowSat,g_Config.m_ClLabelRainboeLig));
 		j = 0;
+	}
+	if(LabelData.m_Type != CButtonLabel::EType::RAINBOW && g_Config.m_ClLabelColorType == 1)
+	{
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLabelColorStatic)));
 	}
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
