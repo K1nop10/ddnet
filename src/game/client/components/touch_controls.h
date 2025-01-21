@@ -1498,6 +1498,7 @@ private:
 	float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
 	int fknano = 0;
 	std::chrono::nanoseconds m_RainbowTimer;
+	std::chrono::nanoseconds m_RainbowTimers;
 	std::chrono::milliseconds m_LabelRainbowSpeed;
 	std::chrono::milliseconds m_ButtonRainbowSpeed;
 
