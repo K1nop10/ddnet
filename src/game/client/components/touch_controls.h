@@ -1495,10 +1495,11 @@ private:
 	 */
 	public: 
 	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_999 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
-	bool m_AllRainbow = false;
 	float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
 	int fknano = 0;
 	std::chrono::nanoseconds m_RainbowTimer;
+	std::chrono::milliseconds m_LabelRainbowSpeed;
+	std::chrono::milliseconds m_ButtonRainbowSpeed;
 
 	/**
 	 * The currently selected action which is used for direct touch and is changed and used by some button behaviors.
