@@ -237,6 +237,8 @@ bool CTouchControls::CTouchButton::IsVisible() const
 // TODO: Optimization: Use text and quad containers for rendering
 void CTouchControls::CTouchButton::Render()
 {
+	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
+	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
 	float alpha = m_pBehavior->IsActive()?0.6f:0.3f;
 	ColorRGBA ButtonColor;
 	auto rainbow = [&](){
@@ -295,8 +297,6 @@ void CTouchControls::CTouchButton::Render()
 	int j=0;
 	char e[1000]="";
 	LabelProps.m_vColorSplits.clear();
-	float ctrx = m_UnitRect.m_X + (float)m_UnitRect.m_W / 2.0f;
-	float ctry = m_UnitRect.m_Y + (float)m_UnitRect.m_H / 2.0f;
 	if((LabelData.m_Type == CButtonLabel::EType::PLAIN || LabelData.m_Type == CButtonLabel::EType::LOCALIZED) && *LabelData.m_pLabel=='%' && g_Config.m_ClLabelColorType == 0)
 	{
 		int tmp_length = str_length(LabelData.m_pLabel);
