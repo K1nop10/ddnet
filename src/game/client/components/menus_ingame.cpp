@@ -300,11 +300,12 @@ void CMenus::RenderGame(CUIRect MainView)
 				case 2: bBuf = "Rainbow";break;
 			}
 			str_format(aBuf, sizeof(aBuf), "Button's Type: %s", bBuf);
+			int cur = g_Config.m_ClButtonColorType;
 			int BType = DoButton_CheckBox_Number(&g_Config.m_ClButtonColorType, aBuf, g_Config.m_ClButtonColorType, &a);
 			if(BType == 1)
-				g_Config.m_ClButtonColorType = (g_Config.m_ClButtonColorType == 2)?0:g_Config.m_ClButtonColorType+1;
+				g_Config.m_ClButtonColorType = (cur == 2)?0:cur+1;
 			else if(BType == 2)
-				g_Config.m_ClButtonColorType = (g_Config.m_ClButtonColorType == 0)?2:g_Config.m_ClButtonColorType-1;
+				g_Config.m_ClButtonColorType = (cur == 0)?2:cur-1;
 			switch(g_Config.m_ClLabelColorType)
 			{
 				case 0: bBuf = "Default";break;
@@ -312,11 +313,12 @@ void CMenus::RenderGame(CUIRect MainView)
 				case 2: bBuf = "Rainbow";break;
 			}
 			str_format(aBuf, sizeof(aBuf), "Label's Type: %s", bBuf);
+			cur = g_Config.m_ClLabelColorType;
 			int LType = DoButton_CheckBox_Number(&g_Config.m_ClLabelColorType, aBuf, g_Config.m_ClLabelColorType, &b);
 			if(LType == 1)
-				g_Config.m_ClLabelColorType = (g_Config.m_ClLabelColorType == 2)?0:g_Config.m_ClLabelColorType+1;
+				g_Config.m_ClLabelColorType = (cur == 2)?0:cur+1;
 			else if(LType == 2)
-				g_Config.m_ClLabelColorType = (g_Config.m_ClLabelColorType == 0)?2:g_Config.m_ClLabelColorType-1;
+				g_Config.m_ClLabelColorType = (cur == 0)?2:cur-1;
 
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
