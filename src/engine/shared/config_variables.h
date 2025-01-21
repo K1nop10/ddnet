@@ -16,11 +16,13 @@ MACRO_CONFIG_INT(ClButtonRainbowSpeed, cl_button_rainbow_speed, 60, 0, 1000000, 
 MACRO_CONFIG_INT(ClButtonRainbowSat, cl_button_rainbow_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow's saturation")
 MACRO_CONFIG_INT(ClButtonRainbowLig, cl_button_rainbow_lig, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow's lightness")
 MACRO_CONFIG_COL(ClButtonColorStatic, cl_button_color_static, 3670271, CFGFLAG_CLIENT | CFGFLAG_SAVE, "the color when type=1")
+MACRO_CONFIG_INT(ClButtonRainbowAlpha, cl_button_rainbow_alpha, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow's alpha")
 MACRO_CONFIG_INT(ClLabelColorType, cl_label_color_type, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "On screen buttons' lebels' colors. 0:Default, 1:All the same, 2:Rainbow")
 MACRO_CONFIG_INT(ClLabelRainbowSpeed, cl_label_rainbow_speed, 60, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Speed of the label's rainbow. Use millisecond.")
 MACRO_CONFIG_INT(ClLabelRainbowSat, cl_label_rainbow_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Label's rainbow's saturation")
 MACRO_CONFIG_INT(ClLabelRainbowLig, cl_label_rainbow_lig, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Label's rainbow's lightness")
 MACRO_CONFIG_COL(ClLabelColorStatic, cl_label_color_static, 3670271, CFGFLAG_CLIENT | CFGFLAG_SAVE, "the color when type=1")
+MACRO_CONFIG_INT(ClLabelRainbowAlpha, cl_label_rainbow_alpha, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Label's rainbow's alpha")
 
 
 // client
