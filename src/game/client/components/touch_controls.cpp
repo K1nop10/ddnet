@@ -265,11 +265,12 @@ void CTouchControls::CTouchButton::Render()
 		case 2: ButtonColor = rainbow();break;
 	}
 	alpha = m_pBehavior->IsActive()?g_Config.m_ClButtonAlphaActive / 255.0f:g_Config.m_ClButtonAlpha / 255.0f;
+	alpha = (g_Config.m_ClButtonColorType == 0) ? 0.25f:alpha;
 	switch(m_Shape)
 	{
 	case EButtonShape::RECT:
 	{
-		m_ScreenRect.Draw(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.a,alpha), m_BackgroundCorners, 10.0f);
+		m_ScreenRect.Draw(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha), m_BackgroundCorners, 10.0f);
 		break;
 	}
 	case EButtonShape::CIRCLE:
@@ -278,7 +279,7 @@ void CTouchControls::CTouchButton::Render()
 		const float Radius = minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
-		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.a,alpha));
+		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
 		m_pTouchControls->Graphics()->DrawCircle(Center.x, Center.y, Radius, maximum(round_truncate(Radius / 4.0f) & ~1, 32));
 		m_pTouchControls->Graphics()->QuadsEnd();
 		break;
