@@ -329,14 +329,14 @@ void CMenus::RenderGame(CUIRect MainView)
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			a.VSplitLeft(a.w / 2.0f, &a, &b);
-			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowSat, &g_Config.m_ClButtonRainbowSat, &a, Localize("Rainbow Sat."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, nullptr);
-			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowSat, &g_Config.m_ClLabelRainbowSat, &b, Localize("Rainbow Sat."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, nullptr);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowSat, &g_Config.m_ClButtonRainbowSat, &a, Localize("Rainbow Sat."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowSat, &g_Config.m_ClLabelRainbowSat, &b, Localize("Rainbow Sat."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			a.VSplitLeft(a.w / 2.0f, &a, &b);
-			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowLig, &g_Config.m_ClButtonRainbowLig, &a, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, nullptr);
-			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowLig, &g_Config.m_ClLabelRainbowLig, &b, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, nullptr);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowLig, &g_Config.m_ClButtonRainbowLig, &a, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowLig, &g_Config.m_ClLabelRainbowLig, &b, Localize("Rainbow Lig."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			MainView.HSplitBottom(5.0f, &MainView, nullptr);
