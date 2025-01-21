@@ -275,9 +275,9 @@ void CMenus::RenderGame(CUIRect MainView)
 			char aBuf[256];
 			CUIRect a, b, c;
 			MainView.HMargin((MainView.h - 230.0f) / 2.0f, &MainView);
-			MainView.h += 35.0f;
+			MainView.h += 65.0f;
 			MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
-			MainView.h -= 35.0f;
+			MainView.h -= 65.0f;
 			MainView.Margin(10.0f, &MainView);
 
 			MainView.HSplitTop(25.0f, &a, &MainView);
@@ -349,11 +349,17 @@ void CMenus::RenderGame(CUIRect MainView)
 			static CButtonContainer s_LabelColorId;
 			DoLine_ColorPicker(&s_LabelColorId, 25.0f, 13.0f, 2.0f, &b, Localize("Label Color"), &g_Config.m_ClLabelColorStatic, color_cast<ColorRGBA>(ColorHSLA(0xFFFFFFFF, true)), false, nullptr, true);
 
-			c.y += 35.0f;
-			c.HMargin(5.0f, &c);
-			c.VSplitLeft(c.w / 2.0f, &a, &b);
+			c.y += 40.0f;
+			c.HSplitTop(25.0f, &a, &c);
+			a.VSplitLeft(a.w / 2.0f, &a, &b);
 			Ui()->DoScrollbarOption(&g_Config.m_ClButtonAlpha, &g_Config.m_ClButtonAlpha, &a, Localize("Button's Alpha."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 			Ui()->DoScrollbarOption(&g_Config.m_ClLabelAlpha, &g_Config.m_ClLabelAlpha, &b, Localize("Label's Alpha."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+
+			c.HSplitTop(5.0f, nullptr, &c);
+			c.HSplitTop(25.0f, &a, &c);
+			a.VSplitLeft(a.w / 2.0f, &a, &b);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonAlphaActive, &g_Config.m_ClButtonAlphaActive, &a, Localize("Button's Alpha2."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelAlphaActive, &g_Config.m_ClLabelAlphaActive, &b, Localize("Label's Alpha2."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 
 		}
 	}
