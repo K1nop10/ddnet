@@ -292,7 +292,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			a.VSplitLeft(a.w / 2.0f, &a, &b);
-			char bBuf[256];
+			char *bBuf;
 			switch(g_Config.m_ClButtonColorType)
 			{
 				case 0: bBuf = "Default";break;
