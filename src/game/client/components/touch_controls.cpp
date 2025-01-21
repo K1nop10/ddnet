@@ -36,7 +36,6 @@ static constexpr const char *const ACTION_COMMANDS[] = {/* unused */ "", "+fire"
 
 static constexpr std::chrono::milliseconds LONG_TOUCH_DURATION = 500ms;
 static constexpr std::chrono::milliseconds BIND_REPEAT_INITIAL_DELAY = 250ms;
-static constexpr std::chrono::milliseconds RAINBOW_SPEED = 6ms;
 static constexpr std::chrono::nanoseconds BIND_REPEAT_RATE = std::chrono::nanoseconds(1s) / 15;
 
 static constexpr const char *const CONFIGURATION_FILENAME = "touch_controls.json";
@@ -328,7 +327,7 @@ void CTouchControls::CTouchButton::Render()
 			m_pTouchControls->fknano = 1;
 			m_pTouchControls->m_Rainbow = 0.0f;
 		}
-		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimer >= RAINBOW_SPEED)
+		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimer >= static_cast<std::chrono::milliseconds>(g_Config.m_ClLabelRainbowSpeed / 10.0f))
 		{
 			m_pTouchControls->m_RainbowTimer = time_get_nanoseconds();
 			m_pTouchControls->m_Rainbow += 1.0f;
