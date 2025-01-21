@@ -256,12 +256,12 @@ void CTouchControls::CTouchButton::Render()
 		float rainbownums = m_pTouchControls->m_Rainbows + (ctrx + ctry) / 2000000 * 600;
 		m_pTouchControls->m_Rainbows = (m_pTouchControls->m_Rainbows >= 600.0f) ? m_pTouchControls->m_Rainbows - 600.0f:m_pTouchControls->m_Rainbows;
 		rainbownums = (rainbownums >= 600.0f) ? rainbownums - 600.0f : rainbownums;
-		return color_cast<ColorRGBA>(ColorHSLA(rainbownums / 600.0f,g_Config.m_ClButtonRainbowSat,g_Config.m_ClButtonRainbowLig, alpha));
+		return color_cast<ColorRGBA>(ColorHSLA(rainbownums / 600.0f,g_Config.m_ClButtonRainbowSat / 255.0f,g_Config.m_ClButtonRainbowLig / 255.0f, alpha));
 	};
 	switch(g_Config.m_ClButtonColorType)
 	{
 		case 0: ButtonColor = m_pBehavior->IsActive() ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);break;
-		case 1: ButtonColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLabelColorStatic));ButtonColor.a = alpha;break;
+		case 1: ButtonColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClButtonColorStatic));ButtonColor.a = alpha;break;
 		case 2: ButtonColor = rainbow();break;
 	}
 	switch(m_Shape)
@@ -358,7 +358,7 @@ void CTouchControls::CTouchButton::Render()
 		float rainbownum = m_pTouchControls->m_Rainbow + (ctrx + ctry) / 2000000 * 600;
 		m_pTouchControls->m_Rainbow = (m_pTouchControls->m_Rainbow >= 600.0f) ? m_pTouchControls->m_Rainbow - 600.0f:m_pTouchControls->m_Rainbow;
 		rainbownum = (rainbownum >= 600.0f) ? rainbownum - 600.0f : rainbownum;
-		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(rainbownum / 600.0f,g_Config.m_ClLabelRainbowSat,g_Config.m_ClLabelRainbowLig)));
+		LabelProps.m_vColorSplits.emplace_back(0,str_length(LabelData.m_pLabel),color_cast<ColorRGBA>(ColorHSLA(rainbownum / 600.0f,g_Config.m_ClLabelRainbowSat / 255.0f,g_Config.m_ClLabelRainbowLig / 255.0f)));
 		j = 0;
 	}
 	if(LabelData.m_Type != CButtonLabel::EType::RAINBOW && g_Config.m_ClLabelColorType == 1)
