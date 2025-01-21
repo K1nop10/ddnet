@@ -237,8 +237,31 @@ bool CTouchControls::CTouchButton::IsVisible() const
 // TODO: Optimization: Use text and quad containers for rendering
 void CTouchControls::CTouchButton::Render()
 {
-	const ColorRGBA ButtonColor = m_pBehavior->IsActive() ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
-
+	float alpha = m_pBehavior->IsActive()?0.6f:0.3f;
+	ColorRGBA ButtonColor;
+	auto rainbow = [&](){
+		if(!m_pTouchControls->fknanos)
+		{
+			m_pTouchControls->m_RainbowTimers = time_get_nanoseconds();
+			m_pTouchControls->fknanos = 1;
+			m_pTouchControls->m_Rainbows = 0.0f;
+		}
+		if(time_get_nanoseconds() - m_pTouchControls->m_RainbowTimers >= static_cast<std::chrono::milliseconds>((int)(g_Config.m_ClButtonRainbowSpeed / 10.0f)))
+		{
+			m_pTouchControls->m_RainbowTimers = time_get_nanoseconds();
+			m_pTouchControls->m_Rainbows += 1.0f;
+		}
+		float rainbownums = m_pTouchControls->m_Rainbows + (ctrx + ctry) / 2000000 * 600;
+		m_pTouchControls->m_Rainbows = (m_pTouchControls->m_Rainbows >= 600.0f) ? m_pTouchControls->m_Rainbows - 600.0f:m_pTouchControls->m_Rainbows;
+		rainbownums = (rainbownums >= 600.0f) ? rainbownums - 600.0f : rainbownums;
+		return color_cast<ColorRGBA>(ColorHSLA(rainbownums / 600.0f,g_Config.m_ClButtonRainbowSat,g_Config.m_ClButtonRainbowLig, alpha));
+	};
+	switch(g_Config.m_ClButtonColorType)
+	{
+		case 0: ButtonColor = m_pBehavior->IsActive() ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);break;
+		case 1: ButtonColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLabelColorStatic));ButtonColor.a = alpha;break;
+		case 2: ButtonColor = rainbow();break;
+	}
 	switch(m_Shape)
 	{
 	case EButtonShape::RECT:
