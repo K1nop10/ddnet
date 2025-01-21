@@ -1495,8 +1495,10 @@ private:
 	 */
 	public: 
 	bool m_aExtraMenuActive[(int)EButtonVisibility::EXTRA_MENU_999 - (int)EButtonVisibility::EXTRA_MENU_1 + 1] = {false};
-	float m_Rainbow=0.0f; //only used with EButtonShape::RAINBOW
+	float m_Rainbow=0.0f;
+	float m_Rainbows = 0.0f;
 	int fknano = 0;
+	int fknanos = 0;
 	std::chrono::nanoseconds m_RainbowTimer;
 	std::chrono::nanoseconds m_RainbowTimers;
 	std::chrono::milliseconds m_LabelRainbowSpeed;
