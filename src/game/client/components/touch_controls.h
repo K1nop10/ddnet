@@ -74,10 +74,11 @@ private:
 	{
 		RECT,
 		CIRCLE,
+		STAR,
 		NUM_SHAPES
 	};
 
-	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle"};
+	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle", "star"};
 
 	enum class EButtonVisibility
 	{
