@@ -48,6 +48,35 @@ Localizable("Move left") Localizable("Move right") Localizable("Jump") Localizab
 Localizable("Zoom out") Localizable("Default zoom") Localizable("Zoom in") Localizable("Scoreboard") Localizable("Chat") Localizable("Team chat")
 Localizable("Vote yes") Localizable("Vote no") Localizable("Toggle dummy")
 */
+bool IsOnLine = [](vec2 target, vec2 a, vec2 b){
+	if(minimum(a.x, b.x) > target.x || maximum(a.x, b.x) < target.x || minimum(a.y, b.y) > target.y || maximum(a.y, b.y) < target.y)
+		return false;
+	float k = (b.y - a.y) / (b.x - a.x);
+	float c = (a.y * b.x - a.x * b.y) / (b.x - a.x);
+	if(std::abs(k * target.x + c - target.y) < 0.0001f)
+		return true;
+	return false;
+};
+
+bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
+	
+};
+
+vec2 TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
+	
+};
+
+bool LinePointUp = [](vec2 a, vec2 b, vec2 c){
+	if(minimum(a.x, b.x) <= c.x && maximum(a.x, b.x) >= c.x && minimum(a.y, b.y) < c.y)
+	{
+		float k = (b.y - a.y) / (b.x - a.x);
+		float d = (a.y * b.x - a.x * b.y) / (b.x - a.x);
+		if(c.y - k * c.x - d <= 0.0001f)
+			return true;
+	}
+	return false;
+};
+
 
 CTouchControls::CTouchButton::CTouchButton(CTouchControls *pTouchControls) :
 	m_pTouchControls(pTouchControls),
