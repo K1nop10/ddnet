@@ -42,41 +42,45 @@ static constexpr const char *const CONFIGURATION_FILENAME = "touch_controls.json
 static constexpr int BUTTON_SIZE_SCALE = 1000000;
 static constexpr int BUTTON_SIZE_MINIMUM = 0;
 static constexpr int BUTTON_SIZE_MAXIMUM = 1000000;
+static constexpr float EPS = 1e-4;
 
 /* This is required for the localization script to find the labels of the default bind buttons specified in the configuration file:
 Localizable("Move left") Localizable("Move right") Localizable("Jump") Localizable("Prev. weapon") Localizable("Next weapon")
 Localizable("Zoom out") Localizable("Default zoom") Localizable("Zoom in") Localizable("Scoreboard") Localizable("Chat") Localizable("Team chat")
 Localizable("Vote yes") Localizable("Vote no") Localizable("Toggle dummy")
 */
-bool IsOnLine = [](vec2 target, vec2 a, vec2 b){
-	if(minimum(a.x, b.x) > target.x || maximum(a.x, b.x) < target.x || minimum(a.y, b.y) > target.y || maximum(a.y, b.y) < target.y)
-		return false;
-	float k = (b.y - a.y) / (b.x - a.x);
-	float c = (a.y * b.x - a.x * b.y) / (b.x - a.x);
-	if(std::abs(k * target.x + c - target.y) < 0.0001f)
-		return true;
-	return false;
+//c is target, ab is line.
+auto Cross = [](vec2 a, vec2 b){
+	return a.x*b.y-b.x*a.y;
 };
 
-bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
-	
+auto Dot = [](vec2 a, vec2 b){
+	return a.x*b.x+a.y*b.y;
 };
-
-auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
-	
-};
-
-bool LinePointUp = [](vec2 a, vec2 b, vec2 c){
-	if(minimum(a.x, b.x) <= c.x && maximum(a.x, b.x) >= c.x && minimum(a.y, b.y) < c.y)
+bool IsUpLine = [](vec2 c, vec2 a, vec2 b){
+	if(minimum(a.x, b.x) <= c.x && maximum(a.x, b.x) >= c.x && maximum(a.y, b.y) >= c.y)
 	{
 		float k = (b.y - a.y) / (b.x - a.x);
 		float d = (a.y * b.x - a.x * b.y) / (b.x - a.x);
-		if(c.y - k * c.x - d <= 0.0001f)
+		if(c.y - k * c.x - d <= EPS)
 			return true;
 	}
 	return false;
 };
 
+bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
+	vec2 ab, cd, ac, ad, cb, ca;
+	ab.x=b.x-a.x;cd.x=d.x-c.x;ac.x=c.x-a.x;ad.x=d.x-a.x;cb.x=b.x-c.x;ca.x=a.x-c.x;
+	ab.y=b.y-a.y;cd.y=d.y-c.y;ac.y=c.y-a.y;ad.y=d.y-a.y;cb.y=b.y-c.y;ca.y=a.y-c.y;
+	if(std::abs(Cross(cd,ab)) <= EPS)
+		return false;
+	if(Cross(ac,ab)*Cross(ad,ab)<EPS&&Cross(ca,cd)*Cross(cb,cd)<EPS)
+		return true;
+};
+
+auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
+	
+};
 
 CTouchControls::CTouchButton::CTouchButton(CTouchControls *pTouchControls) :
 	m_pTouchControls(pTouchControls),
