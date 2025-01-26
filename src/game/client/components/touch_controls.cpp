@@ -62,7 +62,7 @@ bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
 	
 };
 
-vec2 TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
+auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
 	
 };
 
