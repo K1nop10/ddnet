@@ -87,7 +87,13 @@ auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
 };
 
 bool Inside = [](float a, float b, vec2 d){
-	float c=2.0f+std::sin((18.0f)/360*2*pi);
+	float c=2.0f+2*std::sin((18.0f)/360*2*pi);
+	vec2 f,j,o,h,e,p,q,u,r,s;
+	f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
+	p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
+	vec2 jp,pf,fq,qo,or,re,es,sh,hu,uj;vec2 ve[10];
+	jp=p-j;pf=f-p;fq=q-f;qo=o-q;or=r-o;re=e-r;es=s-e;sh=h-s;hu=u-h;uj=j-u;
+	
 };
 CTouchControls::CTouchButton::CTouchButton(CTouchControls *pTouchControls) :
 	m_pTouchControls(pTouchControls),
