@@ -390,6 +390,7 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
 		m_pTouchControls->Graphics()->QuadsDrawFreeform(star,5);
 		m_pTouchControls->Graphics()->QuadsEnd();
+		break;
 	}
 	default:
 		dbg_assert(false, "Unhandled shape");
