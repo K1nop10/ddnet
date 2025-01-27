@@ -380,11 +380,11 @@ void CTouchControls::CTouchButton::Render()
 		f+=bf;j+=bf;o+=bf;h+=bf;e+=bf;p+=bf;q+=bf;u+=bf;r+=bf;s+=bf;
 		IGraphics::CFreeformItem star[5];
 		const vec2 Center = m_ScreenRect.Center();
-		star[0]=IGraphics::CFreeformItem(Center,p,q,f);
-		star[1]=IGraphics::CFreeformItem(Center,q,r,o);
-		star[2]=IGraphics::CFreeformItem(Center,r,s,e);
-		star[3]=IGraphics::CFreeformItem(Center,s,u,h);
-		star[4]=IGraphics::CFreeformItem(Center,u,p,i);
+		star[0]=IGraphics::CFreeformItem(Center.x,Center.y,p.x,p.y,q.x,q.y,f.x,f.y);
+		star[1]=IGraphics::CFreeformItem(Center.x,Center.y,q.x,q.y,r.x,r.y,o.x,o.y);
+		star[2]=IGraphics::CFreeformItem(Center.x,Center.y,r.x,r.y,s.x,s.y,e.x,e.y);
+		star[3]=IGraphics::CFreeformItem(Center.x,Center.y,s.x,s.y,u.x,u.y,h.x,h.y);
+		star[4]=IGraphics::CFreeformItem(Center.x,Center.y,u.x,u.y,p.x,p.y,i.x,i.y);
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
 		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
