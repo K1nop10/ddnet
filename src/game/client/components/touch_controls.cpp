@@ -79,9 +79,16 @@ bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
 };
 
 auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
-	
+	t=((b.y-a.y)*(c.x-a.x)-(c.y-a.y)*(b.x-a.x))/((d.y-c.y)*(b.x-a.x)-(b.y-a.y)*(d.x-c.x));
+	vec2 gg;
+	gg.x=(d.x-c.x)*t+c.x;
+	gg.y=(d.y-c.y)*t+c.y
+	return gg;
 };
 
+bool Inside = [](float a, float b, vec2 d){
+	float c=2.0f+std::sin((18.0f)/360*2*pi);
+};
 CTouchControls::CTouchButton::CTouchButton(CTouchControls *pTouchControls) :
 	m_pTouchControls(pTouchControls),
 	m_VisibilityCached(false)
