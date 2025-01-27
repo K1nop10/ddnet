@@ -91,9 +91,16 @@ bool Inside = [](float a, float b, vec2 d){
 	vec2 f,j,o,h,e,p,q,u,r,s;
 	f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
 	p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
-	vec2 jp,pf,fq,qo,or,re,es,sh,hu,uj;vec2 ve[10];
-	jp=p-j;pf=f-p;fq=q-f;qo=o-q;or=r-o;re=e-r;es=s-e;sh=h-s;hu=u-h;uj=j-u;
-	
+	vec2 pts[10]={j,p,f,q,o,r,e,s,h,u};
+	int flag=0;
+	for(int i=0;i<10;i++)
+	{
+		if(IsUpLine(d,pts[i],pts[i==9?0:i]))
+			flag++;
+	}
+	if(flag%2==0)
+		return false;
+	return true;
 };
 CTouchControls::CTouchButton::CTouchButton(CTouchControls *pTouchControls) :
 	m_pTouchControls(pTouchControls),
@@ -242,6 +249,26 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 		}
 		break;
 	}
+	case: EButtonShape::STAR:
+	{
+		if(Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition))
+			break;
+		else
+		{
+			float a=m_ScreenRect.w;
+			float b=m_ScreenRect.h;
+			float c=2.0f+2*std::sin((18.0f)/360*2*pi);
+			vec2 f,j,o,h,e,p,q,u,r,s;
+			f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
+			p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
+			vec2 pts[10]={j,p,f,q,o,r,e,s,h,u};
+			int i;
+			for(int i=0;i<10;i++)
+			if(IsTwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]))
+			break;
+			TouchPosition=TwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]);
+		}
+	}
 	default:
 		dbg_assert(false, "Unhandled shape");
 		break;
@@ -257,6 +284,8 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 		return m_ScreenRect.Inside(TouchPosition);
 	case EButtonShape::CIRCLE:
 		return distance(TouchPosition, m_ScreenRect.Center()) <= minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
+	case: EButtonShape::STAR:
+		return Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition);
 	default:
 		dbg_assert(false, "Unhandled shape");
 		return false;
@@ -329,6 +358,21 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Graphics()->DrawCircle(Center.x, Center.y, Radius, maximum(round_truncate(Radius / 4.0f) & ~1, 32));
 		m_pTouchControls->Graphics()->QuadsEnd();
 		break;
+	}
+	case: EButtonShape::STAR:
+	{
+		float a=m_ScreenRect.w;
+		float b=m_ScreenRect.h;
+		float c=2.0f+2*std::sin((18.0f)/360*2*pi);
+		vec2 f,j,o,h,e,p,q,u,r,s;
+		f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
+		p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
+		IGraphics::CFreeformItem star[5];
+		star[0]=IGraphics::CFreeformItem();
+		m_pTouchControls->Graphics()->TextureClear();
+		m_pTouchControls->Graphics()->QuadsBegin();
+		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
+		
 	}
 	default:
 		dbg_assert(false, "Unhandled shape");
