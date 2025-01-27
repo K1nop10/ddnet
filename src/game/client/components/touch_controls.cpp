@@ -384,7 +384,7 @@ void CTouchControls::CTouchButton::Render()
 		star[1]=IGraphics::CFreeformItem(Center.x,Center.y,q.x,q.y,r.x,r.y,o.x,o.y);
 		star[2]=IGraphics::CFreeformItem(Center.x,Center.y,r.x,r.y,s.x,s.y,e.x,e.y);
 		star[3]=IGraphics::CFreeformItem(Center.x,Center.y,s.x,s.y,u.x,u.y,h.x,h.y);
-		star[4]=IGraphics::CFreeformItem(Center.x,Center.y,u.x,u.y,p.x,p.y,i.x,i.y);
+		star[4]=IGraphics::CFreeformItem(Center.x,Center.y,u.x,u.y,p.x,p.y,j.x,j.y);
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
 		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
