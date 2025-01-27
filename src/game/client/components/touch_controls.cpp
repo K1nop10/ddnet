@@ -76,10 +76,11 @@ bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
 		return false;
 	if(Cross(ac,ab)*Cross(ad,ab)<EPS&&Cross(ca,cd)*Cross(cb,cd)<EPS)
 		return true;
+	return false;
 };
 
 auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
-	t=((b.y-a.y)*(c.x-a.x)-(c.y-a.y)*(b.x-a.x))/((d.y-c.y)*(b.x-a.x)-(b.y-a.y)*(d.x-c.x));
+	float t=((b.y-a.y)*(c.x-a.x)-(c.y-a.y)*(b.x-a.x))/((d.y-c.y)*(b.x-a.x)-(b.y-a.y)*(d.x-c.x));
 	vec2 gg;
 	gg.x=(d.x-c.x)*t+c.x;
 	gg.y=(d.y-c.y)*t+c.y
@@ -262,10 +263,18 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 			f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
 			p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
 			vec2 pts[10]={j,p,f,q,o,r,e,s,h,u};
+			for(int i=0;i<10;i++){
+				pts[i].x+=m_ScreenRect.x;
+				pts[i].y+=m_ScreenRect.y;
+			}
 			int i;
-			for(int i=0;i<10;i++)
-			if(IsTwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]))
-			break;
+			for(i=0;i<10;i++)
+			{
+				pts[i].x+=m_ScreenRect.x;
+				pts[i].y+=m_ScreenRect.y;
+				if(IsTwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]))
+					break;
+			}
 			TouchPosition=TwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]);
 		}
 	}
