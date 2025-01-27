@@ -57,7 +57,7 @@ auto Cross = [](vec2 a, vec2 b){
 auto Dot = [](vec2 a, vec2 b){
 	return a.x*b.x+a.y*b.y;
 };
-bool IsUpLine = [](vec2 c, vec2 a, vec2 b){
+auto IsUpLine = [](vec2 c, vec2 a, vec2 b){
 	if(minimum(a.x, b.x) <= c.x && maximum(a.x, b.x) >= c.x && maximum(a.y, b.y) >= c.y)
 	{
 		float k = (b.y - a.y) / (b.x - a.x);
@@ -68,7 +68,7 @@ bool IsUpLine = [](vec2 c, vec2 a, vec2 b){
 	return false;
 };
 
-bool IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
+auto IsTwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d){
 	vec2 ab, cd, ac, ad, cb, ca;
 	ab.x=b.x-a.x;cd.x=d.x-c.x;ac.x=c.x-a.x;ad.x=d.x-a.x;cb.x=b.x-c.x;ca.x=a.x-c.x;
 	ab.y=b.y-a.y;cd.y=d.y-c.y;ac.y=c.y-a.y;ad.y=d.y-a.y;cb.y=b.y-c.y;ca.y=a.y-c.y;
@@ -83,11 +83,11 @@ auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
 	float t=((b.y-a.y)*(c.x-a.x)-(c.y-a.y)*(b.x-a.x))/((d.y-c.y)*(b.x-a.x)-(b.y-a.y)*(d.x-c.x));
 	vec2 gg;
 	gg.x=(d.x-c.x)*t+c.x;
-	gg.y=(d.y-c.y)*t+c.y
+	gg.y=(d.y-c.y)*t+c.y;
 	return gg;
 };
 
-bool Inside = [](float a, float b, vec2 d){
+auto Inside = [](float a, float b, vec2 d){
 	float c=2.0f+2*std::sin((18.0f)/360*2*pi);
 	vec2 f,j,o,h,e,p,q,u,r,s;
 	f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
@@ -250,7 +250,7 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 		}
 		break;
 	}
-	case: EButtonShape::STAR:
+	case EButtonShape::STAR:
 	{
 		if(Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition))
 			break;
@@ -293,7 +293,7 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 		return m_ScreenRect.Inside(TouchPosition);
 	case EButtonShape::CIRCLE:
 		return distance(TouchPosition, m_ScreenRect.Center()) <= minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
-	case: EButtonShape::STAR:
+	case EButtonShape::STAR:
 		return Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition);
 	default:
 		dbg_assert(false, "Unhandled shape");
@@ -368,7 +368,7 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Graphics()->QuadsEnd();
 		break;
 	}
-	case: EButtonShape::STAR:
+	case EButtonShape::STAR:
 	{
 		float a=m_ScreenRect.w;
 		float b=m_ScreenRect.h;
@@ -376,12 +376,20 @@ void CTouchControls::CTouchButton::Render()
 		vec2 f,j,o,h,e,p,q,u,r,s;
 		f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
 		p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
+		vec2 bf;bf.x=m_ScreenRect.x;bf.y=m_ScreenRect.y;
+		f+=bf;j+=bf;o+=bf;h+=bf;e+=bf;p+=bf;q+=bf;u+=bf;r+=bf;s+=bf;
 		IGraphics::CFreeformItem star[5];
-		star[0]=IGraphics::CFreeformItem();
+		const vec2 Center = m_ScreenRect.Center();
+		star[0]=IGraphics::CFreeformItem(Center,p,q,f);
+		star[1]=IGraphics::CFreeformItem(Center,q,r,o);
+		star[2]=IGraphics::CFreeformItem(Center,r,s,e);
+		star[3]=IGraphics::CFreeformItem(Center,s,u,h);
+		star[4]=IGraphics::CFreeformItem(Center,u,p,i);
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
 		m_pTouchControls->Graphics()->SetColor(ColorRGBA(ButtonColor.r,ButtonColor.g,ButtonColor.b,alpha));
-		
+		m_pTouchControls->Graphics()->QuadsDrawFreeform(star,5);
+		m_pTouchControls->Graphics()->QuadsEnd();
 	}
 	default:
 		dbg_assert(false, "Unhandled shape");
