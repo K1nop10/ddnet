@@ -98,7 +98,7 @@ auto Inside = [=](float a, float b, vec2 d){
 	int flag=0;
 	for(int i=0;i<10;i++)
 	{
-		if(IsUpLine(d,pts[i],pts[i==9?0:i]))
+		if(IsUpLine(d,pts[i],pts[i==9?0:i+1]))
 			flag++;
 	}
 	if(flag%2==0)
@@ -160,6 +160,11 @@ void CTouchControls::CTouchButton::UpdateScreenFromUnitRect()
 			m_ScreenRect.x += (m_ScreenRect.w - m_ScreenRect.h) / 2.0f;
 			m_ScreenRect.w = m_ScreenRect.h;
 		}
+	}
+	if(m_Shape == EButtonShape::SSTAR)
+	{
+		float a=m_ScreenRect.w;
+		m_ScreenRect.h=a*std::cos((18.0f)/360*2*pi);
 	}
 }
 
@@ -253,6 +258,7 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 		break;
 	}
 	case EButtonShape::STAR:
+	case EButtonShape::SSTAR:
 	{
 		if(Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition))
 			break;
@@ -274,10 +280,10 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 			{
 				pts[i].x+=m_ScreenRect.x;
 				pts[i].y+=m_ScreenRect.y;
-				if(IsTwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]))
+				if(IsTwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i+1]))
 					break;
 			}
-			TouchPosition=TwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i]);
+			TouchPosition=TwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i+1]);
 		}
 	}
 	default:
@@ -296,6 +302,7 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 	case EButtonShape::CIRCLE:
 		return distance(TouchPosition, m_ScreenRect.Center()) <= minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 	case EButtonShape::STAR:
+	case EButtonShape::SSTAR:
 		return Inside(m_ScreenRect.w,m_ScreenRect.h,TouchPosition);
 	default:
 		dbg_assert(false, "Unhandled shape");
@@ -371,6 +378,7 @@ void CTouchControls::CTouchButton::Render()
 		break;
 	}
 	case EButtonShape::STAR:
+	case EButtonShape::SSTAR:
 	{
 		float a=m_ScreenRect.w;
 		float b=m_ScreenRect.h;
