@@ -284,6 +284,7 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 					break;
 			}
 			TouchPosition=TwoLine(TouchPosition,m_ScreenRect.Center(),pts[i],pts[i==9?0:i+1]);
+			break;
 		}
 	}
 	default:
