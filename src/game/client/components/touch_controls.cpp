@@ -87,11 +87,13 @@ auto TwoLine = [](vec2 a, vec2 b, vec2 c, vec2 d)->vec2{
 	return gg;
 };
 
-auto Inside = [](float a, float b, vec2 d){
+auto Inside = [=](float a, float b, vec2 d){
 	float c=2.0f+2*std::sin((18.0f)/360*2*pi);
 	vec2 f,j,o,h,e,p,q,u,r,s;
 	f.x=a/2;f.y=0.0f;j.x=0.0f;j.y=b/c;o.x=a;o.y=b/c;h.x=a/2/c;h.y=b;e.x=a-a/2/c;e.y=b;
 	p.x=a/c;p.y=b/c;q.x=a-a/c;q.y=b/c;u.x=a/c-a/2/c/c;u.y=b-b/c;r.x=a-a/c+a/2/c/c;r.y=b-b/c;s.x=a/2;s.y=b-b/c+b/c/c;
+	vec2 bf;bf.x=m_ScreenRect.x;bf.y=m_ScreenRect.y;
+	f+=bf;j+=bf;o+=bf;h+=bf;e+=bf;p+=bf;q+=bf;u+=bf;r+=bf;s+=bf;
 	vec2 pts[10]={j,p,f,q,o,r,e,s,h,u};
 	int flag=0;
 	for(int i=0;i<10;i++)
