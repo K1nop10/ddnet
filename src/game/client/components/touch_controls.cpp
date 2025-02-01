@@ -937,6 +937,109 @@ void CTouchControls::CBindToggleTouchButtonBehavior::WriteToConfiguration(CJsonW
 	pWriter->EndArray();
 }
 
+//Bind slide
+CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetLabel() const
+{
+	for(const auto &Command: m_vDirCommands)
+		if(Command.m_Direction == EDirection::CENTER)
+			return {Command.m_LabelType, Command.m_Label.c_str()};
+	dbg_assert(false, "Where is the center?");
+	return {};
+}
+CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetLabel(const char *Direction) const
+{
+	for(const auto &Command: m_vDirCommands)
+		if(m_pTouchControls->DIRECTION_NAMES[(int)Command.m_Direction] == Direction)
+			return {Command.m_LabelType, Command.m_Label.c_str()};
+	return {};
+}
+void CTouchControls::CBindSlideTouchButtonBehavior::OnUpdate()
+{
+	const auto Now = time_get_nanoseconds();		
+	if(Now - m_ActivationStartTime >= g_Config.m_ClBindSlideExtraRenderTime)
+		m_IsOpen = true;
+	if(m_AccumulatedDelta.x*m_AccumulatedDelta.x + m_AccumulatedDelta.y*m_AccumulatedDelta.y >= g_Config.m_ClBindSlideDistance/1000.0f*g_Config.m_ClBindSlideDistance/1000.0f)
+		m_IsSliding = true;
+	else
+		m_IsSliding = false;
+}
+void CTouchControls::CBindSlideTouchButtonBehavior::OnDeactivate()
+{
+	CDirCommand Commands[(int)EDirection::NUM_DIRECTIONS];
+	for(const auto &Command: m_vDirCommands)
+	{
+		Commands[(int)Command.m_Direction] = Command;
+		Commands[(int)Command.m_Direction].m_IsInit = true;
+	}
+		
+	if(!m_IsSliding)
+		m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::CENTER].m_Command.c_str());
+	else
+	{
+		float Tan =(m_AccumulatedDelta.x != 0) ? m_AccumulatedDelta.y / m_AccumulatedDelta.x : 100000.0f;
+		float rad = pi / 180.0f;
+		//Sliding to different angles, executing different commands.
+		if(m_AccumulatedDelta.y < 0.0f)
+		{
+			if(Tan >= std::tan(-22.5 * rad) && Tan < 0 && Commands[(int)EDirection::RIGHT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::RIGHT].m_Command.c_str());
+			if(Tan >= std::tan(-67.5 * rad) && Tan < std::tan(-22.5 * rad) && Commands[(int)EDirection::UPRIGHT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::UPRIGHT].m_Command.c_str());
+			if((Tan < std::tan(-67.5 * rad) || Tan > std::tan(-112.5 * rad)) && Commands[(int)EDirection::UP].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::UP].m_Command.c_str());
+			if(Tan > 0 && Tan <= std::tan(-157.5 * rad) && Commands[(int)EDirection::LEFT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::LEFT].m_Command.c_str());
+			if(Tan > std::tan(-157.5 * rad) && Tan <= std::tan(-112.5 * rad) && Commands[(int)EDirection::UPLEFT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::UPLEFT].m_Command.c_str());
+		}
+		else
+		{
+			if(Tan >= 0 && Tan < std::tan(22.5 * rad) && m_AccumulatedDelta.x > 0 && Commands[(int)EDirection::RIGHT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::RIGHT].m_Command.c_str());
+			if(Tan >= std::tan(22.5 * rad) && Tan < std::tan(67.5 * rad) && Commands[(int)EDirection::DOWNRIGHT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::DOWNRIGHT].m_Command.c_str());
+			if((Tan > std::tan(67.5 * rad) || Tan < std::tan(112.5 * rad)) && Commands[(int)EDirection::DOWN].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::DOWN].m_Command.c_str());
+			if(Tan <= 0 && Tan > std::tan(157.5 * rad) && m_AccumulatedDelta.x < 0 && Commands[(int)EDirection::LEFT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::LEFT].m_Command.c_str());
+			if(Tan > std::tan(112.5 * rad) && Tan <= std::tan(157.5 * rad) && Commands[(int)EDirection::DOWNLEFT].m_IsInit)
+				m_pTouchControls->Console()->ExecuteLine(Commands[(int)EDirection::DOWNLEFT].m_Command.c_str());
+		}
+	}
+	m_AccumulatedDelta = vec2(0.0f, 0.0f);
+	m_IsOpen = false;
+	m_IsSliding = false;
+}
+void CTouchControls::CBindSlideTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
+{
+	pWriter->WriteAttribute("type");
+	pWriter->WriteStrValue(BEHAVIOR_TYPE);
+
+	pWriter->WriteAttribute("commands");
+	pWriter->BeginArray();
+
+	for(const auto &Command : m_vDirCommands)
+	{
+		pWriter->BeginObject();
+
+		pWriter->WriteAttribute("label");
+		pWriter->WriteStrValue(Command.m_Label.c_str());
+
+		pWriter->WriteAttribute("label-type");
+		pWriter->WriteStrValue(LABEL_TYPE_NAMES[(int)Command.m_LabelType]);
+
+		pWriter->WriteAttribute("direction");
+		pWriter->WriteStrValue(DIRECTION_NAMES[(int)Command.m_Direction]);
+
+		pWriter->WriteAttribute("command");
+		pWriter->WriteStrValue(Command.m_Command.c_str());
+
+		pWriter->EndObject();
+	}
+
+	pWriter->EndArray();
+}
+
 void CTouchControls::OnInit()
 {
 	InitVisibilityFunctions();
@@ -5763,6 +5866,7 @@ std::unique_ptr<CTouchControls::CBindToggleTouchButtonBehavior> CTouchControls::
 std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::ParseBindSlideBehavior(const json_value *pBehaviorObject)
 {
 	const json_value &CommandsObject = (*pBehaviorObject)["commands"];
+	bool flag = false;
 	if(CommandsObject.type != json_array)
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'commands' must specify an array", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE);
@@ -5819,6 +5923,8 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
 				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
+				if(str_comp(Direction.u.string.ptr, "center") == 0)
+					flag = true;
 				break;
 			}
 		}
@@ -5835,6 +5941,11 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 			return nullptr;
 		}
 		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, ParsedDirection, Command.u.string.ptr);
+	}
+	if(!flag)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': the key direction 'center' is missing.", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE);
+		return nullptr;
 	}
 	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
