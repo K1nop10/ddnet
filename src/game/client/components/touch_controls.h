@@ -1486,10 +1486,10 @@ private:
 			RIGHT,
 			UP,
 			DOWN,
-			UPRIGHT,
 			UPLEFT,
-			DOWNRIGHT,
+			UPRIGHT,
 			DOWNLEFT,
+			DOWNRIGHT,
 			CENTER,
 			NUM_DIRECTIONS
 		};
@@ -1499,8 +1499,8 @@ private:
 		public:
 			std::string m_Label;
 			CButtonLabel::EType m_LabelType;
-			std::string m_Command;
 			EDirection m_Direction;
+			std::string m_Command;
 
 			CDirCommand(const char *pLabel, CButtonLabel::EType LabelType, EDirection Direction, const char *pCommand) :
 				m_Label(pLabel),
@@ -1517,8 +1517,8 @@ private:
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		std::vector<CDirCommand> m_vDirCommands;
 		bool m_IsOpen = false;
-	}
-
+	};
+	static constexpr const char *const DIRECTION_NAMES[(int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS] = {"left", "right", "up", "down", "upleft", "upright", "downleft", "downright", "center"};
 	/**
 	 * Mode of direct touch input while ingame.
 	 *
