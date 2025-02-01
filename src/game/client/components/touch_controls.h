@@ -1196,6 +1196,7 @@ private:
 		bool IsInside(vec2 TouchPosition) const;
 		void UpdateVisibility();
 		bool IsVisible() const;
+		bool m_ExtraRender = false;
 		void Render();
 		void WriteToConfiguration(CJsonWriter *pWriter);
 	};
@@ -1501,6 +1502,7 @@ private:
 			CButtonLabel::EType m_LabelType;
 			EDirection m_Direction;
 			std::string m_Command;
+			bool m_IsInit = false;
 
 			CDirCommand(const char *pLabel, CButtonLabel::EType LabelType, EDirection Direction, const char *pCommand) :
 				m_Label(pLabel),
@@ -1509,14 +1511,16 @@ private:
 				m_Command(pCommand) {}
 		};
 		CBindSlideTouchButtonBehavior(std::vector<CDirCommand> &&vDirCommands) :
-			m_vDirCommands(std::move(vDirCommands)) {}
+			m_vDirCommands(std::move(vDirCommands)) {m_pTouchButton->m_ExtraRender = true;}
 
 		CButtonLabel GetLabel() const override;
+		CButtonLabel GetLabel(const char *Direction) const;
 		void OnUpdate() override;
 		void OnDeactivate() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		std::vector<CDirCommand> m_vDirCommands;
 		bool m_IsOpen = false;
+		bool m_IsSliding = false;
 	};
 	static constexpr const char *const DIRECTION_NAMES[(int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS] = {"left", "right", "up", "down", "upleft", "upright", "downleft", "downright", "center"};
 	/**
