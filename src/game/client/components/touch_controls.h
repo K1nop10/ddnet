@@ -1494,19 +1494,29 @@ private:
 			NUM_DIRECTIONS
 		};
 
-		class CCommand
+		class CDirCommand
 		{
 		public:
 			std::string m_Label;
 			CButtonLabel::EType m_LabelType;
 			std::string m_Command;
 			EDirection m_Direction;
-			CCommand(const char *pLabel, CButtonLabel::EType LabelType, EDirection Direction, const char *pCommand) :
+
+			CDirCommand(const char *pLabel, CButtonLabel::EType LabelType, EDirection Direction, const char *pCommand) :
 				m_Label(pLabel),
 				m_LabelType(LabelType),
 				m_Direction(Direction),
 				m_Command(pCommand) {}
 		};
+		CBindSlideTouchButtonBehavior(std::vector<CDirCommand> &&vDirCommands) :
+			m_vDirCommands(std::move(vDirCommands)) {}
+
+		CButtonLabel GetLabel() const override;
+		void OnUpdate() override;
+		void OnDeactivate() override;
+		void WriteToConfiguration(CJsonWriter *pWriter) override;
+		std::vector<CDirCommand> m_vDirCommands;
+		bool m_IsOpen = false;
 	}
 
 	/**
