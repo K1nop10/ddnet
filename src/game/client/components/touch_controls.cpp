@@ -5918,7 +5918,7 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 			return {};
 		}
 		CBindSlideTouchButtonBehavior::EDirection ParsedDirection = CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS;
-		for(int CurrentDir = (int)CBindSlideTouchButtonBehavior::EDirection::LEFT; CurrentDir < (int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS; CurrentDir++)
+		for(int CurrentDir = (int)CBindSlideTouchButtonBehavior::EDirection::LEFT; CurrentDir < (int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS; ++CurrentDir)
 		{
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
