@@ -5592,6 +5592,10 @@ std::unique_ptr<CTouchControls::CTouchButtonBehavior> CTouchControls::ParseBehav
 	{
 		return ParseBindToggleBehavior(&BehaviorObject);
 	}
+	else if(str_comp(BehaviorType.u.string.ptr, CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE) == 0)
+	{
+		return ParseBindSlideBehavior(&BehaviorObject);
+	}
 	else
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior: attribute 'type' specifies unknown value '%s'", BehaviorType.u.string.ptr);
@@ -5754,6 +5758,85 @@ std::unique_ptr<CTouchControls::CBindToggleTouchButtonBehavior> CTouchControls::
 		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, Command.u.string.ptr);
 	}
 	return std::make_unique<CBindToggleTouchButtonBehavior>(std::move(vCommands));
+}
+
+std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::ParseBindSlideBehavior(const json_value *pBehaviorObject)
+{
+	const json_value &CommandsObject = (*pBehaviorObject)["commands"];
+	if(CommandsObject.type != json_array)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'commands' must specify an array", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE);
+		return {};
+	}
+
+	std::vector<CTouchControls::CBindSlideTouchButtonBehavior::CDirCommand> vCommands;
+	vCommands.reserve(CommandsObject.u.array.length);
+	for(unsigned CommandIndex = 0; CommandIndex < CommandsObject.u.array.length; ++CommandIndex)
+	{
+		const json_value &CommandObject = CommandsObject[CommandIndex];
+		if(CommandObject.type != json_object)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'commands' must specify an array of objects", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+			return nullptr;
+		}
+
+		const json_value &Label = CommandObject["label"];
+		if(Label.type != json_string)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label' must specify a string", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+			return nullptr;
+		}
+
+		const json_value &LabelType = CommandObject["label-type"];
+		if(LabelType.type != json_string)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label-type' must specify a string", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+			return {};
+		}
+		const json_value &Direction = CommandObject["direction"];
+		if(Direction.type != json_string)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'direction' must specify a string", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+			return nullptr;
+		}
+		CButtonLabel::EType ParsedLabelType = CButtonLabel::EType::NUM_TYPES;
+		for(int CurrentType = (int)CButtonLabel::EType::PLAIN; CurrentType < (int)CButtonLabel::EType::NUM_TYPES; ++CurrentType)
+		{
+			if(str_comp(LabelType.u.string.ptr, LABEL_TYPE_NAMES[CurrentType]) == 0)
+			{
+				ParsedLabelType = (CButtonLabel::EType)CurrentType;
+				break;
+			}
+		}
+		if(ParsedLabelType == CButtonLabel::EType::NUM_TYPES)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label-type' specifies unknown value '%s'", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex, LabelType.u.string.ptr);
+			return {};
+		}
+		CBindSlideTouchButtonBehavior::EDirection ParsedDirection = CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS;
+		for(int CurrentDir = (int)CBindSlideTouchButtonBehavior::EDirection::LEFT; CurrentDir < (int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS; CurrentDir++)
+		{
+			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
+			{
+				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
+				break;
+			}
+		}
+		if(ParsedDirection == CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'direction' specifies unknown value '%s'", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex, Direction.u.string.ptr);
+			return {};
+		}
+
+		const json_value &Command = CommandObject["command"];
+		if(Command.type != json_string)
+		{
+			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'command' must specify a string", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+			return nullptr;
+		}
+		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, ParsedDirection, Command.u.string.ptr);
+	}
+	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
 
 void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
