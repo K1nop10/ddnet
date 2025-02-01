@@ -5923,7 +5923,7 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
 				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
-				if(str_comp(Direction.u.string.ptr, "center") == 0)
+				if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[8]) == 0)
 					flag = true;
 				break;
 			}
