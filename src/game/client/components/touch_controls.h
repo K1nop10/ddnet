@@ -1470,6 +1470,44 @@ private:
 		std::vector<CCommand> m_vCommands;
 		size_t m_ActiveCommandIndex = 0;
 	};
+	
+	/**
+ 	 * Similar to bind toggle, this behavior also has multiple commands.
+   	 *
+     	 * Instead, you need to slide to execute different commands.
+	 */
+	class CBindSlideTouchButtonBehavior : public CTouchButtonBehavior
+	{
+	public:
+		static constexpr const char *const BEHAVIOR_TYPE = "bind-slide";
+		enum class EDirection
+		{
+			LEFT,
+			RIGHT,
+			UP,
+			DOWN,
+			UPRIGHT,
+			UPLEFT,
+			DOWNRIGHT,
+			DOWNLEFT,
+			CENTER,
+			NUM_DIRECTIONS
+		};
+
+		class CCommand
+		{
+		public:
+			std::string m_Label;
+			CButtonLabel::EType m_LabelType;
+			std::string m_Command;
+			EDirection m_Direction;
+			CCommand(const char *pLabel, CButtonLabel::EType LabelType, EDirection Direction, const char *pCommand) :
+				m_Label(pLabel),
+				m_LabelType(LabelType),
+				m_Direction(Direction),
+				m_Command(pCommand) {}
+		};
+	}
 
 	/**
 	 * Mode of direct touch input while ingame.
