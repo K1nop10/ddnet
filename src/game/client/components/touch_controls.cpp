@@ -956,7 +956,7 @@ CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetL
 void CTouchControls::CBindSlideTouchButtonBehavior::OnUpdate()
 {
 	const auto Now = time_get_nanoseconds();		
-	if(Now - m_ActivationStartTime >= g_Config.m_ClBindSlideExtraRenderTime)
+	if(Now - m_ActivationStartTime >= static_cast<std::chrono::milliseconds>g_Config.m_ClBindSlideExtraRenderTime)
 		m_IsOpen = true;
 	if(m_AccumulatedDelta.x*m_AccumulatedDelta.x + m_AccumulatedDelta.y*m_AccumulatedDelta.y >= g_Config.m_ClBindSlideDistance/1000.0f*g_Config.m_ClBindSlideDistance/1000.0f)
 		m_IsSliding = true;
