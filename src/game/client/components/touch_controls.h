@@ -1510,7 +1510,7 @@ private:
 				m_Direction(Direction),
 				m_Command(pCommand) {}
 
-			CDirCommand() : m_Label(""), m_LabelType(CButtonLabel::EType::NUM_TYPES), m_Direction(EDirection::NUM_DIRECTIONS"), m_Command(""), m_IsInit(false) {}
+			CDirCommand() : m_Label(""), m_LabelType(CButtonLabel::EType::NUM_TYPES), m_Direction(EDirection::NUM_DIRECTIONS), m_Command(""), m_IsInit(false) {}
 		};
 		CBindSlideTouchButtonBehavior(std::vector<CDirCommand> &&vDirCommands) :
 			m_vDirCommands(std::move(vDirCommands)) {m_pTouchButton->m_ExtraRender = true;}
