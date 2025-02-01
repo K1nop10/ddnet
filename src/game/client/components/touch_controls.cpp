@@ -5942,11 +5942,7 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		}
 		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, ParsedDirection, Command.u.string.ptr);
 	}
-	if(!flag)
-	{
-		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': the key direction 'center' is missing.", CBindSlideTouchButtonBehavior::BEHAVIOR_TYPE);
-		return nullptr;
-	}
+	
 	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
 
