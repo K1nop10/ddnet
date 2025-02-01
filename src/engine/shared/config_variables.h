@@ -25,7 +25,8 @@ MACRO_CONFIG_INT(ClLabelRainbowLig, cl_label_rainbow_lig, 255, 0, 255, CFGFLAG_C
 MACRO_CONFIG_COL(ClLabelColorStatic, cl_label_color_static, 3670271, CFGFLAG_CLIENT | CFGFLAG_SAVE, "the color when type=1")
 MACRO_CONFIG_INT(ClLabelAlpha, cl_label_alpha, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Label's alpha")
 MACRO_CONFIG_INT(ClLabelAlphaActive, cl_label_alpha_active, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Label's alpha when activated")
-
+MACRO_CONFIG_INT(ClBindSlideExtraRenderTime, cl_bind_slide_extra_render_time, 350, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "After how long will the bind slide's all button appear, based on milliseconds")
+MACRO_CONFIG_INT(ClBindSlideDistance, cl_bind_slide_distance, 50, 1, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The min distance to trigger bind slide")
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
