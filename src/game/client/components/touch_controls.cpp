@@ -5279,10 +5279,12 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 	// overlapping buttons of excluding visibilities.
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
+		//此for遍历是为了激活按钮，被隐藏或已经处于激活则跳过
 		if(!TouchButton.IsVisible() || TouchButton.m_pBehavior->IsActive())
 		{
 			continue;
 		}
+		//检测是否存在手指在按键显示之后才按下，且此时在按键内部(同一根)。同时记录下对应手指(取第一个)。没有就跳过
 		const auto FingerInsideButton = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 			return TouchButton.m_VisibilityStartTime < TouchFingerState.m_PressTime &&
 			       TouchButton.IsInside(TouchFingerState.m_Position * ScreenSize);
@@ -5291,6 +5293,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		{
 			continue;
 		}
+		//检测上述记录的手指是否还在其他显示的按键内。有则清除该手指信息(即该手指无法再触发其他按钮)，并跳过。
 		const auto OtherHoveredTouchButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
 			return &Button != &TouchButton && Button.IsVisible() && Button.IsInside(FingerInsideButton->m_Position * ScreenSize);
 		});
@@ -5301,6 +5304,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 			vRemainingTouchFingerStates.erase(FingerInsideButton);
 			continue;
 		}
+		//该次遍历中，目标按钮目前处于未触发，而目标手指可能之前触发了其他按钮再来到了目标按钮，因此这里把该其他按钮关闭，再打开目标按钮。
 		auto PrevActiveTouchButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
 			return Button.m_pBehavior->IsActive(FingerInsideButton->m_Finger);
 		});
@@ -5315,15 +5319,19 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 	// are kept active also if the finger is moved outside the button.
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
+		//此for遍历为了更新按钮状态(关闭，更新)
+		//未显示则关闭并跳过(此处SetInactive会在该按钮Active时才执行OnDeactivate，因此只会执行一次指令)
 		if(!TouchButton.IsVisible())
 		{
 			TouchButton.m_pBehavior->SetInactive();
 			continue;
 		}
+		//根本没开则跳过
 		if(!TouchButton.m_pBehavior->IsActive())
 		{
 			continue;
 		}
+		//检测激活该按钮的手指是否还在，不在则关闭按钮，否则更新按钮
 		const auto ActiveFinger = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 			return TouchFingerState.m_Finger == TouchButton.m_pBehavior->m_Finger;
 		});
@@ -5410,7 +5418,7 @@ void CTouchControls::RenderButtons()
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
 		TouchButton.UpdateVisibility();
-		if(!TouchButton.IsVisible() || TouchButton.m_pBehavior->BEHAVIOR_TYPE == "bind-slide")
+		if(!TouchButton.IsVisible())
 		{
 			continue;
 		}
