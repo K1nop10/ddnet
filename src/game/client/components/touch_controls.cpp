@@ -501,8 +501,10 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?manwhatcanisay:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
 	//bind-slide 额外渲染
+	CBindSlideTouchButtonBehavior* pTmp = nullptr
 	try {
-		CBindSlideTouchButtonBehavior& pTmp = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
+		CBindSlideTouchButtonBehavior& pRef = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
+		pTmp = &pRef;
 	} catch (const std::bad_cast& e) {
     		return;
 	}
@@ -523,7 +525,7 @@ void CTouchControls::CTouchButton::Render()
 		Heart.x = m_UnitRect.m_X + m_UnitRect.m_W / 2;
 		Heart.y = m_UnitRect.m_Y + m_UnitRect.m_H / 2;
 		CUIRect ExtraRect;
-		const vec2 ScreenSize = m_pBehavior->CalculateScreenSize();
+		const vec2 ScreenSize = m_pTouchControls->CalculateScreenSize();
 		float Dx = ScreenSize.x / BUTTON_SIZE_SCALE;
 		float Dy = ScreenSize.y / BUTTON_SIZE_SCALE;
 		ExtraRect.w = 50000 * Dx;
