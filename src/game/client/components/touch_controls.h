@@ -1513,7 +1513,7 @@ private:
 			CDirCommand() : m_Label(""), m_LabelType(CButtonLabel::EType::NUM_TYPES), m_Direction(EDirection::NUM_DIRECTIONS), m_Command(""), m_IsInit(false) {}
 		};
 		CBindSlideTouchButtonBehavior(std::vector<CDirCommand> &&vDirCommands) :
-			m_vDirCommands(std::move(vDirCommands)) {m_pTouchButton->m_ExtraRender = true;}
+			m_vDirCommands(std::move(vDirCommands)) {}
 
 		CButtonLabel GetLabel() const override;
 		CButtonLabel GetLabel(const char *Direction) const;
