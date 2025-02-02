@@ -619,7 +619,62 @@ void CTouchControls::CTouchButton::Render()
 			}
 		}
 
-		
+		if(RenderFlag & 1 == 1 && TrueFlag != 1)
+		{
+			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
+			ExtraRect.y = (Heart.y - 25000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 9 == 9 && TrueFlag != 9)
+		{
+			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
+			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::UPRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 8 == 8 && TrueFlag != 8)
+		{
+			ExtraRect.x = (Heart.x - 25000) * Dx;
+			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::UP), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 2 == 2 && TrueFlag != 2)
+		{
+			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
+			ExtraRect.y = (Heart.y - 25000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 10 == 10 && TrueFlag != 10)
+		{		
+			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
+			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::UPLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 5 == 5 && TrueFlag != 5)
+		{				
+			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;				
+			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::DOWNRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 4 == 4 && TrueFlag != 4)
+		{
+			ExtraRect.x = (Heart.x - 25000) * Dx;
+			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::DOWN), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
+		if(RenderFlag & 6 == 6 && TrueFlag != 6)
+		{				
+			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
+			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
+			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, m_pBehavior->GetLabel(m_pBehavior->EDirection::DOWNLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+		}
 	}
 }
 
