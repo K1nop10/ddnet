@@ -501,7 +501,12 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?manwhatcanisay:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
 	//bind-slide 额外渲染
-	std::unique_ptr<CBindSlideTouchButtonBehavior> pTmp = dynamic_cast<std::unique_ptr<CBindSlideTouchButtonBehavior>>(m_pBehavior);
+	try {
+		CBindSlideTouchButtonBehavior& pTmp = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
+	} catch (const std::bad_cast& e) {
+    		return;
+	}
+	
 	if(pTmp && (pTmp->m_IsOpen || pTmp->m_IsSliding))
 	{
 		size_t RenderFlag = 0;
