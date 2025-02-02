@@ -5948,10 +5948,11 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, ParsedDirection, Command.u.string.ptr);
 	}
 	if(!flag)
+	{
 		log_error("touch_controls", "Center is missing");
-	log_error("touch_controls", "finished");
-	return nullptr;
-	//return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
+		return nullptr;
+	}
+	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
 
 void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
