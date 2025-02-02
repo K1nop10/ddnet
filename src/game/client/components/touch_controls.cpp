@@ -503,6 +503,21 @@ void CTouchControls::CTouchButton::Render()
 		const char *pLabel = LabelData.m_Type == CButtonLabel::EType::LOCALIZED ? Localize(LabelData.m_pLabel) : LabelData.m_pLabel;
 		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?manwhatcanisay:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
+	//bind-slide 额外渲染
+	if(m_pBehavior->BEHAVIOR_TYPE == "bind-slide" && (m_pBehavior->m_IsOpen || m_pBehavior->m_IsSliding))
+	{
+		size_t RenderFlag = 0;
+		if(m_UnitRect.m_X + m_UnitRect.m_W <= 940000)
+			RenderFlag += 1 << 0;//1
+		if(m_UnitRect.m_X >= 60000)
+			RenderFlag += 1 << 1;//2
+		if(m_UnitRect.m_Y + m_UnitRect.m_H <= 940000)
+			RenderFlag += 1 << 2;//4
+		if(m_UnitRect.m_Y >= 60000)
+			RenderFlag += 1 << 3;//8
+		//Left
+		if(RenderFlag & )
+	}
 }
 
 void CTouchControls::CTouchButton::WriteToConfiguration(CJsonWriter *pWriter)
@@ -5285,15 +5300,21 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 			continue;
 		}
 		//检测是否存在手指在按键显示之后才按下，且此时在按键内部(同一根)。同时记录下对应手指(取第一个)。没有就跳过
+		//新增：且该手指未触发bind-slide按钮
 		const auto FingerInsideButton = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+			const auto TriggerButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
+					return Button.m_pBehavior->IsActive(TouchFingerState.m_Finger) &&
+					       Button.m_pBehavior->BEHAVIOR_TYPE == "bind-slide";
+				});
 			return TouchButton.m_VisibilityStartTime < TouchFingerState.m_PressTime &&
-			       TouchButton.IsInside(TouchFingerState.m_Position * ScreenSize);
+			       TouchButton.IsInside(TouchFingerState.m_Position * ScreenSize) &&
+			       TriggerButton == m_vTouchButtons.end();
 		});
 		if(FingerInsideButton == vRemainingTouchFingerStates.end())
 		{
 			continue;
 		}
-		//检测上述记录的手指是否还在其他显示的按键内。有则清除该手指信息(即该手指无法再触发其他按钮)，并跳过。
+		//检测上述记录的手指是否还在其他显示的按键内。有则清除该手指信息(即该手指在这一帧内无法再触发其他按钮)，并跳过。
 		const auto OtherHoveredTouchButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
 			return &Button != &TouchButton && Button.IsVisible() && Button.IsInside(FingerInsideButton->m_Position * ScreenSize);
 		});
