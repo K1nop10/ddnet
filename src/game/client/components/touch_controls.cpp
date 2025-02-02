@@ -5410,7 +5410,7 @@ void CTouchControls::RenderButtons()
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
 		TouchButton.UpdateVisibility();
-		if(!TouchButton.IsVisible())
+		if(!TouchButton.IsVisible() || TouchButton.m_pBehavior->BEHAVIOR_TYPE == "bind-slide")
 		{
 			continue;
 		}
