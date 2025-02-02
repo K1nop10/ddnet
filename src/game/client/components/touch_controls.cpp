@@ -5920,6 +5920,7 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		CBindSlideTouchButtonBehavior::EDirection ParsedDirection = CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS;
 		for(int CurrentDir = (int)CBindSlideTouchButtonBehavior::EDirection::LEFT; CurrentDir < (int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS; ++CurrentDir)
 		{
+			dbg_msg("usage", "Comparing %s and %s.", Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]);
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
 				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
@@ -5927,6 +5928,7 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 					flag = true;
 				break;
 			}
+			dbg_msg("usage", "Comparison failed.");
 		}
 		if(ParsedDirection == CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS)
 		{
@@ -5942,7 +5944,8 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		}
 		vCommands.emplace_back(Label.u.string.ptr, ParsedLabelType, ParsedDirection, Command.u.string.ptr);
 	}
-	
+	if(!flag)
+		log_error("touch_controls", "Center is missing");
 	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
 
