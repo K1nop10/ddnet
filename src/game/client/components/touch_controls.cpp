@@ -5923,9 +5923,12 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 			dbg_msg("usage", "Comparing %s and %s.", Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]);
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
+				dbg_msg("usage", "Comparison succeed");
 				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
+				dbg_msg("usage2", "Comparing '%s' and '%s'.", Direction.u.string.ptr, DIRECTION_NAMES[8]);
 				if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[8]) == 0)
 					flag = true;
+				dbg_msg("flag", "Flag is '%d'", (flag)?1:0);
 				break;
 			}
 			dbg_msg("usage", "Comparison failed.");
@@ -5946,7 +5949,9 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 	}
 	if(!flag)
 		log_error("touch_controls", "Center is missing");
-	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
+	log_error("touch_controls", "finished");
+	return nullptr;
+	//return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
 }
 
 void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
