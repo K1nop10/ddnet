@@ -501,7 +501,7 @@ void CTouchControls::CTouchButton::Render()
 		m_pTouchControls->Ui()->DoLabel(&LabelRect, (j)?manwhatcanisay:pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
 	//bind-slide 额外渲染
-	CBindSlideTouchButtonBehavior* pTmp = nullptr
+	CBindSlideTouchButtonBehavior* pTmp = nullptr;
 	try {
 		CBindSlideTouchButtonBehavior& pRef = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
 		pTmp = &pRef;
@@ -5469,7 +5469,13 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		//新增：且该手指未触发bind-slide按钮
 		const auto FingerInsideButton = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 			const auto TriggerButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
-					CBindSlideTouchButtonBehavior* pTmp = dynamic_cast<CBindSlideTouchButtonBehavior*>(Button.m_pBehavior);
+					CBindSlideTouchButtonBehavior* pTmp = nullptr;
+					try {
+						CBindSlideTouchButtonBehavior& pRef = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
+						pTmp = &pRef;
+						} catch (const std::bad_cast& e) {
+    							return false;
+						}
 					return Button.m_pBehavior->IsActive(TouchFingerState.m_Finger) &&
 					       pTmp;
 				});
