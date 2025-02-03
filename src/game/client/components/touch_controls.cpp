@@ -544,7 +544,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
 				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(pTmp->EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
-			if(Tan >= std::tan(-67.5 * rad) && Tan < std::tan(-22.5 * rad) (RenderFlag & 9) == 9)
+			if(Tan >= std::tan(-67.5 * rad) && Tan < std::tan(-22.5 * rad) && (RenderFlag & 9) == 9)
 			{
 				TrueFlag = 9;
 				ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
@@ -1119,13 +1119,19 @@ CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetL
 	for(const auto &Command: m_vDirCommands)
 		if(Command.m_Direction == EDirection::CENTER)
 			return {Command.m_LabelType, Command.m_Label.c_str()};
-	dbg_assert(false, "Where is the center?");
 	return {};
 }
 CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetLabel(const char *Direction) const
 {
 	for(const auto &Command: m_vDirCommands)
 		if(m_pTouchControls->DIRECTION_NAMES[(int)Command.m_Direction] == Direction)
+			return {Command.m_LabelType, Command.m_Label.c_str()};
+	return {};
+}
+CTouchControls::CButtonLabel CTouchControls::CBindSlideTouchButtonBehavior::GetLabel(EDirection Direction) const
+{
+	for(const auto &Command: m_vDirCommands)
+		if(Command.m_Direction == Direction)
 			return {Command.m_LabelType, Command.m_Label.c_str()};
 	return {};
 }
