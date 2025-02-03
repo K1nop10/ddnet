@@ -1517,6 +1517,7 @@ private:
 
 		CButtonLabel GetLabel() const override;
 		CButtonLabel GetLabel(const char *Direction) const;
+		CButtonLabel GetLabel(EDirection Direction) const;
 		void OnUpdate() override;
 		void OnDeactivate() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
