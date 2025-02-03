@@ -502,12 +502,7 @@ void CTouchControls::CTouchButton::Render()
 	}
 	//bind-slide 额外渲染
 	CBindSlideTouchButtonBehavior* pTmp = nullptr;
-	try {
-		CBindSlideTouchButtonBehavior& pRef = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
-		pTmp = &pRef;
-	} catch (const std::bad_cast& e) {
-    		return;
-	}
+	pTmp = dynamic_cast<CBindSlideTouchButtonBehavior*>(m_pBehavior.get());
 	
 	if(pTmp && (pTmp->m_IsOpen || pTmp->m_IsSliding))
 	{
@@ -5470,12 +5465,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		const auto FingerInsideButton = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 			const auto TriggerButton = std::find_if(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](const CTouchButton &Button) {
 					CBindSlideTouchButtonBehavior* pTmp = nullptr;
-					try {
-						CBindSlideTouchButtonBehavior& pRef = dynamic_cast<CBindSlideTouchButtonBehavior&>(*m_pBehavior);
-						pTmp = &pRef;
-						} catch (const std::bad_cast& e) {
-    							return false;
-						}
+					pTmp = dynamic_cast<CBindSlideTouchButtonBehavior*>(m_pBehavior.get());
 					return Button.m_pBehavior->IsActive(TouchFingerState.m_Finger) &&
 					       pTmp;
 				});
