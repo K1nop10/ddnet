@@ -542,7 +542,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 				ExtraRect.y = (Heart.y - 25000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if(Tan >= std::tan(-67.5 * rad) && Tan < std::tan(-22.5 * rad) && (RenderFlag & 9) == 9)
 			{
@@ -550,7 +550,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UPRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UPRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if((RenderFlag & 8) == 8 && (Tan < std::tan(-67.5 * rad) || Tan > std::tan(-112.5 * rad)))
 			{
@@ -558,7 +558,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (Heart.x - 25000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UP), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UP), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if(Tan > 0 && Tan <= std::tan(-157.5 * rad) && (RenderFlag & 2) == 2)
 			{
@@ -566,7 +566,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 				ExtraRect.y = (Heart.y - 25000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 	
 			}
 			if(Tan > std::tan(-157.5 * rad) && Tan <= std::tan(-112.5 * rad) && (RenderFlag & 10) == 10)
@@ -575,7 +575,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UPLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UPLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 		}
 		else
@@ -586,7 +586,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 				ExtraRect.y = (Heart.y - 25000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if(Tan >= std::tan(22.5 * rad) && Tan < std::tan(67.5 * rad) && (RenderFlag & 5) == 5)
 			{
@@ -594,7 +594,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWNRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWNRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if((RenderFlag & 4) == 4 && (Tan > std::tan(67.5 * rad) || Tan < std::tan(112.5 * rad)))
 			{
@@ -602,7 +602,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (Heart.x - 25000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWN), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWN), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if((RenderFlag & 2) == 2 && Tan <= 0 && Tan > std::tan(157.5 * rad) && m_pBehavior->m_AccumulatedDelta.x < 0)
 			{
@@ -610,7 +610,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 				ExtraRect.y = (Heart.y - 25000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 			if((RenderFlag & 6) == 6 && Tan > std::tan(112.5 * rad) && Tan <= std::tan(157.5 * rad))
 			{
@@ -618,7 +618,7 @@ void CTouchControls::CTouchButton::Render()
 				ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 				ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 				ExtraRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWNLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+				m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWNLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 			}
 		}
 
@@ -627,56 +627,56 @@ void CTouchControls::CTouchButton::Render()
 			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 			ExtraRect.y = (Heart.y - 25000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::RIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 9) == 9 && TrueFlag != 9)
 		{
 			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;
 			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UPRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UPRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 8) == 8 && TrueFlag != 8)
 		{
 			ExtraRect.x = (Heart.x - 25000) * Dx;
 			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UP), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UP), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 2) == 2 && TrueFlag != 2)
 		{
 			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 			ExtraRect.y = (Heart.y - 25000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::LEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 10) == 10 && TrueFlag != 10)
 		{		
 			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 			ExtraRect.y = (m_UnitRect.m_Y - 60000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::UPLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::UPLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 5) == 5 && TrueFlag != 5)
 		{				
 			ExtraRect.x = (m_UnitRect.m_X + m_UnitRect.m_W + 10000) * Dx;				
 			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWNRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWNRIGHT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 4) == 4 && TrueFlag != 4)
 		{
 			ExtraRect.x = (Heart.x - 25000) * Dx;
 			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWN), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWN), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 		if((RenderFlag & 6) == 6 && TrueFlag != 6)
 		{				
 			ExtraRect.x = (m_UnitRect.m_X - 60000) * Dx;
 			ExtraRect.y = (m_UnitRect.m_Y + m_UnitRect.m_H + 10000) * Dy;
 			ExtraRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 8.0f);
-			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideButtonBehavior::EDirection::DOWNLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
+			m_pTouchControls->Ui()->DoLabel(&ExtraRect, pTmp->GetLabel(CTouchControls::CBindSlideTouchButtonBehavior::EDirection::DOWNLEFT), ExtraFontSize, TEXTALIGN_MC, ExtraLabelProps);
 		}
 	}
 }
