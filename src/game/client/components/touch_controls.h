@@ -5,6 +5,8 @@
 
 #include <engine/input.h>
 
+#include <engine/shared/config.h>
+
 #include <game/client/component.h>
 #include <game/client/ui_rect.h>
 
