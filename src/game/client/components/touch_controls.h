@@ -1626,7 +1626,8 @@ private:
 class SuperMap
 {
 public:
-	std::map<std::string, int*> Map;
+	static std::map<std::string, int*> Map;
+	static void Init(){
 	Map["cl_button_color_type"] = &g_Config.m_ClButtonColorType;
 	Map["cl_button_rainbow_speed"] = &g_Config.m_ClButtonRainbowSpeed;
 	Map["cl_button_rainbow_sat"] = &g_Config.m_ClButtonRainbowSat;
@@ -1862,7 +1863,8 @@ public:
 	Map["cl_demo_show_speed"] = &g_Config.m_ClDemoShowSpeed;
 	Map["cl_demo_show_pause"] = &g_Config.m_ClDemoShowPause;
 	Map["cl_demo_keyboard_shortcuts"] = &g_Config.m_ClDemoKeyboardShortcuts;
-	int* Get(std::string a)
+	}
+	static int* Get(std::string a)
 	{
 		return Map[a];
 	}
