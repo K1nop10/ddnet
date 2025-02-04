@@ -5,7 +5,6 @@
 
 #include <engine/client.h>
 #include <engine/external/json-parser/json.h>
-#include <engine/shared/config.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/localization.h>
 
