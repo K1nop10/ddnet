@@ -1783,7 +1783,6 @@ public:
 	Map["cl_video_show_direction"] = &g_Config.m_ClVideoShowDirection;
 	Map["cl_video_crf"] = &g_Config.m_ClVideoX264Crf;
 	Map["cl_video_preset"] = &g_Config.m_ClVideoX264Preset;
-	Map["dbg_dummies"] = &g_Config.m_DbgDummies;
 	Map["dbg_tuning"] = &g_Config.m_DbgTuning;
 	Map["player_country"] = &g_Config.m_PlayerCountry;
 	Map["events"] = &g_Config.m_Events;
@@ -1812,7 +1811,6 @@ public:
 	Map["inp_mousesens"] = &g_Config.m_InpMousesens;
 	Map["inp_translated_keys"] = &g_Config.m_InpTranslatedKeys;
 	Map["inp_ignored_modifiers"] = &g_Config.m_InpIgnoredModifiers;
-	Map["inp_ime_native_ui"] = &g_Config.m_InpImeNativeUi;
 	Map["cl_race_binds_set"] = &g_Config.m_ClDDRaceBindsSet;
 	Map["cl_reconnect_timeout"] = &g_Config.m_ClReconnectTimeout;
 	Map["cl_reconnect_full"] = &g_Config.m_ClReconnectFull;
