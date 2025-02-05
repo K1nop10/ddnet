@@ -5879,7 +5879,7 @@ void CTouchControls::RenderButtons()
 	}
 	for(CTouchButton &Button : VisiableButtons)
 	{
-		Button.UpdateBackgroundCorners(VisiableButtons);
+		Button.UpdateBackgroundCorners(std::move(VisiableButtons));
 		Button.Render();
 	}
 }
