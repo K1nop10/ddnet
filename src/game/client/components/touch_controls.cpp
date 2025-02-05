@@ -5875,11 +5875,11 @@ void CTouchControls::RenderButtons()
 		{
 			continue;
 		}
-		VisiableButtons.push_back(std::move(TouchButton));
+		VisiableButtons.push_back(TouchButton);
 	}
 	for(CTouchButton &Button : VisiableButtons)
 	{
-		Button.UpdateBackgroundCorners(std::move(VisiableButtons));
+		Button.UpdateBackgroundCorners(VisiableButtons);
 		Button.Render();
 	}
 }
