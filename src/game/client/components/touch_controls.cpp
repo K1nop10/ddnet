@@ -438,7 +438,7 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchBut
 	};
 	for(CTouchButton* OtherButton : VisiableButtons)
 	{
-		if(*OtherButton == this || OtherButton->m_Shape != EButtonShape::RECT)
+		if(OtherButton == this || OtherButton->m_Shape != EButtonShape::RECT)
 			continue;
 		// TODO: This does not consider that button visibilities can change independently, also update corners when any visibility changed
 
