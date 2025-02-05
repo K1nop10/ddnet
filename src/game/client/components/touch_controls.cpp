@@ -19,6 +19,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/localization.h>
+#include <game/client/ui_listbox.h>
 
 using namespace std::chrono_literals;
 
@@ -1469,7 +1470,7 @@ void CTouchControls::CBindSlideTouchButtonBehavior::WriteToConfiguration(CJsonWr
 
 	pWriter->EndArray();
 }
-void CTouchControls::CBarTouchButtonBehavior::GetLabel() const
+CTouchControls::CButtonLabel CTouchControls::CBarTouchButtonBehavior::GetLabel() const
 {
 	return {CTouchControls::CButtonLabel::EType::PLAIN, m_Label.c_str()};
 }
