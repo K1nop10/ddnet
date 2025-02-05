@@ -18,8 +18,6 @@
 #include <game/client/components/voting.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/client/ui_listbox.h>
-#include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
 using namespace std::chrono_literals;
@@ -605,7 +603,7 @@ void CTouchControls::CTouchButton::Render()
 	tmp = dynamic_cast<CBarTouchButtonBehavior*>(m_pBehavior.get());
 	if(tmp)
 	{
-		Ui()->DoScrollbarOption(tmp->m_Target, tmp->m_Target, &m_ScreenRect, tmp->m_Label, tmp->m_Min, tmp->m_Max, &CUi::ms_LinearScrollbarScale, *(tmp->m_Target), "");
+		m_pTouchControls->Ui()->DoScrollbarOption(tmp->m_Target, tmp->m_Target, &m_ScreenRect, tmp->m_Label, tmp->m_Min, tmp->m_Max, &CUi::ms_LinearScrollbarScale, *(tmp->m_Target), "");
 		return;
 	}
 	switch(m_Shape)
