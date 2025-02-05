@@ -599,6 +599,13 @@ void CTouchControls::CTouchButton::Render()
 	}
 	alpha = m_pBehavior->IsActive()?g_Config.m_ClButtonAlphaActive / 255.0f:g_Config.m_ClButtonAlpha / 255.0f;
 	alpha = (g_Config.m_ClButtonColorType == 0) ? 0.25f:alpha;
+	CBarTouchButtonBehavior* tmp = nullptr;
+	tmp = dynamic_cast<CBarTouchButtonBehavior*>(m_pBehavior.get());
+	if(tmp)
+	{
+		Ui()->DoScrollbarOption(tmp->m_Target, tmp->m_Target, &m_ScreenRect, tmp->m_Label, tmp->m_Min, tmp->m_Max, &CUi::ms_LinearScrollbarScale, *(tmp->m_Target), "");
+		return;
+	}
 	switch(m_Shape)
 	{
 	case EButtonShape::RECT:
@@ -1462,7 +1469,7 @@ void CTouchControls::CBindSlideTouchButtonBehavior::WriteToConfiguration(CJsonWr
 
 	pWriter->EndArray();
 }
-void CTouchControls::CBarTouchBehavior::GetLabel() const
+void CTouchControls::CBarTouchButtonBehavior::GetLabel() const
 {
 	return {CTouchControls::CButtonLabel::EType::PLAIN, m_Label.c_str()};
 }
