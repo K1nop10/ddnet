@@ -1172,8 +1172,11 @@ private:
 	public:
 		CTouchButton(CTouchControls *pTouchControls);
 		CTouchButton(CTouchButton &&Other) noexcept;
+		CTouchButton(const CTouchButton &Other) = delete;
+
+		CTouchButton &operator=(const CTouchButton &Other) = delete;
 		CTouchButton &operator=(CTouchButton &&Other) noexcept;
-		CTouchButton(const CTouchButton &Other);
+
 
 		CTouchControls *m_pTouchControls;
 
@@ -1191,7 +1194,7 @@ private:
 
 		void UpdatePointers();
 		void UpdateScreenFromUnitRect();
-		void UpdateBackgroundCorners(std::vector<CTouchButton> VisiableButtons);
+		void UpdateBackgroundCorners(std::vector<CTouchButton*> VisiableButtons);
 
 		vec2 ClampTouchPosition(vec2 TouchPosition) const;
 		bool IsInside(vec2 TouchPosition) const;
