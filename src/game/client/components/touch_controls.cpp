@@ -18,8 +18,9 @@
 #include <game/client/components/voting.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/localization.h>
 #include <game/client/ui_listbox.h>
+#include <game/client/ui_scrollregion.h>
+#include <game/localization.h>
 
 using namespace std::chrono_literals;
 
