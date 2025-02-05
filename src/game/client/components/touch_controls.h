@@ -1193,7 +1193,7 @@ private:
 
 		void UpdatePointers();
 		void UpdateScreenFromUnitRect();
-		void UpdateBackgroundCorners();
+		void UpdateBackgroundCorners(std::vector<CTouchButton> VisiableButtons);
 
 		vec2 ClampTouchPosition(vec2 TouchPosition) const;
 		bool IsInside(vec2 TouchPosition) const;
