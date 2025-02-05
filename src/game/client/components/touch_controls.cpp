@@ -5875,7 +5875,7 @@ void CTouchControls::RenderButtons()
 		{
 			continue;
 		}
-		VisiableButtons.push_back(TouchButton);
+		VisiableButtons.push_back(std::move(TouchButton));
 	}
 	for(CTouchButton &Button : VisiableButtons)
 	{
