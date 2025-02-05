@@ -1529,6 +1529,27 @@ private:
 		bool m_IsSliding = false;
 	};
 	static constexpr const char *const DIRECTION_NAMES[(int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS] = {"left", "right", "up", "down", "upleft", "upright", "downleft", "downright", "center"};
+
+	class CBarTouchButtonBehavior : public CTouchButtonBehavior
+	{
+	public:
+		static constexpr const char *const BEHAVIOR_TYPE = "bar";
+		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, const char *pTarget) :
+			m_Label(pLabel),
+			m_Min(Min),
+			m_Max(Max),
+			m_Command(pTarget) {}
+
+		CButtonLabel GetLabel() const override;
+		void WriteToConfiguration(CJsonWriter *pWriter) override;
+
+		std::string m_Label;
+		int m_Min;
+		int m_Max;
+		std::string m_Target;
+	};
+
+
 	/**
 	 * Mode of direct touch input while ingame.
 	 *
@@ -1622,6 +1643,7 @@ private:
 	std::unique_ptr<CBindTouchButtonBehavior> ParseBindBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindToggleTouchButtonBehavior> ParseBindToggleBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindSlideTouchButtonBehavior> ParseBindSlideBehavior(const json_value *pBehaviorObject);
+	std::unique_ptr<CBarTouchButtonBehavior> ParseBarBehavior(const json_value *pBehaviorObject);
 	void WriteConfiguration(CJsonWriter *pWriter);
 };
 
