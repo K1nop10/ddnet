@@ -436,7 +436,7 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchBut
 	const auto &&PointInOrOnRect = [](ivec2 Point, CUnitRect Rect) {
 		return Point.x >= Rect.m_X && Point.x <= Rect.m_X + Rect.m_W && Point.y >= Rect.m_Y && Point.y <= Rect.m_Y + Rect.m_H;
 	};
-	for(const CTouchButton &OtherButton : VisiableButtons)
+	for(CTouchButton &OtherButton : VisiableButtons)
 	{
 		if(&OtherButton == this || OtherButton.m_Shape != EButtonShape::RECT)
 			continue;
