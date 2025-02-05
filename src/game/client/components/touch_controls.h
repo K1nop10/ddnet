@@ -1538,7 +1538,7 @@ private:
 			m_Label(pLabel),
 			m_Min(Min),
 			m_Max(Max),
-			m_Command(pTarget) {}
+			m_Target(pTarget) {}
 
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
