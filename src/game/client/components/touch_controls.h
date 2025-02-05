@@ -1538,7 +1538,7 @@ private:
 			m_Label(pLabel),
 			m_Min(Min),
 			m_Max(Max),
-			m_Target(pTarget)
+			m_Target(pTarget),
 			m_StrTarget(StrTarget) {}
 
 		CButtonLabel GetLabel() const override;
