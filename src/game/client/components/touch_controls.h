@@ -1534,7 +1534,7 @@ private:
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "bar";
-		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, const char *pTarget) :
+		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, int *pTarget) :
 			m_Label(pLabel),
 			m_Min(Min),
 			m_Max(Max),
@@ -1546,7 +1546,7 @@ private:
 		std::string m_Label;
 		int m_Min;
 		int m_Max;
-		std::string m_Target;
+		int *m_Target;
 	};
 
 
