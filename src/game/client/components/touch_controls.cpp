@@ -405,7 +405,7 @@ void CTouchControls::CTouchButton::UpdateScreenFromUnitRect()
 	}
 }
 
-void CTouchControls::CTouchButton::UpdateBackgroundCorners()
+void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchButton> VisiableButtons)
 {
 	if(m_Shape != EButtonShape::RECT)
 	{
@@ -436,18 +436,11 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners()
 	const auto &&PointInOrOnRect = [](ivec2 Point, CUnitRect Rect) {
 		return Point.x >= Rect.m_X && Point.x <= Rect.m_X + Rect.m_W && Point.y >= Rect.m_Y && Point.y <= Rect.m_Y + Rect.m_H;
 	};
-	for(const CTouchButton &OtherButton : m_pTouchControls->m_vTouchButtons)
+	for(const CTouchButton &OtherButton : VisiableButtons)
 	{
 		if(&OtherButton == this || OtherButton.m_Shape != EButtonShape::RECT)
 			continue;
 		// TODO: This does not consider that button visibilities can change independently, also update corners when any visibility changed
-		const bool ExcludingVisibilities = std::any_of(OtherButton.m_vVisibilities.begin(), OtherButton.m_vVisibilities.end(), [&](const CButtonVisibility &OtherVisibility) {
-			return std::any_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](const CButtonVisibility &OurVisibility) {
-				return OtherVisibility.m_Type == OurVisibility.m_Type && OtherVisibility.m_Parity != OurVisibility.m_Parity;
-			});
-		});
-		if(ExcludingVisibilities)
-			continue;
 
 		if((m_BackgroundCorners & IGraphics::CORNER_TL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y), OtherButton.m_UnitRect))
 		{
@@ -5874,6 +5867,7 @@ void CTouchControls::ResetButtons()
 
 void CTouchControls::RenderButtons()
 {
+	std::vector<CTouchButton> VisiableButtons;
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
 		TouchButton.UpdateVisibility();
@@ -5881,7 +5875,12 @@ void CTouchControls::RenderButtons()
 		{
 			continue;
 		}
-		TouchButton.Render();
+		VisiableButtons.emplace_back(TouchButton);
+	}
+	for(CTouchButton &Button : VisiableButtons)
+	{
+		Button.UpdateBackgroundCorners(VisiableButtons);
+		Button.Render();
 	}
 }
 
@@ -5957,7 +5956,6 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	{
 		TouchButton.UpdatePointers();
 		TouchButton.UpdateScreenFromUnitRect();
-		TouchButton.UpdateBackgroundCorners();
 	}
 
 	json_value_free(pConfiguration);
