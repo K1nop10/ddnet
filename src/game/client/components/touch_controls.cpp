@@ -1221,6 +1221,27 @@ void CTouchControls::CBindSlideTouchButtonBehavior::WriteToConfiguration(CJsonWr
 
 	pWriter->EndArray();
 }
+void CTouchControls::CBarTouchBehavior::GetLabel() const
+{
+	return {CTouchControls::CButtonLabel::EType::PLAIN, m_Label.c_str()};
+}
+void CTouchControls::CBarTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
+{
+	pWriter->WriteAttribute("type");
+	pWriter->WriteStrValue(BEHAVIOR_TYPE);
+
+	pWriter->WriteAttribute("label");
+	pWriter->WriteStrValue(m_Label.c_str());
+
+	pWriter->WriteAttribute("min");
+	pWriter->WriteIntValue(m_Min);
+
+	pWriter->WriteAttribute("max");
+	pWriter->WriteIntValue(m_Max);
+
+	pWriter->WriteAttribute("target");
+	pWriter->WriteStrValue(m_StrTarget.c_str());
+}
 
 void CTouchControls::OnInit()
 {
@@ -6195,7 +6216,7 @@ std::unique_ptr<CTouchControls::CBarTouchButtonBehavior> CTouchControls::ParseBa
 		return nullptr;
 	}
 	
-	return std::make_unique<CBarTouchButtonBehavior>(Label.u.string.ptr, Min.u.integer, Max.u.integer, Find->second);
+	return std::make_unique<CBarTouchButtonBehavior>(Label.u.string.ptr, Min.u.integer, Max.u.integer, Find->second, Find->first);
 }
 
 void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
