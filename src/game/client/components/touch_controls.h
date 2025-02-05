@@ -1534,11 +1534,12 @@ private:
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "bar";
-		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, int *pTarget) :
+		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, int *pTarget, std::string StrTarget) :
 			m_Label(pLabel),
 			m_Min(Min),
 			m_Max(Max),
-			m_Target(pTarget) {}
+			m_Target(pTarget)
+			m_StrTarget(StrTarget) {}
 
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
@@ -1547,6 +1548,7 @@ private:
 		int m_Min;
 		int m_Max;
 		int *m_Target;
+		std::string m_StrTarget;
 	};
 
 
