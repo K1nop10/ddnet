@@ -370,15 +370,6 @@ CTouchControls::CTouchButton &CTouchControls::CTouchButton::operator=(CTouchButt
 	m_VisibilityCached = false;
 	return *this;
 }
-CTouchControls::CTouchButton(const CTouchButton &Other)
-{
-	m_pTouchControls = Other.m_pTouchControls;
-	m_UnitRect = Other.m_UnitRect;
-	m_Shape = Other.m_Shape;
-	m_vVisibilities = Other.m_vVisibilities;
-	m_pBehavior = Other.m_pBehavior;
-	m_VisibilityCached = false;
-}
 
 void CTouchControls::CTouchButton::UpdatePointers()
 {
@@ -414,7 +405,7 @@ void CTouchControls::CTouchButton::UpdateScreenFromUnitRect()
 	}
 }
 
-void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchButton> VisiableButtons)
+void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchButton*> VisiableButtons)
 {
 	if(m_Shape != EButtonShape::RECT)
 	{
@@ -445,25 +436,25 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners(std::vector<CTouchBut
 	const auto &&PointInOrOnRect = [](ivec2 Point, CUnitRect Rect) {
 		return Point.x >= Rect.m_X && Point.x <= Rect.m_X + Rect.m_W && Point.y >= Rect.m_Y && Point.y <= Rect.m_Y + Rect.m_H;
 	};
-	for(CTouchButton &OtherButton : VisiableButtons)
+	for(CTouchButton* OtherButton : VisiableButtons)
 	{
-		if(&OtherButton == this || OtherButton.m_Shape != EButtonShape::RECT)
+		if(*OtherButton == this || OtherButton->m_Shape != EButtonShape::RECT)
 			continue;
 		// TODO: This does not consider that button visibilities can change independently, also update corners when any visibility changed
 
-		if((m_BackgroundCorners & IGraphics::CORNER_TL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y), OtherButton.m_UnitRect))
+		if((m_BackgroundCorners & IGraphics::CORNER_TL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y), OtherButton->m_UnitRect))
 		{
 			m_BackgroundCorners &= ~IGraphics::CORNER_TL;
 		}
-		if((m_BackgroundCorners & IGraphics::CORNER_TR) && PointInOrOnRect(ivec2(m_UnitRect.m_X + m_UnitRect.m_W, m_UnitRect.m_Y), OtherButton.m_UnitRect))
+		if((m_BackgroundCorners & IGraphics::CORNER_TR) && PointInOrOnRect(ivec2(m_UnitRect.m_X + m_UnitRect.m_W, m_UnitRect.m_Y), OtherButton->m_UnitRect))
 		{
 			m_BackgroundCorners &= ~IGraphics::CORNER_TR;
 		}
-		if((m_BackgroundCorners & IGraphics::CORNER_BL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y + m_UnitRect.m_H), OtherButton.m_UnitRect))
+		if((m_BackgroundCorners & IGraphics::CORNER_BL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y + m_UnitRect.m_H), OtherButton->m_UnitRect))
 		{
 			m_BackgroundCorners &= ~IGraphics::CORNER_BL;
 		}
-		if((m_BackgroundCorners & IGraphics::CORNER_BR) && PointInOrOnRect(ivec2(m_UnitRect.m_X + m_UnitRect.m_W, m_UnitRect.m_Y + m_UnitRect.m_H), OtherButton.m_UnitRect))
+		if((m_BackgroundCorners & IGraphics::CORNER_BR) && PointInOrOnRect(ivec2(m_UnitRect.m_X + m_UnitRect.m_W, m_UnitRect.m_Y + m_UnitRect.m_H), OtherButton->m_UnitRect))
 		{
 			m_BackgroundCorners &= ~IGraphics::CORNER_BR;
 		}
@@ -5876,7 +5867,7 @@ void CTouchControls::ResetButtons()
 
 void CTouchControls::RenderButtons()
 {
-	std::vector<CTouchButton> VisiableButtons;
+	std::vector<CTouchButton*> VisiableButtons;
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
 		TouchButton.UpdateVisibility();
@@ -5884,12 +5875,12 @@ void CTouchControls::RenderButtons()
 		{
 			continue;
 		}
-		VisiableButtons.push_back(TouchButton);
+		VisiableButtons.push_back(std::move(&TouchButton));
 	}
-	for(CTouchButton &Button : VisiableButtons)
+	for(CTouchButton* Button : VisiableButtons)
 	{
-		Button.UpdateBackgroundCorners(VisiableButtons);
-		Button.Render();
+		Button->UpdateBackgroundCorners(VisiableButtons);
+		Button->Render();
 	}
 }
 
