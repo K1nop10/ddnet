@@ -370,6 +370,15 @@ CTouchControls::CTouchButton &CTouchControls::CTouchButton::operator=(CTouchButt
 	m_VisibilityCached = false;
 	return *this;
 }
+CTouchControls::CTouchButton(const CTouchButton &Other)
+{
+	m_pTouchControls = Other.m_pTouchControls;
+	m_UnitRect = Other.m_UnitRect;
+	m_Shape = Other.m_Shape;
+	m_vVisibilities = Other.m_vVisibilities;
+	m_pBehavior = Other.m_pBehavior;
+	m_VisibilityCached = false;
+}
 
 void CTouchControls::CTouchButton::UpdatePointers()
 {
