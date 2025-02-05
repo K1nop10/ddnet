@@ -1172,9 +1172,6 @@ private:
 	public:
 		CTouchButton(CTouchControls *pTouchControls);
 		CTouchButton(CTouchButton &&Other) noexcept;
-		CTouchButton(const CTouchButton &Other) = delete;
-
-		CTouchButton &operator=(const CTouchButton &Other) = delete;
 		CTouchButton &operator=(CTouchButton &&Other) noexcept;
 
 		CTouchControls *m_pTouchControls;
