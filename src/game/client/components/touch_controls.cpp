@@ -5897,6 +5897,10 @@ std::unique_ptr<CTouchControls::CTouchButtonBehavior> CTouchControls::ParseBehav
 	{
 		return ParseBindSlideBehavior(&BehaviorObject);
 	}
+	else if(str_comp(BehaviorType.u.string.ptr, CBarTouchButtonBehavior::BEHAVIOR_TYPE) == 0)
+	{
+		return ParseBarBehavior(&BehaviorObject);
+	}
 	else
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior: attribute 'type' specifies unknown value '%s'", BehaviorType.u.string.ptr);
@@ -6151,6 +6155,47 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		return nullptr;
 	}
 	return std::make_unique<CBindSlideTouchButtonBehavior>(std::move(vCommands));
+}
+
+std::unique_ptr<CTouchControls::CBarTouchButtonBehavior> CTouchControls::ParseBarBehavior(const json_value *pBehaviorObject)
+{
+	const json_value &BehaviorObject = *pBehaviorObject;
+	const json_value &Label = BehaviorObject["label"];
+	if(Label.type != json_string)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'label' must specify a string", CBarTouchButtonBehavior::BEHAVIOR_TYPE);
+		return nullptr;
+	}
+
+	const json_value &Min = BehaviorObject["min"];
+	if(Min.type != json_integer)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'min' must specify an integer", CBarTouchButtonBehavior::BEHAVIOR_TYPE);
+		return {};
+	}
+	const json_value &Max = BehaviorObject["max"];
+	if(Max.type != json_integer)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'max' must specify an integer", CBarTouchButtonBehavior::BEHAVIOR_TYPE);
+		return {};
+	}
+
+	const json_value &Target = BehaviorObject["target"];
+	if(Target.type != json_string)
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'target' must specify a string", CBarTouchButtonBehavior::BEHAVIOR_TYPE);
+		return nullptr;
+	}
+
+	SuperMap::Init();
+	auto Find = SuperMap::Map.find(Target.u.string.ptr);
+	if(Find == SuperMap::Map.end())
+	{
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'target' specify an unknown string", CBarTouchButtonBehavior::BEHAVIOR_TYPE);
+		return nullptr;
+	}
+	
+	return std::make_unique<CBarTouchButtonBehavior>(Label.u.string.ptr, Min.u.integer, Max.u.integer, Find->second);
 }
 
 void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
