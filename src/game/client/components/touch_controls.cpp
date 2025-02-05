@@ -50,7 +50,6 @@ Localizable("Vote yes") Localizable("Vote no") Localizable("Toggle dummy")
 */
 //c is target, ab is line.
 std::map<std::string, int*> SuperMap::Map;
-SuperMap::Init();
 auto Cross = [](vec2 a, vec2 b){
 	return a.x*b.y-b.x*a.y;
 };
