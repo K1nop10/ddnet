@@ -105,6 +105,8 @@ public:
 
 	bool m_NoWeakHookAndBounce;
 	bool m_NoSkinChangeForFrozen;
+
+	bool m_DDRaceTeam;
 };
 
 class CSnapEntities
@@ -850,10 +852,6 @@ private:
 	CCharOrder m_CharOrder;
 	int m_aSwitchStateTeam[NUM_DUMMIES];
 
-	enum
-	{
-		NUM_TUNEZONES = 256
-	};
 	void LoadMapSettings();
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
