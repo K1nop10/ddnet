@@ -2003,9 +2003,9 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 		TouchButton.UpdatePointers();
 		TouchButton.UpdateScreenFromUnitRect();
 		if(TouchButton.m_vMenus.empty())
-		dbg_msg("warn", "ButtonEmpty");
+		
 		else for(const auto& Menu : TouchButton.m_vMenus)
-		dbg_msg("usage", "Map[%s]=%d", Menu.first.c_str(), Menu.second?1:0);
+		
 	}
 
 	json_value_free(pConfiguration);
@@ -2157,7 +2157,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 	for(unsigned VisibilityIndex = 0; VisibilityIndex < Visibilities.u.array.length; ++VisibilityIndex)
 	{
 		const json_value &Visibility = Visibilities[VisibilityIndex];
-		dbg_msg("visibility", "Now Parsing:%s", Visibility.u.string.ptr);
+		
 		if(Visibility.type != json_string)
 		{
 			log_error("touch_controls", "Failed to parse touch button: attribute 'visibilities' does not specify string at index '%d'", VisibilityIndex);
@@ -2167,12 +2167,12 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		const bool ParsedParity = Visibility.u.string.ptr[0] != '-';
 		const char *pVisibilityString = ParsedParity ? Visibility.u.string.ptr : &Visibility.u.string.ptr[1];
 		std::string VisibilityString(pVisibilityString);
-		dbg_msg("visiString", "String:", VisibilityString.c_str());
+		
 		if(str_comp(pVisibilityString, "extra-menu") == 0)
 		{
 			m_vMenuMap[""] = false;
 			vParsedMenus[""] = ParsedParity;
-			dbg_msg("success", "Extra-menu success, m_vMenuMap[""] == %d", m_vMenuMap[""]?1:0);
+			
 			continue;
 		}
 		if(VisibilityString.compare(0, 11, "extra-menu-") == 0)
@@ -2188,7 +2188,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 			if(m_vMenuMap.find(MenuString) != m_vMenuMap.end())
 			m_vMenuMap[MenuString] = false;
 			vParsedMenus[MenuString] = ParsedParity;
-			dbg_msg("success", "Extra-menu-diy success, vParsedMenu.1=%s, 2=%d", MenuString.c_str(), vParsedMenus[MenuString]?1:0);
+			
 			continue;
 		}
 		else
@@ -2378,7 +2378,7 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 		return nullptr;
 	}
 	for(std::string& Num : ParsedMenuNumber)
-	dbg_msg("extra_menu", "Num:%s", Num.c_str());
+	
 	return std::make_unique<CExtraMenuTouchButtonBehavior>(ParsedMenuNumber);
 }
 
