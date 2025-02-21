@@ -2186,7 +2186,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 			if(m_vMenuMap.find(MenuString) != m_vMenuMap.end())
 			m_vMenuMap[MenuString] = false;
 			vParsedMenus[MenuString] = ParsedParity;
-			dbg_msg("success", "Extra-menu-diy success, vParsedMenu.1=%s, 2=%d", MenuString.c_str(), vParsedMenus[MenuString]?1:0;);
+			dbg_msg("success", "Extra-menu-diy success, vParsedMenu.1=%s, 2=%d", MenuString.c_str(), vParsedMenus[MenuString]?1:0);
 			continue;
 		}
 		else
