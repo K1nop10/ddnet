@@ -1052,7 +1052,7 @@ CTouchControls::CExtraMenuTouchButtonBehavior::CExtraMenuTouchButtonBehavior(std
 	}
 	else
 	{
-		str_format(m_aLabel, sizeof(m_aLabel), "\xEF\x83\x89%d", m_vMenus[0].c_str());
+		str_format(m_aLabel, sizeof(m_aLabel), "\xEF\x83\x89%s", m_vMenus[0].c_str());
 	}
 }
 
@@ -2182,11 +2182,11 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 				ParsedVisibility = (EButtonVisibility)CurrentVisibility;
 				break;
 			}
-		}
-		if(ParsedVisibility == EButtonVisibility::NUM_VISIBILITIES)
-		{
-			log_error("touch_controls", "Failed to parse touch button: attribute 'visibilities' specifies unknown value '%s' at index '%d'", pVisibilityString, VisibilityIndex);
-			return {};
+			if(ParsedVisibility == EButtonVisibility::NUM_VISIBILITIES)
+			{
+				log_error("touch_controls", "Failed to parse touch button: attribute 'visibilities' specifies unknown value '%s' at index '%d'", pVisibilityString, VisibilityIndex);
+				return {};
+			}
 		}
 		const bool VisibilityAlreadyUsed = std::any_of(vParsedVisibilities.begin(), vParsedVisibilities.end(), [&](CButtonVisibility OtherParsedVisibility) {
 			return OtherParsedVisibility.m_Type == ParsedVisibility;
