@@ -949,7 +949,7 @@ void CTouchControls::CTouchButton::WriteToConfiguration(CJsonWriter *pWriter)
 	}
 	for(const auto& Menu : m_vMenus)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s%s", Menu.second ? "extra-menu-" : "-extra-menu-", Menu.first)
+		str_format(aBuf, sizeof(aBuf), "%s%s", Menu.second ? "extra-menu-" : "-extra-menu-", Menu.first.c_str());
 		pWriter->WriteStrValue(aBuf);
 	}
 	pWriter->EndArray();
@@ -1052,7 +1052,7 @@ CTouchControls::CExtraMenuTouchButtonBehavior::CExtraMenuTouchButtonBehavior(std
 	}
 	else
 	{
-		str_format(m_aLabel, sizeof(m_aLabel), "\xEF\x83\x89%d", m_vMenus[0]);
+		str_format(m_aLabel, sizeof(m_aLabel), "\xEF\x83\x89%d", m_vMenus[0].c_str());
 	}
 }
 
@@ -1088,7 +1088,7 @@ void CTouchControls::CExtraMenuTouchButtonBehavior::WriteToConfiguration(CJsonWr
 	if(m_vMenus.size() == 1)
 	{
 		pWriter->WriteAttribute("number");
-		pWriter->WriteStrValue(m_vMenus[0]);
+		pWriter->WriteStrValue(m_vMenus[0].c_str());
 	}
 	else
 	{
@@ -1096,7 +1096,7 @@ void CTouchControls::CExtraMenuTouchButtonBehavior::WriteToConfiguration(CJsonWr
 		pWriter->BeginArray();
 		for(const auto& Menu : m_vMenus)
 		{
-			pWriter->WriteStrValue(Menu);
+			pWriter->WriteStrValue(Menu.c_str());
 		}
 		pWriter->EndArray();
 	}
@@ -1109,8 +1109,8 @@ CTouchControls::CButtonLabel CTouchControls::CCloseAllExtraMenuTouchButtonBehavi
 }
 void CTouchControls::CCloseAllExtraMenuTouchButtonBehavior::OnDeactivate()
 {
-	for(int tmp_i = 0;tmp_i < 999;tmp_i++)
-	m_pTouchControls->m_aExtraMenuActive[tmp_i] = false;
+	for(auto& Menu : m_pTouchControls->m_vMenuMap)
+	Menu.second = false;
 }
 
 // Emoticon button: keeps the emoticon HUD open, next touch in emoticon HUD will close it again.
@@ -2159,11 +2159,12 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		EButtonVisibility ParsedVisibility = EButtonVisibility::NUM_VISIBILITIES;
 		const bool ParsedParity = Visibility.u.string.ptr[0] != '-';
 		const char *pVisibilityString = ParsedParity ? Visibility.u.string.ptr : &Visibility.u.string.ptr[1];
-		if(ParsedParity ? Visibility.u.string.compare(0, 11, "extra-menu-") : Visibility.u.string.compare(0, 12, "-extra-menu-"))
+		std::string VisibilityString(pVisibilityString);
+		if(VisibilityString.compare(0, 11, "extra-menu-"))
 		{
-			std::string MenuString = ParsedParity ? Visibility.u.string.substr(11) : Visibility.u.string.substr(12);
-			if(std::any_of(m_vMenus.begin(), m_vMenus.end(), [&](auto OtherMenu) {
-				return str_comp(OtherMenu.first, MenuString) == 0;
+			std::string MenuString = VisibilityString.substr(11);
+			if(std::any_of(vParsedMenus.begin(), vParsedMenus.end(), [&](auto OtherMenu) {
+				return str_comp(OtherMenu.first.c_str(), MenuString.c_str()) == 0;
 			}))
 			{
 				log_error("touch_controls", "Failed to parse touch button: attribute 'visibilities' specifies duplicate value '%s' at '%d'", pVisibilityString, VisibilityIndex);
@@ -2313,7 +2314,8 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 	}
 	else if(MenuNumber.type == json_string)
 	{
-		ParsedMenuNumber.emplace_back(MenuNumber.u.string);
+		std::string TmpString(MenuNumber.u.string.ptr);
+		ParsedMenuNumber.emplace_back(TmpString);
 	}
 	else if(MenuNumber.type == json_array)
 		for(unsigned MenuIndex = 0; MenuIndex < MenuNumber.u.array.length; ++MenuIndex)
@@ -2324,7 +2326,10 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 			else if(MenuNumber.type == json_integer)
 				ParsedMenuNumber.emplace_back(std::to_string(Menu.u.integer));
 			else if(MenuNumber.type == json_string)
-				ParsedMenuNumber.emplace_back(Menu.u.string);
+			{
+				std::string TmpString(Menu.u.string.ptr);
+				ParsedMenuNumber.emplace_back(TmpString);
+			}
 			else
 			{
 				Flag = true;
