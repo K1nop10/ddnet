@@ -2003,7 +2003,7 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 		if(TouchButton.m_vMenus.empty())
 		dbg_msg("warn", "ButtonEmpty");
 		else for(const auto& Menu : TouchButton.m_vMenus)
-		dbg_msg("usage", "Map[%s]=%d", Menu.first, Menu.second?1:0);
+		dbg_msg("usage", "Map[%s]=%d", Menu.first.c_str(), Menu.second?1:0);
 	}
 
 	json_value_free(pConfiguration);
