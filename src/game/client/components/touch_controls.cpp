@@ -2155,6 +2155,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 	for(unsigned VisibilityIndex = 0; VisibilityIndex < Visibilities.u.array.length; ++VisibilityIndex)
 	{
 		const json_value &Visibility = Visibilities[VisibilityIndex];
+		dbg_msg("visibility", "Now Parsing:%s", Visibility.u.string.ptr);
 		if(Visibility.type != json_string)
 		{
 			log_error("touch_controls", "Failed to parse touch button: attribute 'visibilities' does not specify string at index '%d'", VisibilityIndex);
@@ -2164,10 +2165,12 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		const bool ParsedParity = Visibility.u.string.ptr[0] != '-';
 		const char *pVisibilityString = ParsedParity ? Visibility.u.string.ptr : &Visibility.u.string.ptr[1];
 		std::string VisibilityString(pVisibilityString);
+		dbg_msg("visiString", "String:", VisibilityString.c_str());
 		if(str_comp(pVisibilityString, "extra-menu") == 0)
 		{
 			m_vMenuMap[""] = false;
 			vParsedMenus[""] = ParsedParity;
+			dbg_msg("success", "Extra-menu success, m_vMenuMap[""] == %d", m_vMenuMap[""]?1:0);
 			continue;
 		}
 		if(VisibilityString.compare(0, 11, "extra-menu-") == 0)
@@ -2183,6 +2186,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 			if(m_vMenuMap.find(MenuString) != m_vMenuMap.end())
 			m_vMenuMap[MenuString] = false;
 			vParsedMenus[MenuString] = ParsedParity;
+			dbg_msg("success", "Extra-menu-diy success, vParsedMenu.1=%s, 2=%d", MenuString.c_str(), vParsedMenus[MenuString]?1:0;);
 			continue;
 		}
 		else
