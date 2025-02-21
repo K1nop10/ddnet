@@ -2000,9 +2000,9 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	{
 		TouchButton.UpdatePointers();
 		TouchButton.UpdateScreenFromUnitRect();
-		if(m_vMenus.empty())
+		if(TouchButton.m_vMenus.empty())
 		dbg_msg("warn", "ButtonEmpty");
-		else for(const auto& Menu : m_vMenus)
+		else for(const auto& Menu : TouchButton.m_vMenus)
 		dbg_msg("usage", "Map[%s]=%d", Menu.first, Menu.second?1:0);
 	}
 
@@ -2372,7 +2372,7 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 		return nullptr;
 	}
 	for(std::string& Num : ParsedMenuNumber)
-	dbg_msg("extra_menu", "Num:%s", Num);
+	dbg_msg("extra_menu", "Num:%s", Num.c_str());
 	return std::make_unique<CExtraMenuTouchButtonBehavior>(ParsedMenuNumber);
 }
 
