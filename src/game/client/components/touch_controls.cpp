@@ -353,7 +353,8 @@ CTouchControls::CTouchButton::CTouchButton(CTouchButton &&Other) noexcept :
 	m_Shape(Other.m_Shape),
 	m_vVisibilities(Other.m_vVisibilities),
 	m_pBehavior(std::move(Other.m_pBehavior)),
-	m_VisibilityCached(false)
+	m_VisibilityCached(false),
+	m_vMenus(Other.m_vMenus)
 {
 	Other.m_pTouchControls = nullptr;
 }
@@ -367,6 +368,7 @@ CTouchControls::CTouchButton &CTouchControls::CTouchButton::operator=(CTouchButt
 	m_vVisibilities = Other.m_vVisibilities;
 	m_pBehavior = std::move(Other.m_pBehavior);
 	m_VisibilityCached = false;
+	m_vMenus = std::move(Other.m_vMenus);
 	return *this;
 }
 
