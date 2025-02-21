@@ -2160,7 +2160,13 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		const bool ParsedParity = Visibility.u.string.ptr[0] != '-';
 		const char *pVisibilityString = ParsedParity ? Visibility.u.string.ptr : &Visibility.u.string.ptr[1];
 		std::string VisibilityString(pVisibilityString);
-		if(VisibilityString.compare(0, 11, "extra-menu-"))
+		if(str_comp(pVisibilityString, "extra-menu") == 0)
+		{
+			m_vMenuMap[""] = false;
+			vParsedMenus[""] = ParsedParity;
+			continue;
+		}
+		if(VisibilityString.compare(0, 11, "extra-menu-") == 0)
 		{
 			std::string MenuString = VisibilityString.substr(11);
 			if(std::any_of(vParsedMenus.begin(), vParsedMenus.end(), [&](auto OtherMenu) {
@@ -2304,31 +2310,45 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 	bool Flag = false;
 	const json_value &BehaviorObject = *pBehaviorObject;
 	const json_value &MenuNumber = BehaviorObject["number"];
+	std::string TmpString;
+	m_vMenuMap[""] = false;
 	if(MenuNumber.type == json_none)
 	{
 		ParsedMenuNumber.emplace_back("");
 	}
 	else if(MenuNumber.type == json_integer)
 	{
-		ParsedMenuNumber.emplace_back(std::to_string(MenuNumber.u.integer));
+		TmpString = std::to_string(MenuNumber.u.integer);
+		ParsedMenuNumber.emplace_back(TmpString);
+		if(m_vMenuMap.find(TmpString) != m_vMenuMap.end())
+			m_vMenuMap[TmpString] = false;
 	}
 	else if(MenuNumber.type == json_string)
 	{
-		std::string TmpString(MenuNumber.u.string.ptr);
+		TmpString = MenuNumber.u.string.ptr;
 		ParsedMenuNumber.emplace_back(TmpString);
+		if(m_vMenuMap.find(TmpString) != m_vMenuMap.end())
+			m_vMenuMap[TmpString] = false;
 	}
 	else if(MenuNumber.type == json_array)
 		for(unsigned MenuIndex = 0; MenuIndex < MenuNumber.u.array.length; ++MenuIndex)
 		{
 			const json_value &Menu = MenuNumber[MenuIndex];
-			if(MenuNumber.type == json_none)
+			if(Menu.type == json_none)
 				ParsedMenuNumber.emplace_back("");
-			else if(MenuNumber.type == json_integer)
-				ParsedMenuNumber.emplace_back(std::to_string(Menu.u.integer));
-			else if(MenuNumber.type == json_string)
+			else if(Menu.type == json_integer)
 			{
-				std::string TmpString(Menu.u.string.ptr);
+				TmpString = std::to_string(MenuNumber.u.integer);
 				ParsedMenuNumber.emplace_back(TmpString);
+				if(m_vMenuMap.find(TmpString) != m_vMenuMap.end())
+					m_vMenuMap[TmpString] = false;
+			}
+			else if(Menu.type == json_string)
+			{
+				TmpString = Menu.u.string.ptr;
+				ParsedMenuNumber.emplace_back(TmpString);
+				if(m_vMenuMap.find(TmpString) != m_vMenuMap.end())
+					m_vMenuMap[TmpString] = false;
 			}
 			else
 			{
