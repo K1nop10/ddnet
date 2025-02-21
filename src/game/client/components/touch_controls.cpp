@@ -547,6 +547,7 @@ void CTouchControls::CTouchButton::UpdateVisibility()
 	m_VisibilityCached = m_pTouchControls->m_EditingActive || (std::all_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](CButtonVisibility Visibility) {
 		return m_pTouchControls->m_aVisibilityFunctions[(int)Visibility.m_Type].m_Function() == Visibility.m_Parity;
 	}) && std::all_of(m_vMenus.begin(), m_vMenus.end(), [&](const auto& Menu) {
+		dbg_msg("usage", "Comparing %d and %d", m_pTouchControls->m_vMenuMap[Menu.first]?1:0, Menu.second?1:0);
 		return m_pTouchControls->m_vMenuMap[Menu.first] == Menu.second;
 	}));
 	if(m_VisibilityCached && !PrevVisibility)
@@ -2181,12 +2182,15 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 			vParsedMenus[MenuString] = ParsedParity;
 			continue;
 		}
-		else for(int CurrentVisibility = (int)EButtonVisibility::INGAME; CurrentVisibility < (int)EButtonVisibility::NUM_VISIBILITIES; ++CurrentVisibility)
+		else
 		{
-			if(str_comp(pVisibilityString, m_aVisibilityFunctions[CurrentVisibility].m_pId) == 0)
+			for(int CurrentVisibility = (int)EButtonVisibility::INGAME; CurrentVisibility < (int)EButtonVisibility::NUM_VISIBILITIES; ++CurrentVisibility)
 			{
-				ParsedVisibility = (EButtonVisibility)CurrentVisibility;
-				break;
+				if(str_comp(pVisibilityString, m_aVisibilityFunctions[CurrentVisibility].m_pId) == 0)
+				{
+					ParsedVisibility = (EButtonVisibility)CurrentVisibility;
+					break;
+				}
 			}
 			if(ParsedVisibility == EButtonVisibility::NUM_VISIBILITIES)
 			{
@@ -2524,18 +2528,13 @@ std::unique_ptr<CTouchControls::CBindSlideTouchButtonBehavior> CTouchControls::P
 		CBindSlideTouchButtonBehavior::EDirection ParsedDirection = CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS;
 		for(int CurrentDir = (int)CBindSlideTouchButtonBehavior::EDirection::LEFT; CurrentDir < (int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS; ++CurrentDir)
 		{
-			dbg_msg("usage", "Comparing %s and %s.", Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]);
 			if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[CurrentDir]) == 0)
 			{
-				dbg_msg("usage", "Comparison succeed");
 				ParsedDirection = (CBindSlideTouchButtonBehavior::EDirection)CurrentDir;
-				dbg_msg("usage2", "Comparing '%s' and '%s'.", Direction.u.string.ptr, DIRECTION_NAMES[8]);
 				if(str_comp(Direction.u.string.ptr, DIRECTION_NAMES[8]) == 0)
 					flag = true;
-				dbg_msg("flag", "Flag is '%d'", (flag)?1:0);
 				break;
 			}
-			dbg_msg("usage", "Comparison failed.");
 		}
 		if(ParsedDirection == CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS)
 		{
