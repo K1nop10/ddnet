@@ -547,7 +547,6 @@ void CTouchControls::CTouchButton::UpdateVisibility()
 	m_VisibilityCached = m_pTouchControls->m_EditingActive || (std::all_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](CButtonVisibility Visibility) {
 		return m_pTouchControls->m_aVisibilityFunctions[(int)Visibility.m_Type].m_Function() == Visibility.m_Parity;
 	}) && std::all_of(m_vMenus.begin(), m_vMenus.end(), [&](const auto& Menu) {
-		dbg_msg("usage", "Comparing %d and %d", m_pTouchControls->m_vMenuMap[Menu.first]?1:0, Menu.second?1:0);
 		return m_pTouchControls->m_vMenuMap[Menu.first] == Menu.second;
 	}));
 	if(m_VisibilityCached && !PrevVisibility)
@@ -2001,6 +2000,10 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	{
 		TouchButton.UpdatePointers();
 		TouchButton.UpdateScreenFromUnitRect();
+		if(m_vMenus.empty())
+		dbg_msg("warn", "ButtonEmpty");
+		else for(const auto& Menu : m_vMenus)
+		dbg_msg("usage", "Map[%s]=%d", Menu.first, Menu.second?1:0);
 	}
 
 	json_value_free(pConfiguration);
@@ -2368,6 +2371,8 @@ std::unique_ptr<CTouchControls::CExtraMenuTouchButtonBehavior> CTouchControls::P
 			CPredefinedTouchButtonBehavior::BEHAVIOR_TYPE, CExtraMenuTouchButtonBehavior::BEHAVIOR_ID);
 		return nullptr;
 	}
+	for(std::string& Num : ParsedMenuNumber)
+	dbg_msg("extra_menu", "Num:%s", Num);
 	return std::make_unique<CExtraMenuTouchButtonBehavior>(ParsedMenuNumber);
 }
 
