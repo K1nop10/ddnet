@@ -99,10 +99,6 @@ private:
 	
 	std::unordered_map<std::string, bool> m_vMenuMap;
 	
-	class StackAddTouchButtonBehavior;
-	class StackAddTouchButtonBehavior::CCommand;
-	std::unordered_map<std::string, std::vector<StackAddTouchButtonBehavior::CCommand>> m_vCommandStack;
-	
 
 	class CButtonVisibility
 	{
@@ -614,8 +610,7 @@ private:
 				m_LabelType(LabelType),
 				m_Command(pCommand) {}
 		};
-
-		CStackAddTouchButtonBehavior(std::string Number, const char *Label, CButtonLabel::EType LabelType, std::vector<CCommand> &&vCommands) :
+		CStackAddTouchButtonBehavior(std::string Number, char *Label, CButtonLabel::EType LabelType, std::vector<CCommand> &&vCommands) :
 			m_Number(Number),
 			m_Label(Label),
 			m_LabelType(LabelType),
@@ -633,6 +628,7 @@ private:
 			return BEHAVIOR_TYPE;
 		}
 	};
+	std::unordered_map<std::string, std::vector<StackAddTouchButtonBehavior::CCommand>> m_vCommandStack;
 	
 	class CStackRemoveTouchButtonBehavior : public CTouchButtonBehavior
 	{
@@ -653,7 +649,7 @@ private:
 		std::string GetType() override {
 			return BEHAVIOR_TYPE;
 		}
-	}
+	};
 	
 	class CStackShowTouchButtonBehavior : public CTouchButtonBehavior
 	{
@@ -676,7 +672,7 @@ private:
 		std::string GetType() override {
 			return BEHAVIOR_TYPE;
 		}
-	}
+	};
 
 
 	/**
