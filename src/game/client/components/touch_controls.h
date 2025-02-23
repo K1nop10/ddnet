@@ -583,7 +583,7 @@ private:
 		
 		void OnActivate() override;
 		void OnDeactivate() override;
-		CButtonLabel GetLabel() const override;
+		CButtonLabel GetLabel() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		
 		std::string m_Number;
@@ -662,7 +662,7 @@ private:
 			m_Suffix(Suffix) {}
 		
 		void OnActivate() override;
-		CButtonLabel GetLabel() const override;
+		CButtonLabel GetLabel() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		
 		std::string m_Number;

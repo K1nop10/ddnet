@@ -1525,7 +1525,7 @@ void CTouchControls::CStackActTouchButtonBehavior::OnDeactivate()
 	m_Current = (m_Current + 1) % m_pTouchControls->m_vCommandStack[m_Number].size();
 		m_Current = 0;
 }
-CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel() const
+CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel()
 {
 	if(!m_pTouchControls->m_vCommandStack[m_Number].empty())
 	{
@@ -1646,7 +1646,7 @@ void CTouchControls::CStackShowTouchButtonBehavior::OnActivate()
 	Main += m_Suffix.value_or("");
 	m_pTouchControls->Console()->ExecuteLine(Main.c_str());
 }
-CTouchControls::CButtonLabel CTouchControls::CStackShowTouchButtonBehavior::GetLabel() const
+CTouchControls::CButtonLabel CTouchControls::CStackShowTouchButtonBehavior::GetLabel()
 {
 	std::string Main = "";
 	std::string Cut;
