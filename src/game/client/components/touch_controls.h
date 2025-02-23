@@ -669,6 +669,7 @@ private:
 		int m_Order;
 		std::optional<std::string> m_Prefix;
 		std::optional<std::string> m_Suffix;
+		std::string m_Label;
 		std::string GetType() override {
 			return BEHAVIOR_TYPE;
 		}

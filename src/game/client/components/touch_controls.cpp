@@ -746,7 +746,7 @@ void CTouchControls::CTouchButton::Render()
 	
 	CBindSlideTouchButtonBehavior* pTmp = nullptr;
 	if(m_pBehavior->GetType() == "bind-slide")
-		pTmp = m_pBehavior.get();
+		pTmp = static_cast<CBindSlideTouchButtonBehavior*>(m_pBehavior.get());
 	
 	if(pTmp && (pTmp->m_IsOpen || pTmp->m_IsSliding))
 	{
@@ -1512,24 +1512,24 @@ void CTouchControls::CStackActTouchButtonBehavior::OnActivate()
 {
 	if(!m_pTouchControls->m_vCommandStack[m_Number].empty())
 	{
-		if(m_Current >= m_pTouchControls->m_vCommandStack[m_Number].size())
+		if(m_Current >= (int)m_pTouchControls->m_vCommandStack[m_Number].size())
 			m_Current = 0;
-		m_pTouchControls->Console()->ExecuteLineStroked(1, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command);
+		m_pTouchControls->Console()->ExecuteLineStroked(1, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command.c_str());
 	}
 	else m_pTouchControls->Console()->ExecuteLine("echo Stack is empty!");
 		
 }
 void CTouchControls::CStackActTouchButtonBehavior::OnDeactivate()
 {
-	m_pTouchControls->Console()->ExecuteLineStroked(0, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command);
+	m_pTouchControls->Console()->ExecuteLineStroked(0, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command.c_str());
 	m_Current = (m_Current + 1) % m_pTouchControls->m_vCommandStack[m_Number].size();
 		m_Current = 0;
 }
-CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel()
+CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel()
 {
 	if(!m_pTouchControls->m_vCommandStack[m_Number].empty())
 	{
-		if(m_Current >= m_pTouchControls->m_vCommandStack[m_Number].size())
+		if(m_Current >= (int)m_pTouchControls->m_vCommandStack[m_Number].size())
 			m_Current = 0;
 		return {m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_LabelType, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command};
 	}
@@ -1541,7 +1541,7 @@ void CTouchControls::CStackActTouchButtonBehavior::WriteToConfiguration(CJsonWri
 	pWriter->WriteStrValue(BEHAVIOR_TYPE);
 	
 	pWriter->WriteAttribute("number");
-	pWriter->WriteStrValue(m_Number);
+	pWriter->WriteStrValue(m_Number.c_str());
 }
 
 //Stack Add
@@ -1551,7 +1551,7 @@ CTouchControls::CButtonLabel CTouchControls::CStackAddTouchButtonBehavior::GetLa
 }
 void CTouchControls::CStackAddTouchButtonBehavior::OnActivate()
 {
-	m_pTouchControls->m_vCommandStack[m_Number].insert(m_vCommandStack[m_Number].end(), m_vCommands.begin(), m_vCommands.end());
+	m_pTouchControls->m_vCommandStack[m_Number].insert(m_pTouchControls->m_vCommandStack[m_Number].end(), m_vCommands.begin(), m_vCommands.end());
 }
 void CTouchControls::CStackAddTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
 {
@@ -1599,14 +1599,14 @@ void CTouchControls::CStackRemoveTouchButtonBehavior::OnActivate()
 	}
 	for(const int& Order : m_vOrders)
 	{
-		if(Order >= m_pTouchControls->m_vCommandStack[m_Number].size())
+		if(Order >= (int)m_pTouchControls->m_vCommandStack[m_Number].size())
 			continue;
 		auto DeleteIndex = m_pTouchControls->m_vCommandStack[m_Number].begin() + Order - 1;
 		m_pTouchControls->m_vCommandStack[m_Number].erase(DeleteIndex);
 	}
 }
 
-CButtonLabel CTouchControls::CStackRemoveTouchButtonBehavior::GetLabel() const
+CTouchControls::CButtonLabel CTouchControls::CStackRemoveTouchButtonBehavior::GetLabel() const
 {
 	return {CButtonLabel::EType::ICON, m_Label};
 }
@@ -1635,14 +1635,14 @@ void CTouchControls::CStackRemoveTouchButtonBehavior::WriteToConfiguration(CJson
 void CTouchControls::CStackShowTouchButtonBehavior::OnActivate()
 {
 	std::string Main;
-	if(Order >= m_pTouchControls->m_vCommandStack[m_Number].size())
+	if(m_Order >= m_pTouchControls->m_vCommandStack[m_Number].size())
 	{
 		m_pTouchControls->Console()->ExecuteLine("echo Empty");
 		return;
 	}
 	Main = "echo ";
 	Main += m_Prefix.value_or("");
-	Main += m_pTouchControls->m_vCommandStack[m_Number][Order].m_Label;
+	Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label;
 	Main += m_Suffix.value_or("");
 	m_pTouchControls->Console()->ExecuteLine(Main.c_str());
 }
@@ -1651,12 +1651,13 @@ CTouchControls::CButtonLabel CTouchControls::CStackShowTouchButtonBehavior::GetL
 	std::string Main = "";
 	std::string Cut;
 	Main += m_Prefix.value_or("");
-	if(m_pTouchControls->m_vCommandStack[m_Number][Order].m_Label.length() > 15)
-		Main += m_pTouchControls->m_vCommandStack[m_Number][Order].m_Label.substr(0, 15);
+	if(m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label.length() > 15)
+		Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label.substr(0, 15);
 	else
-		Main += m_pTouchControls->m_vCommandStack[m_Number][Order].m_Label;
+		Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label;
 	Main += m_Suffix.value_or("");
-	return {CButtonLabel::EType::ICON, Main.c_str()};
+	m_Label = Main;
+	return {CButtonLabel::EType::ICON, m_Label.c_str()};
 }
 void CTouchControls::CStackShowTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
 {
@@ -1672,13 +1673,13 @@ void CTouchControls::CStackShowTouchButtonBehavior::WriteToConfiguration(CJsonWr
 	if(m_Prefix)
 	{
 		pWriter->WriteAttribute("prefix");
-		pWriter->WriteStrValue(m_Prefix.value());
+		pWriter->WriteStrValue(m_Prefix.value().c_str());
 	}
 	
 	if(m_Suffix)
 	{
 		pWriter->WriteAttribute("suffix");
-		pWriter->WriteStrValue(m_Suffix.value());
+		pWriter->WriteStrValue(m_Suffix.value().c_str());
 	}
 }
 
@@ -2563,10 +2564,10 @@ std::unique_ptr<CTouchControls::CBindTouchButtonBehavior> CTouchControls::ParseB
 		return nullptr;
 	}
 
-	const json_value &LabelType = CommandObject["label-type"];
+	const json_value &LabelType = BehaviorObject["label-type"];
 	if(LabelType.type != json_string && LabelType.type != json_none)
 	{
-		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label-type' must specify a string", CBindToggleTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'label-type' must specify a string", CBindTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
 	}
 	CButtonLabel::EType ParsedLabelType = CButtonLabel::EType::NUM_TYPES;
@@ -2584,7 +2585,7 @@ std::unique_ptr<CTouchControls::CBindTouchButtonBehavior> CTouchControls::ParseB
 	}
 	if(ParsedLabelType == CButtonLabel::EType::NUM_TYPES)
 	{
-		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label-type' specifies unknown value '%s'", CBindToggleTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex, LabelType.u.string.ptr);
+		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'label-type' specifies unknown value '%s'", CBindTouchButtonBehavior::BEHAVIOR_TYPE, LabelType.u.string.ptr);
 		return {};
 	}
 
