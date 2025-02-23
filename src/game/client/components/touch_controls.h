@@ -628,7 +628,7 @@ private:
 			return BEHAVIOR_TYPE;
 		}
 	};
-	std::unordered_map<std::string, std::vector<StackAddTouchButtonBehavior::CCommand>> m_vCommandStack;
+	std::unordered_map<std::string, std::vector<CStackAddTouchButtonBehavior::CCommand>> m_vCommandStack;
 	
 	class CStackRemoveTouchButtonBehavior : public CTouchButtonBehavior
 	{
