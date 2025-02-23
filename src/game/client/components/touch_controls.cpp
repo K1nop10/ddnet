@@ -1525,13 +1525,13 @@ void CTouchControls::CStackActTouchButtonBehavior::OnDeactivate()
 	m_Current = (m_Current + 1) % m_pTouchControls->m_vCommandStack[m_Number].size();
 		m_Current = 0;
 }
-CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel()
+CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel() const
 {
 	if(!m_pTouchControls->m_vCommandStack[m_Number].empty())
 	{
 		if(m_Current >= (int)m_pTouchControls->m_vCommandStack[m_Number].size())
 			m_Current = 0;
-		return {m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_LabelType, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command};
+		return {m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_LabelType, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command.c_str()};
 	}
 	return {CButtonLabel::EType::PLAIN, ""};
 }
@@ -1608,7 +1608,7 @@ void CTouchControls::CStackRemoveTouchButtonBehavior::OnActivate()
 
 CTouchControls::CButtonLabel CTouchControls::CStackRemoveTouchButtonBehavior::GetLabel() const
 {
-	return {CButtonLabel::EType::ICON, m_Label};
+	return {CButtonLabel::EType::ICON, m_Label.c_str()};
 }
 
 void CTouchControls::CStackRemoveTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
@@ -1635,7 +1635,7 @@ void CTouchControls::CStackRemoveTouchButtonBehavior::WriteToConfiguration(CJson
 void CTouchControls::CStackShowTouchButtonBehavior::OnActivate()
 {
 	std::string Main;
-	if(m_Order >= m_pTouchControls->m_vCommandStack[m_Number].size())
+	if(m_Order >= (int)m_pTouchControls->m_vCommandStack[m_Number].size())
 	{
 		m_pTouchControls->Console()->ExecuteLine("echo Empty");
 		return;
@@ -1656,8 +1656,8 @@ CTouchControls::CButtonLabel CTouchControls::CStackShowTouchButtonBehavior::GetL
 	else
 		Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label;
 	Main += m_Suffix.value_or("");
-	m_Label = Main;
-	return {CButtonLabel::EType::ICON, m_Label.c_str()};
+	m_Tmp = Main;
+	return {CButtonLabel::EType::ICON, m_Tmp.c_str()};
 }
 void CTouchControls::CStackShowTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
 {
@@ -2924,7 +2924,7 @@ std::unique_ptr<CTouchControls::CStackAddTouchButtonBehavior> CTouchControls::Pa
 		}
 		vCommands.emplace_back(CommandLabel.u.string.ptr, ParsedCommandLabelType, Command.u.string.ptr);
 	}
-	return make_unique<CStackAddTouchButtonBehavior>(ParsedNumber, Label.u.string.ptr, ParsedLabelType, std::move(vCommands));
+	return std::make_unique<CStackAddTouchButtonBehavior>(ParsedNumber, Label.u.string.ptr, ParsedLabelType, std::move(vCommands));
 }
 
 std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls::ParseStackRemoveBehavior(const json_value *pBehaviorObject)
@@ -2953,13 +2953,13 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 	std::vector<int> vParsedOrders;
 	if(Orders.type == json_integer)
 	{
-		int Check = (Others.u.integer <= 0) ? -1 : Others.u.integer;
+		int Check = (Orders.u.integer <= 0) ? -1 : Orders.u.integer;
 		vParsedOrders.emplace_back(Check);
 	}
 	else if(Orders.type == json_array)
 	{
 		vParsedOrders.reserve(Orders.u.array.length);
-		for(unsigned CommandIndex = 0; CommandIndex < CommandsObject.u.array.length; ++CommandIndex)
+		for(unsigned CommandIndex = 0; CommandIndex < Orders.u.array.length; ++CommandIndex)
 		{
 			const json_value &Order = Orders[CommandIndex];
 			if(Order.type != json_integer)
@@ -2976,7 +2976,7 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 			}
 			else
 			{
-				bool CheckIfRepeat = std::any_of(vParsedOrders.begin(), vParsedOrders.end(), [Order.u.integer](const int& Element){
+				bool CheckIfRepeat = std::any_of(vParsedOrders.begin(), vParsedOrders.end(), [Order](const int& Element){
 					return Order.u.integer == Element;
 				});
 				if(CheckIfRepeat)
@@ -2995,7 +2995,7 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 	std::string bBuf = "";
 	if(vParsedOrders[0] == -1)
 	{
-		ParsedLabel = "\xEF\x81\x97All";
+		ParsedLabel = "\xEF\x81\x97" "All";
 	}
 	else
 	{
@@ -3003,7 +3003,7 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 			return ElementA > ElementB;
 		});
 		if(vParsedOrders.size() > 5)
-			ParsedLabel = "\xEF\x81\x97..."
+			ParsedLabel = "\xEF\x81\x97...";
 		else
 		{
 			for(int Index = vParsedOrders.size() - 1; Index >= 0; Index --)
@@ -3016,7 +3016,7 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 		}
 	}
 	
-	return std::make_unique<CStackRemoveTouchButtonBehavior>(ParsedNumber, vParsedOrders, ParsedLabel);
+	return std::make_unique<CStackRemoveTouchButtonBehavior>(ParsedNumber, std::move(vParsedOrders), ParsedLabel);
 }
 
 std::unique_ptr<CTouchControls::CStackShowTouchButtonBehavior> CTouchControls::ParseStackShowBehavior(const json_value *pBehaviorObject)
