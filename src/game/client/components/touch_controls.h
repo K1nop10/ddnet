@@ -583,11 +583,11 @@ private:
 		
 		void OnActivate() override;
 		void OnDeactivate() override;
-		CButtonLabel GetLabel();
+		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		
 		std::string m_Number;
-		int m_Current = 0;
+		mutable int m_Current = 0;
 		std::string GetType() override {
 			return BEHAVIOR_TYPE;
 		}
@@ -662,14 +662,14 @@ private:
 			m_Suffix(Suffix) {}
 		
 		void OnActivate() override;
-		CButtonLabel GetLabel();
+		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 		
 		std::string m_Number;
 		int m_Order;
 		std::optional<std::string> m_Prefix;
 		std::optional<std::string> m_Suffix;
-		std::string m_Tmp;
+		mutable std::string m_Tmp;
 		std::string GetType() override {
 			return BEHAVIOR_TYPE;
 		}
