@@ -1648,15 +1648,14 @@ void CTouchControls::CStackShowTouchButtonBehavior::OnActivate()
 }
 CTouchControls::CButtonLabel CTouchControls::CStackShowTouchButtonBehavior::GetLabel() const
 {
-	mutable std::string Main = "";
+	m_Tmp = "";
 	std::string Cut;
-	Main += m_Prefix.value_or("");
+	m_Tmp += m_Prefix.value_or("");
 	if(m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label.length() > 15)
-		Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label.substr(0, 15);
+		m_Tmp += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label.substr(0, 15);
 	else
-		Main += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label;
-	Main += m_Suffix.value_or("");
-	m_Tmp = Main;
+		m_Tmp += m_pTouchControls->m_vCommandStack[m_Number][m_Order].m_Label;
+	m_Tmp += m_Suffix.value_or("");
 	return {CButtonLabel::EType::ICON, m_Tmp.c_str()};
 }
 void CTouchControls::CStackShowTouchButtonBehavior::WriteToConfiguration(CJsonWriter *pWriter)
