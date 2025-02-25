@@ -1523,7 +1523,7 @@ void CTouchControls::CStackActTouchButtonBehavior::OnDeactivate()
 {
 	if(m_pTouchControls->m_vCommandStack[m_Number].empty())
 	{
-		m_Current = 0
+		m_Current = 0;
 		return;
 	}
 	m_pTouchControls->Console()->ExecuteLineStroked(0, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command.c_str());
