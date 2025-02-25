@@ -1521,9 +1521,13 @@ void CTouchControls::CStackActTouchButtonBehavior::OnActivate()
 }
 void CTouchControls::CStackActTouchButtonBehavior::OnDeactivate()
 {
+	if(m_pTouchControls->m_vCommandStack[m_Number].empty())
+	{
+		m_Current = 0
+		return;
+	}
 	m_pTouchControls->Console()->ExecuteLineStroked(0, m_pTouchControls->m_vCommandStack[m_Number][m_Current].m_Command.c_str());
 	m_Current = (m_Current + 1) % m_pTouchControls->m_vCommandStack[m_Number].size();
-		m_Current = 0;
 }
 CTouchControls::CButtonLabel CTouchControls::CStackActTouchButtonBehavior::GetLabel() const
 {
@@ -2788,29 +2792,29 @@ std::unique_ptr<CTouchControls::CStackActTouchButtonBehavior> CTouchControls::Pa
 {
 	const json_value &BehaviorObject = *pBehaviorObject;
 	const json_value &Number = BehaviorObject["number"];
-	std::string TmpString;
+	std::string ParsedNumber;
 	if(Number.type == json_integer)
 	{
-		TmpString = std::to_string(Number.u.integer);
+		ParsedNumber = std::to_string(Number.u.integer);
 	}
 	else if(Number.type == json_none)
 	{
-		TmpString = "";
+		ParsedNumber = "";
 	}
 	else if(Number.type == json_string)
 	{
-		TmpString = Number.u.string.ptr;
+		ParsedNumber = Number.u.string.ptr;
 	}
 	else
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'number' specify an unknown type value", CStackActTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
 	}
-	if(m_vCommandStack.find(TmpString) != m_vCommandStack.end())
+	if(m_vCommandStack.find(ParsedNumber) != m_vCommandStack.end())
 	{
-		m_vCommandStack[TmpString];
+		m_vCommandStack[ParsedNumber];
 	}
-	return std::make_unique<CStackActTouchButtonBehavior>(TmpString);
+	return std::make_unique<CStackActTouchButtonBehavior>(ParsedNumber);
 }
 
 std::unique_ptr<CTouchControls::CStackAddTouchButtonBehavior> CTouchControls::ParseStackAddBehavior(const json_value *pBehaviorObject)
@@ -2835,11 +2839,15 @@ std::unique_ptr<CTouchControls::CStackAddTouchButtonBehavior> CTouchControls::Pa
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'number' specify an unknown type value", CStackAddTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
 	}
+	if(m_vCommandStack.find(ParsedNumber) != m_vCommandStack.end())
+	{
+		m_vCommandStack[ParsedNumber];
+	}
 	const json_value &Label = BehaviorObject["label"];
 	if(Label.type != json_string)
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'label' must specify a string", CStackAddTouchButtonBehavior::BEHAVIOR_TYPE);
-		return nullptr;
+		return {};
 	}
 	
 	const json_value &LabelType = BehaviorObject["label-type"];
@@ -2948,6 +2956,10 @@ std::unique_ptr<CTouchControls::CStackRemoveTouchButtonBehavior> CTouchControls:
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'number' specify an unknown type value", CStackRemoveTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
 	}
+	if(m_vCommandStack.find(ParsedNumber) != m_vCommandStack.end())
+	{
+		m_vCommandStack[ParsedNumber];
+	}
 	const json_value &Orders = BehaviorObject["order"];
 	std::vector<int> vParsedOrders;
 	if(Orders.type == json_integer)
@@ -3039,6 +3051,10 @@ std::unique_ptr<CTouchControls::CStackShowTouchButtonBehavior> CTouchControls::P
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'number' specify an unknown type value", CStackShowTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
+	}
+	if(m_vCommandStack.find(ParsedNumber) != m_vCommandStack.end())
+	{
+		m_vCommandStack[ParsedNumber];
 	}
 	
 	const json_value &Order = BehaviorObject["order"];
