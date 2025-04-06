@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "menus.h"
-#include "touch_controls.h"
 
 static const char *BEHAVIORS[] = {"Bind", "Bind Toggle", "Predefined"};
 static const char *PREDEFINEDS[] = {"Extra Menu", "Joystick Hook", "Joystick Fire", "Joystick Aim", "Joystick Action", "Use Action", "Swap Action", "Spectate", "Emoticon", "Ingame Menu"};
@@ -250,8 +249,7 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 	static CButtonContainer s_RemoveButton;
 	if(DoButton_Menu(&s_RemoveButton, "Delete Button", 0, &B))
 	{
-		GameClient()->m_TouchControls.DeleteButton();
-		CacheAllSettingsFromTarget(nullptr);
+		PopupConfirm("Delete Button", "Are you sure to delete the button? This can't be undone.", "Delete", "Cancel", &CMenus::PopupConfirm_DeleteButton);
 	}
 
 	// Create a new button with current cached settings. Auto moving to nearest empty space.
@@ -325,11 +323,13 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 
 void CMenus::RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView)
 {
-	CUIRect A, B;
+	CUIRect A, B, C;
 	MainView.h = 200.0f;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
-	MainView.HSplitMid(&A, &B);
+	MainView.HSplitTop(MainView.h / 3.0f, &A, &MainView);
+	MainView.HSplitMid(&C, &B);
 	Ui()->DoLabel(&A, "No Button Selected.", 20.0f, TEXTALIGN_MC);
+	Ui()->DoLabel(&C, "Long press to selected a button.", 15.0f, TEXTALIGN_MC);
 	B.HMargin((B.h - 30.0f) / 2.0f, &B);
 	B.VSplitMid(&A, &B);
 	A.VMargin(15.0f, &A);
@@ -350,6 +350,8 @@ void CMenus::RenderVirtualVisibilityEditor(CUIRect MainView)
 	CUIRect Label;
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitTop(25.0f, &Label, &MainView);
+	MainView.HSplitBottom(20.0f, &MainView, &EditBox);
+	Ui()->DoLabel(&EditBox, "This visibility only works in editor.", 15.0f, TEXTALIGN_MC);
 	MainView.HMargin(5.0f, &MainView);
 	Ui()->DoLabel(&Label, Localize("Edit Visibilities"), 20.0f, TEXTALIGN_MC);
 	const std::array<const char *, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings = {"Ingame", "Zoom Allowed", "Vote Active", "Dummy Allowed", "Dummy Connected", "Rcon Authed",
@@ -1042,6 +1044,12 @@ void CMenus::PopupConfirm_SaveSettings()
 	SaveCachedSettingsToTarget(m_OldSelectedButton);
 }
 
+void CMenus::PopupConfirm_DeleteButton()
+{
+	GameClient()->m_TouchControls.DeleteButton();
+	CacheAllSettingsFromTarget(nullptr);
+}
+
 void CMenus::DoPopupType(CTouchControls::CPopupParam PopupParam)
 {
 	m_OldSelectedButton = PopupParam.m_OldSelectedButton;
@@ -1077,7 +1085,7 @@ void CMenus::UpdateTmpButton()
 void CMenus::RenderSelectingTab(CUIRect SelectingTab)
 {
 	CUIRect A;
-	const char *TabText[3] = {"File", "Button", "Visibility"};
+	const char *TabText[3] = {"File", "Button", "Setting"};
 	for(int CurrentTab = 0; CurrentTab < 3; CurrentTab++)
 	{
 		SelectingTab.VSplitLeft(40.0f, nullptr, &SelectingTab);
@@ -1108,6 +1116,60 @@ void CMenus::ResolveIssues()
 			}
 		}
 	}
+}
+
+void CMenus::RenderButtonSettings(CUIRect MainView)
+{
+	CUIRect SelectingTab = MainView;
+	CUIRect EditBox;
+	SelectingTab.x = MainView.x + MainView.w;
+	SelectingTab.w = 100.0f;
+	float SelectGap = (MainView.h - 100.0f) / 3;
+	SelectingTab.HSplitTop(SelectGap, nullptr, &SelectingTab);
+	SelectingTab.HSplitTop(50.0f, &EditBox, &SelectingTab);
+	if(Ui()->DoButtonLogic(m_aSettingTabIds.data(), 0, &EditBox, BUTTONFLAG_LEFT))
+	{
+		m_CurrentSetting = 0;
+	}
+	EditBox.Draw(m_CurrentSetting == 0 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_R, 5.0f);
+	Ui()->DoLabel(&EditBox, "Visibility", 20.0f, TEXTALIGN_MC);
+	SelectingTab.HSplitTop(SelectGap, nullptr, &SelectingTab);
+	SelectingTab.HSplitTop(50.0f, &EditBox, &SelectingTab);
+	if(Ui()->DoButtonLogic(&m_aSettingTabIds[1], 0, &EditBox, BUTTONFLAG_LEFT))
+	{
+		m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+		m_ColorInActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
+		m_CurrentSetting = 1;
+	}
+	EditBox.Draw(m_CurrentSetting == 1 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_R, 5.0f);
+	Ui()->DoLabel(&EditBox, "Color", 20.0f, TEXTALIGN_MC);
+	switch(m_CurrentSetting)
+	{
+	case 0: RenderVirtualVisibilityEditor(MainView); break;
+	case 1: RenderColorSettings(MainView); break;
+	default: dbg_assert(false, "Unknown Setting Detected in button editor.");
+	}
+}
+
+void CMenus::RenderColorSettings(CUIRect MainView)
+{
+	CUIRect EditBox;
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+	MainView.Margin(20.0f, &MainView);
+	MainView.HSplitTop(40.0f, &EditBox, &MainView);
+	Ui()->DoLabel(&EditBox, "Edit Color Settings", 20.0f, TEXTALIGN_MC);
+
+	MainView.HSplitTop(20.0f, nullptr, &MainView);
+	MainView.HSplitTop(40.0f, &EditBox, &MainView);
+	static CButtonContainer s_ActiveColorPicker;
+	DoLine_ColorPicker(&s_ActiveColorPicker, 40.0f, 20.0f, 5.0f, &EditBox, "Active Color", &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
+	GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorActive, true)));
+
+	MainView.HSplitTop(20.0f, nullptr, &MainView);
+	MainView.HSplitTop(40.0f, &EditBox, &MainView);
+	static CButtonContainer s_InActiveColorPicker;
+	DoLine_ColorPicker(&s_InActiveColorPicker, 40.0f, 20.0f, 5.0f, &EditBox, "InActive Color", &m_ColorInActive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
+	GameClient()->m_TouchControls.SetBackgroundColorInActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInActive, true)));
 }
 /*
 	Note: FindPositionXY is used for finding a position of the current moving rect not overlapping with other visible rects.

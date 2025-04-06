@@ -529,6 +529,9 @@ private:
 	 */
 	ColorRGBA m_BackgroundColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 
+	// Default Inactive Color. This shouldn't be changed.
+	const ColorRGBA m_DefaultBackgroundColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+
 	/**
 	 * Background color of active touch buttons.
 	 *
@@ -536,6 +539,8 @@ private:
 	 */
 	ColorRGBA m_BackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
 
+	// Default Active Color. This shouldn't be changed.
+	const ColorRGBA m_DefaultBackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
 	/**
 	 * All touch buttons.
 	 *
@@ -686,6 +691,12 @@ public:
 	void RemakeTmpButton() { m_pTmpButton = std::make_unique<CTouchButton>(this); }
 	CTouchButton *TmpButton() const { return m_pTmpButton.get(); }
 	bool IsButtonEditing() const { return m_pSelectedButton != nullptr || m_pTmpButton != nullptr; }
+	ColorRGBA DefaultBackgroundColorInactive() const { return m_DefaultBackgroundColorInactive; }
+	ColorRGBA DefaultBackgroundColorActive() const { return m_DefaultBackgroundColorActive; }
+	ColorRGBA BackgroundColorInactive() const { return m_BackgroundColorInactive; }
+	ColorRGBA BackgroundColorActive() const { return m_BackgroundColorActive; }
+	void SetBackgroundColorInActive(ColorRGBA Color) { m_BackgroundColorInactive = Color; }
+	void SetBackgroundColorActive(ColorRGBA Color) { m_BackgroundColorActive = Color; }
 
 	// The extra menu behavior will use m_CachedNumber in CMenus.
 	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {

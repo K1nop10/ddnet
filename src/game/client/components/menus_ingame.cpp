@@ -309,34 +309,9 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 			case 0: RenderTouchControlsEditor(MainView); break;
 			case 1: RenderTouchButtonEditor(MainView); break;
-			case 2: RenderVirtualVisibilityEditor(MainView); break;
+			case 2: RenderButtonSettings(MainView); break;
 			default: dbg_assert(false, "Unknown Selected tab value.");
 			}
-			// Gap between two tab is 40.0f, width of the tab is 115.0f, the total of everything is 505.0f.
-
-			/*if(GameClient()->m_TouchControls.IsButtonEditing())
-			{
-				// Only render this when a real button is selected or a virtual button is created.
-				MainView.HSplitTop(10.0f, nullptr, &MainView);
-				MainView.HSplitBottom(230.0f, &TouchButtonEditor, &TouchControlsEditor);
-				TouchButtonEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
-				RenderTouchButtonEditor(TouchButtonEditor);
-				TouchControlsEditor.VSplitLeft(505.0f, &TouchControlsEditor, &VirtualVisibilityEditor);
-				VirtualVisibilityEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
-			}
-			else
-			{
-				// No button editing
-				MainView.HMargin((MainView.h - 275.0f) / 2.0f, &TouchControlsEditor);
-				TouchControlsEditor.HSplitBottom(45.0f, &TouchControlsEditor, &TinyButtonTab);
-				TouchControlsEditor.VSplitLeft(505.0f, &TouchControlsEditor, &VirtualVisibilityEditor);
-				VirtualVisibilityEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_TR, 10.0f);
-				TinyButtonTab.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
-			}
-			VirtualVisibilityEditor.VMargin(20.0f, &VirtualVisibilityEditor);
-			RenderVirtualVisibilityEditor(VirtualVisibilityEditor);
-			RenderTouchControlsEditor(TouchControlsEditor);
-			RenderTinyButtonTab(TinyButtonTab);*/
 		}
 	}
 }

@@ -864,8 +864,12 @@ private:
 	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
 	std::array<int, 3> m_aEditElementIds = {};
 	std::array<int, 3> m_aSelectingTabIds = {};
+	std::array<int, 2> m_aSettingTabIds = {};
 	int m_CurrentSelect = 0;
+	int m_CurrentSetting = 0; // 0 for visibility, 1 for colors.
 	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
+	unsigned int m_ColorActive;
+	unsigned int m_ColorInActive;
 
 	static const constexpr float LINEGAP = 10.0f;
 
@@ -892,6 +896,8 @@ private:
 	void RenderVirtualVisibilityEditor(CUIRect MainView);
 	void RenderTinyButtonTab(CUIRect MainView);
 	void RenderSelectingTab(CUIRect SelectingTab);
+	void RenderButtonSettings(CUIRect MainView);
+	void RenderColorSettings(CUIRect MainView);
 	// Return true if Changed.
 	bool RenderPosSettingBlock(CUIRect Block);
 	bool RenderVisibilitySettingBlock(CUIRect Block);
@@ -921,6 +927,8 @@ private:
 
 	void PopupConfirm_TurnOffEditor();
 	void PopupCancel_TurnOffEditor();
+
+	void PopupConfirm_DeleteButton();
 
 	// Getter and setters.
 	bool UnsavedChanges();
