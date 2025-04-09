@@ -853,10 +853,32 @@ private:
 	CServerProcess m_ServerProcess;
 
 	// found in menus_ingame_touch_controls.cpp
+	enum class EBehaviorType
+	{
+		BIND = 0,
+		BIND_TOGGLE,
+		PREDEFINED,
+		NUM_BEHAVIORS
+	};
+
+	enum class EPredefinedType
+	{
+		EXTRA_MENU = 0,
+		JOYSTICK_HOOK,
+		JOYSTICK_FIRE,
+		JOYSTICK_AIM,
+		JOYSTICK_ACTION,
+		USE_ACTION,
+		SWAP_ACTION,
+		SPECTATE,
+		EMOTICON,
+		INGAME_MENU,
+		NUM_PREDEFINEDS
+	};
 	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
 	CTouchControls::CTouchButton *m_NewSelectedButton = nullptr;
-	int m_EditBehaviorType = 0; // Default = bind. 1 = bind-toggle, 2 = predefined.
-	int m_PredefinedBehaviorType = 0; // Default = extra menu.
+	int m_EditBehaviorType = (int)EBehaviorType::BIND; // Default = bind. 1 = bind-toggle, 2 = predefined.
+	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU; // Default = extra menu.
 	int m_EditCommandNumber = 0;
 	int m_EditElement = 0; // 0 for shape&size, 1 for visibility, 2 for behavior.
 	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.

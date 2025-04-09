@@ -26,7 +26,6 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
-#include "game/client/ui_rect.h"
 #include "menus.h"
 #include "motd.h"
 #include "voting.h"

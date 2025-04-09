@@ -1167,7 +1167,6 @@ void CTouchControls::RenderButtons()
 			continue;
 		}
 		TouchButton.UpdateBackgroundCorners();
-		// Man you takes me half an hour to debug HELL YEAH!!!
 		TouchButton.UpdateScreenFromUnitRect();
 		TouchButton.Render();
 	}
@@ -2260,7 +2259,7 @@ std::array<CTouchControls::CIssueParam, (unsigned)CTouchControls::EIssueType::NU
 	return ReturnIssue;
 }
 
-// Make it look like the button, only have bind behavior.
+// Make it look like the button, only have bind behavior. This is only used on m_pTmpButton.
 void CTouchControls::CopySettings(CTouchButton *TargetButton, CTouchButton *SrcButton)
 {
 	if(TargetButton == nullptr || SrcButton == nullptr)

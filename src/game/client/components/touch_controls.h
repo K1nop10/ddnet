@@ -121,6 +121,8 @@ public:
 		NUM_VISIBILITIES
 	};
 	static const constexpr int MAXNUMBER = (int)EButtonVisibility::EXTRA_MENU_5 - (int)EButtonVisibility::EXTRA_MENU_1 + 1;
+	const std::array<const char *, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_VisibilityStrings = {"Ingame", "Zoom Allowed", "Vote Active", "Dummy Allowed", "Dummy Connected", "Rcon Authed",
+		"Demo Player", "Extra Menu 1", "Extra Menu 2", "Extra Menu 3", "Extra Menu 4", "Extra Menu 5"};
 
 	enum class EButtonShape
 	{
@@ -162,6 +164,7 @@ private:
 	static constexpr const char *const DIRECT_TOUCH_SPECTATE_MODE_NAMES[(int)EDirectTouchSpectateMode::NUM_STATES] = {"disabled", "aim"};
 
 	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle"};
+	std::array<const char *, (int)EButtonShape::NUM_SHAPES> m_Shapes = {"Rect", "Circle"};
 
 	class CButtonVisibility
 	{
@@ -697,6 +700,8 @@ public:
 	ColorRGBA BackgroundColorActive() const { return m_BackgroundColorActive; }
 	void SetBackgroundColorInActive(ColorRGBA Color) { m_BackgroundColorInactive = Color; }
 	void SetBackgroundColorActive(ColorRGBA Color) { m_BackgroundColorActive = Color; }
+	std::array<const char *, (size_t)EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings() const { return m_VisibilityStrings; }
+	std::array<const char *, (int)EButtonShape::NUM_SHAPES> Shapes() const { return m_Shapes; }
 
 	// The extra menu behavior will use m_CachedNumber in CMenus.
 	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {

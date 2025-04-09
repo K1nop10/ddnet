@@ -12,6 +12,8 @@
 #include <game/client/ui_rect.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
+
+#include <array>
 #include <memory>
 
 #include "menus.h"
@@ -19,6 +21,7 @@
 static const char *BEHAVIORS[] = {"Bind", "Bind Toggle", "Predefined"};
 static const char *PREDEFINEDS[] = {"Extra Menu", "Joystick Hook", "Joystick Fire", "Joystick Aim", "Joystick Action", "Use Action", "Swap Action", "Spectate", "Emoticon", "Ingame Menu"};
 static const char *LABELTYPES[] = {"Plain", "Localized", "Icon"};
+// This is for the gray names in visibility editor.
 static const ColorRGBA LABELCOLORS[2] = {ColorRGBA(0.3f, 0.3f, 0.3f, 1.0f), ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f)};
 
 // This is called when the Touch button editor is rendered, the below one. Also when selectedbutton changes. Used for updating all cached settings.
@@ -46,7 +49,7 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 		std::string BehaviorType = TargetButton->m_pBehavior->GetBehaviorType();
 		if(BehaviorType == "bind")
 		{
-			m_EditBehaviorType = 0;
+			m_EditBehaviorType = (int)EBehaviorType::BIND;
 			auto *CastedBehavior = static_cast<CTouchControls::CBindTouchButtonBehavior *>(TargetButton->m_pBehavior.get());
 			// Take care m_LabelType must not be null as for now. When adding a new button give it a default value or cry.
 			m_vCachedCommands[0].m_Label = CastedBehavior->GetLabel().m_pLabel;
@@ -57,7 +60,7 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 		}
 		else if(BehaviorType == "bind-toggle")
 		{
-			m_EditBehaviorType = 1;
+			m_EditBehaviorType = (int)EBehaviorType::BIND_TOGGLE;
 			auto *CastedBehavior = static_cast<CTouchControls::CBindToggleTouchButtonBehavior *>(TargetButton->m_pBehavior.get());
 			m_vCachedCommands = CastedBehavior->GetCommand();
 			m_EditCommandNumber = 0;
@@ -69,18 +72,18 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 		}
 		else if(BehaviorType == "predefined")
 		{
-			m_EditBehaviorType = 2;
+			m_EditBehaviorType = (int)EBehaviorType::PREDEFINED;
 			const char *PredefinedType = TargetButton->m_pBehavior->GetPredefinedType();
 			if(PredefinedType == nullptr)
-				m_PredefinedBehaviorType = 0;
+				m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
 			else
-				for(m_PredefinedBehaviorType = 0; m_PredefinedBehaviorType < 10 && str_comp(PredefinedType, GameClient()->m_TouchControls.m_BehaviorFactoriesEditor[m_PredefinedBehaviorType].m_pId) != 0; m_PredefinedBehaviorType++)
+				for(m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU; m_PredefinedBehaviorType < (int)EPredefinedType::NUM_PREDEFINEDS && str_comp(PredefinedType, GameClient()->m_TouchControls.m_BehaviorFactoriesEditor[m_PredefinedBehaviorType].m_pId) != 0; m_PredefinedBehaviorType++)
 					/*Update m_PredefinedBehaviorType, nothing else should be done here*/;
 
-			if(m_PredefinedBehaviorType == 10)
+			if(m_PredefinedBehaviorType == (int)EPredefinedType::NUM_PREDEFINEDS)
 				dbg_assert(false, "Detected out of bound m_PredefinedBehaviorType. PredefinedType = %s", PredefinedType);
 
-			if(m_PredefinedBehaviorType == 0)
+			if(m_PredefinedBehaviorType == (int)EPredefinedType::EXTRA_MENU)
 			{
 				auto *CastedBehavior = static_cast<CTouchControls::CExtraMenuTouchButtonBehavior *>(TargetButton->m_pBehavior.get());
 				m_CachedNumber = CastedBehavior->GetNumber();
@@ -96,8 +99,8 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 void CMenus::ResetCachedSettings()
 {
 	// Reset all cached values.
-	m_EditBehaviorType = 0;
-	m_PredefinedBehaviorType = 0;
+	m_EditBehaviorType = (int)EBehaviorType::BIND;
+	m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
 	m_CachedNumber = 0;
 	m_EditCommandNumber = 0;
 	m_vCachedCommands.clear();
@@ -354,8 +357,6 @@ void CMenus::RenderVirtualVisibilityEditor(CUIRect MainView)
 	Ui()->DoLabel(&EditBox, "This visibility only works in editor.", 15.0f, TEXTALIGN_MC);
 	MainView.HMargin(5.0f, &MainView);
 	Ui()->DoLabel(&Label, Localize("Edit Visibilities"), 20.0f, TEXTALIGN_MC);
-	const std::array<const char *, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings = {"Ingame", "Zoom Allowed", "Vote Active", "Dummy Allowed", "Dummy Connected", "Rcon Authed",
-		"Demo Player", "Extra Menu 1", "Extra Menu 2", "Extra Menu 3", "Extra Menu 4", "Extra Menu 5"};
 	static CScrollRegion s_VirtualVisibilityScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	MainView.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
@@ -373,7 +374,7 @@ void CMenus::RenderVirtualVisibilityEditor(CUIRect MainView)
 				GameClient()->m_TouchControls.ReverseVirtualVisibilities(Current);
 			}
 			TextRender()->TextColor(LabelColor[aVirtualVisibilities[Current] ? 1 : 0]);
-			Ui()->DoLabel(&EditBox, VisibilityStrings[Current], 16.0f, TEXTALIGN_MC);
+			Ui()->DoLabel(&EditBox, GameClient()->m_TouchControls.VisibilityStrings()[Current], 16.0f, TEXTALIGN_MC);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
@@ -414,21 +415,25 @@ void CMenus::SaveCachedSettingsToTarget(CTouchControls::CTouchButton *TargetButt
 	}
 	TargetButton->m_Shape = m_CachedShape;
 	TargetButton->UpdateScreenFromUnitRect();
-	if(m_EditBehaviorType == 0)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 	{
 		TargetButton->m_pBehavior = std::make_unique<CTouchControls::CBindTouchButtonBehavior>(m_vCachedCommands[0].m_Label.c_str(), m_vCachedCommands[0].m_LabelType, m_vCachedCommands[0].m_Command.c_str());
 	}
-	else if(m_EditBehaviorType == 1)
+	else if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
 		std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> vMovingBehavior = m_vCachedCommands;
 		TargetButton->m_pBehavior = std::make_unique<CTouchControls::CBindToggleTouchButtonBehavior>(std::move(vMovingBehavior));
 	}
-	else if(m_EditBehaviorType == 2)
+	else if(m_EditBehaviorType == (int)EBehaviorType::PREDEFINED)
 	{
-		if(m_PredefinedBehaviorType == 0)
+		if(m_PredefinedBehaviorType == (int)EPredefinedType::EXTRA_MENU)
 			TargetButton->m_pBehavior = std::make_unique<CTouchControls::CExtraMenuTouchButtonBehavior>(CTouchControls::CExtraMenuTouchButtonBehavior(m_CachedNumber));
 		else
 			TargetButton->m_pBehavior = GameClient()->m_TouchControls.m_BehaviorFactoriesEditor[m_PredefinedBehaviorType].m_Factory();
+	}
+	else
+	{
+		dbg_assert(false, "Unknown m_EditBehaviorType = %d", m_EditBehaviorType);
 	}
 	TargetButton->UpdatePointers();
 }
@@ -511,7 +516,7 @@ bool CMenus::CheckCachedSettings()
 		FatalError = true;
 	}
 	// Bind Toggle has less than two commands. This is illegal.
-	if(m_EditBehaviorType == 1 && m_vCachedCommands.size() < 2)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE && m_vCachedCommands.size() < 2)
 	{
 		Errors.emplace_back("Commands in Bind Toggle has less than two command. Add more commands or use Bind behavior.\n");
 		FatalError = true;
@@ -744,9 +749,14 @@ bool CMenus::RenderPosSettingBlock(CUIRect Block)
 	static CUi::SDropDownState s_ButtonShapeDropDownState;
 	static CScrollRegion s_ButtonShapeDropDownScrollRegion;
 	s_ButtonShapeDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ButtonShapeDropDownScrollRegion;
-	const char *Shapes[] = {"Rect", "Circle"};
+	std::array<const char *, (int)CTouchControls::EButtonShape::NUM_SHAPES> aShapes = GameClient()->m_TouchControls.Shapes();
+	const char *Shapes[(int)CTouchControls::EButtonShape::NUM_SHAPES];
+	for(int Shape = 0; Shape < (int)CTouchControls::EButtonShape::NUM_SHAPES; Shape++)
+	{
+		Shapes[Shape] = aShapes[Shape];
+	}
 	B.VSplitRight(100.0f, nullptr, &B);
-	const CTouchControls::EButtonShape NewButtonShape = (CTouchControls::EButtonShape)Ui()->DoDropDown(&B, (int)m_CachedShape, Shapes, std::size(Shapes), s_ButtonShapeDropDownState);
+	const CTouchControls::EButtonShape NewButtonShape = (CTouchControls::EButtonShape)Ui()->DoDropDown(&B, (int)m_CachedShape, Shapes, (int)CTouchControls::EButtonShape::NUM_SHAPES, s_ButtonShapeDropDownState);
 	if(NewButtonShape != m_CachedShape)
 	{
 		m_CachedShape = NewButtonShape;
@@ -778,12 +788,12 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	if(NewButtonBehavior != m_EditBehaviorType)
 	{
 		m_EditBehaviorType = NewButtonBehavior;
-		if(m_EditBehaviorType == 0)
+		if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 		{
 			m_InputLabel.Set(m_vCachedCommands[0].m_Label.c_str());
 			m_InputCommand.Set(m_vCachedCommands[0].m_Command.c_str());
 		}
-		if(m_EditBehaviorType == 1)
+		if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 		{
 			if(m_vCachedCommands.size() <= (size_t)(m_EditCommandNumber))
 				m_EditCommandNumber = 0;
@@ -801,7 +811,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &B);
 	A.VMargin(5.0f, &A);
 	B.VMargin(5.0f, &B);
-	if(m_EditBehaviorType == 0)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 	{
 		Ui()->DoLabel(&A, "Command:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputCommand, &B, 10.0f))
@@ -811,7 +821,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			Changed = true;
 		}
 	}
-	else if(m_EditBehaviorType == 1)
+	else if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
 		Ui()->DoLabel(&A, "Number:", 16.0f, TEXTALIGN_ML);
 		// Decrease Button, increase button and delete button share 1/2 width of B, the rest is for number. 1/6, 1/2, 1/6, 1/6.
@@ -868,7 +878,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			Changed = true;
 		}
 	}
-	else if(m_EditBehaviorType == 2)
+	else if(m_EditBehaviorType == (int)EBehaviorType::PREDEFINED)
 	{
 		Ui()->DoLabel(&A, "Type:", 16.0f, TEXTALIGN_ML);
 		static CUi::SDropDownState s_ButtonPredefinedDropDownState;
@@ -887,7 +897,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &B);
 	A.VMargin(5.0f, &A);
 	B.VMargin(5.0f, &B);
-	if(m_EditBehaviorType == 0)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 	{
 		Ui()->DoLabel(&A, "Label:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputLabel, &B, 10.0f))
@@ -897,7 +907,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			Changed = true;
 		}
 	}
-	else if(m_EditBehaviorType == 1)
+	else if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
 		Ui()->DoLabel(&A, "Command:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputCommand, &B, 10.0f))
@@ -907,7 +917,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			Changed = true;
 		}
 	}
-	else if(m_EditBehaviorType == 2 && m_PredefinedBehaviorType == 0) // Extra menu type, needs to input number.
+	else if(m_EditBehaviorType == (int)EBehaviorType::PREDEFINED && m_PredefinedBehaviorType == (int)EPredefinedType::EXTRA_MENU) // Extra menu type, needs to input number.
 	{
 		// Increase & Decrease button share 1/2 width, the rest is for label.
 		EditBox.VSplitLeft(EditBox.w / 4, &A, &B);
@@ -943,7 +953,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &B);
 	A.VMargin(5.0f, &A);
 	B.VMargin(5.0f, &B);
-	if(m_EditBehaviorType == 0)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 	{
 		Ui()->DoLabel(&A, "Label type:", 16.0f, TEXTALIGN_ML);
 		static CUi::SDropDownState s_ButtonLabelTypeDropDownState;
@@ -957,7 +967,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			Changed = true;
 		}
 	}
-	else if(m_EditBehaviorType == 1)
+	else if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
 		Ui()->DoLabel(&A, "Label:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputLabel, &B, 10.0f))
@@ -972,7 +982,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &B);
 	A.VMargin(5.0f, &A);
 	B.VMargin(5.0f, &B);
-	if(m_EditBehaviorType == 1)
+	if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
 		Ui()->DoLabel(&A, "Label type:", 16.0f, TEXTALIGN_ML);
 		static CUi::SDropDownState s_ButtonLabelTypeDropDownState;
@@ -1003,8 +1013,6 @@ bool CMenus::RenderVisibilitySettingBlock(CUIRect Block)
 	Block.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 	s_VisibilityScrollRegion.Begin(&Block, &ScrollOffset);
 	Block.y += ScrollOffset.y;
-	const std::array<const char *, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings = {"Ingame", "Zoom Allowed", "Vote Active", "Dummy Allowed", "Dummy Connected", "Rcon Authed",
-		"Demo Player", "Extra Menu 1", "Extra Menu 2", "Extra Menu 3", "Extra Menu 4", "Extra Menu 5"};
 	for(unsigned Current = 0; Current < (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES; ++Current)
 	{
 		Block.HSplitTop(30.0f, &EditBox, &Block);
@@ -1020,7 +1028,7 @@ bool CMenus::RenderVisibilitySettingBlock(CUIRect Block)
 			}
 			TextRender()->TextColor(LABELCOLORS[m_aCachedVisibilities[Current] == 2 ? 0 : 1]);
 			char aBuf[20];
-			str_format(aBuf, sizeof(aBuf), "%s%s", m_aCachedVisibilities[Current] == 0 ? "-" : "+", VisibilityStrings[Current]);
+			str_format(aBuf, sizeof(aBuf), "%s%s", m_aCachedVisibilities[Current] == 0 ? "-" : "+", GameClient()->m_TouchControls.VisibilityStrings()[Current]);
 			Ui()->DoLabel(&EditBox, aBuf, 16.0f, TEXTALIGN_MC);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
