@@ -703,6 +703,8 @@ public:
 	void SetBackgroundColorActive(ColorRGBA Color) { m_BackgroundColorActive = Color; }
 	std::array<const char *, (size_t)EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings() const { return m_VisibilityStrings; }
 	std::array<const char *, (int)EButtonShape::NUM_SHAPES> Shapes() const { return m_Shapes; }
+	std::vector<CTouchButton *> VisibleButtons();
+	std::vector<CTouchButton *> InvisibleButtons();
 
 	// The extra menu behavior will use m_CachedNumber in CMenus.
 	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {

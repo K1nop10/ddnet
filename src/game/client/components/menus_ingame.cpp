@@ -26,7 +26,6 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
-#include "base/color.h"
 #include "menus.h"
 #include "motd.h"
 #include "voting.h"
@@ -281,6 +280,9 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			Console()->ExecuteLine("toggle_local_console");
 		}
+		// Only when these are all false, the preview page is rendered. Once the page is not rendered, update is needed upon next rendering.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || !m_PreviewButton || m_CurrentMenu != EMenuType::MENU_BUTTONS || GameClient()->m_TouchControls.IsButtonEditing())
+			m_NeedUpdatePreview = true;
 		if(GameClient()->m_TouchControls.IsEditingActive())
 		{
 			// Resolve issues if needed before rendering, so the elements could have a correct value on this frame.
@@ -291,7 +293,6 @@ void CMenus::RenderGame(CUIRect MainView)
 			if(PopupParam.m_PopupType != CTouchControls::EPopupType::NUM_POPUPS)
 			{
 				DoPopupType(PopupParam);
-				// No need for continue rendering.
 				return;
 			}
 			if(m_FirstEnter)
@@ -314,9 +315,9 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			switch(m_CurrentMenu)
 			{
-			case EMenuType::FILE: RenderTouchControlsEditor(MainView); break;
-			case EMenuType::BUTTONS: RenderTouchButtonEditor(MainView); break;
-			case EMenuType::SETTINGS: RenderButtonSettings(MainView); break;
+			case EMenuType::MENU_FILE: RenderTouchControlsEditor(MainView); break;
+			case EMenuType::MENU_BUTTONS: RenderTouchButtonEditor(MainView); break;
+			case EMenuType::MENU_SETTINGS: RenderButtonSettings(MainView); break;
 			default: dbg_assert(false, "Unknown selected tab value.");
 			}
 		}
@@ -327,7 +328,7 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 {
 	CUIRect Label, Button, Row;
 	MainView.h -= 95.0f;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B | IGraphics::CORNER_TR, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 	MainView.HSplitTop(25.0f, &Row, &MainView);

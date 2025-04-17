@@ -1,5 +1,6 @@
 #include "touch_controls.h"
 
+#include <algorithm>
 #include <base/log.h>
 #include <base/system.h>
 
@@ -2272,4 +2273,30 @@ void CTouchControls::CopySettings(CTouchButton *TargetButton, CTouchButton *SrcB
 	TargetButton->m_pBehavior = std::make_unique<CBindTouchButtonBehavior>(Label.m_pLabel, Label.m_Type, "");
 	TargetButton->UpdatePointers();
 	TargetButton->UpdateScreenFromUnitRect();
+}
+
+std::vector<CTouchControls::CTouchButton *> CTouchControls::VisibleButtons()
+{
+	std::vector<CTouchButton *> vReturnValue;
+	std::for_each(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](auto &Button) {
+		bool Visible = std::all_of(Button.m_vVisibilities.begin(), Button.m_vVisibilities.end(), [&](const CButtonVisibility &Visibility) {
+			return Visibility.m_Parity == m_aVirtualVisibilities[(int)Visibility.m_Type];
+		});
+		if(Visible)
+			vReturnValue.emplace_back(&Button);
+	});
+	return vReturnValue;
+}
+
+std::vector<CTouchControls::CTouchButton *> CTouchControls::InvisibleButtons()
+{
+	std::vector<CTouchButton *> vReturnValue;
+	std::for_each(m_vTouchButtons.begin(), m_vTouchButtons.end(), [&](auto &Button) {
+		bool Visible = std::all_of(Button.m_vVisibilities.begin(), Button.m_vVisibilities.end(), [&](const CButtonVisibility &Visibility) {
+			return Visibility.m_Parity == m_aVirtualVisibilities[(int)Visibility.m_Type];
+		});
+		if(!Visible)
+			vReturnValue.emplace_back(&Button);
+	});
+	return vReturnValue;
 }
