@@ -1,8 +1,5 @@
 #include "touch_controls.h"
-#include <engine/graphics.h>
-#include <engine/textrender.h>
 
-#include <algorithm>
 #include <base/log.h>
 #include <base/system.h>
 
@@ -277,6 +274,7 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 		ScreenRect = m_ScreenRect;
 
 	ColorRGBA ButtonColor;
+	// "Selected" can decide which color to use, while not disturbing the original color check.
 	ButtonColor = m_pBehavior->IsActive() || Selected.value_or(false) ? m_pTouchControls->m_BackgroundColorActive : m_pTouchControls->m_BackgroundColorInactive;
 	if(!Selected.value_or(true))
 		ButtonColor = m_pTouchControls->m_BackgroundColorInactive;

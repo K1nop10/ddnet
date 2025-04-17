@@ -164,7 +164,7 @@ private:
 	static constexpr const char *const DIRECT_TOUCH_SPECTATE_MODE_NAMES[(int)EDirectTouchSpectateMode::NUM_STATES] = {"disabled", "aim"};
 
 	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle"};
-	std::array<const char *, (int)EButtonShape::NUM_SHAPES> m_Shapes = {"Rect", "Circle"};
+	std::array<const char *, (int)EButtonShape::NUM_SHAPES> m_Shapes = {"Rectangle", "Circle"};
 
 	class CButtonVisibility
 	{
@@ -532,7 +532,7 @@ private:
 	 */
 	ColorRGBA m_BackgroundColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 
-	// Default Inactive Color. This shouldn't be changed.
+	// Default Inactive Color.
 	const ColorRGBA m_DefaultBackgroundColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 
 	/**
@@ -542,8 +542,9 @@ private:
 	 */
 	ColorRGBA m_BackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
 
-	// Default Active Color. This shouldn't be changed.
+	// Default Active Color.
 	const ColorRGBA m_DefaultBackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
+
 	/**
 	 * All touch buttons.
 	 *
@@ -698,7 +699,7 @@ public:
 	ColorRGBA DefaultBackgroundColorActive() const { return m_DefaultBackgroundColorActive; }
 	ColorRGBA BackgroundColorInactive() const { return m_BackgroundColorInactive; }
 	ColorRGBA BackgroundColorActive() const { return m_BackgroundColorActive; }
-	void SetBackgroundColorInActive(ColorRGBA Color) { m_BackgroundColorInactive = Color; }
+	void SetBackgroundColorInactive(ColorRGBA Color) { m_BackgroundColorInactive = Color; }
 	void SetBackgroundColorActive(ColorRGBA Color) { m_BackgroundColorActive = Color; }
 	std::array<const char *, (size_t)EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings() const { return m_VisibilityStrings; }
 	std::array<const char *, (int)EButtonShape::NUM_SHAPES> Shapes() const { return m_Shapes; }

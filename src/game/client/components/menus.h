@@ -875,23 +875,50 @@ private:
 		INGAME_MENU,
 		NUM_PREDEFINEDS
 	};
+
+	// Which menu is selected.
+	enum class EMenuType
+	{
+		FILE = 0,
+		BUTTONS,
+		SETTINGS,
+		NUM_MENUS
+	};
+	EMenuType m_CurrentMenu = EMenuType::FILE;
+
+	// In setting menu.
+	enum class ESettingType
+	{
+		PREVIEW_VISIBILITY = 0,
+		COLOR,
+		DIRECT_INPUT,
+		NUM_SETTING_TYPES
+	};
+	ESettingType m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
+	const char *m_apSettings[(int)ESettingType::NUM_SETTING_TYPES] = {"Preview Visibility", "Color", "Direct Input"};
+
+	// Mainly for passing values in popups.
 	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
 	CTouchControls::CTouchButton *m_NewSelectedButton = nullptr;
-	int m_EditBehaviorType = (int)EBehaviorType::BIND; // Default = bind. 1 = bind-toggle, 2 = predefined.
-	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU; // Default = extra menu.
+
+	// Storing everything you are editing.
+	int m_EditBehaviorType = (int)EBehaviorType::BIND;
+	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
 	int m_EditCommandNumber = 0;
 	int m_EditElement = 0; // 0 for shape&size, 1 for visibility, 2 for behavior.
 	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
+
+	// Used for passing unique ids.
 	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
 	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
-	std::array<int, 3> m_aEditElementIds = {};
+	std::array<CButtonContainer, 3> m_aEditElementIds = {};
 	std::array<int, 3> m_aSelectingTabIds = {};
 	std::array<int, 2> m_aSettingTabIds = {};
-	int m_CurrentSelect = 0;
-	int m_CurrentSetting = 0; // 0 for visibility, 1 for colors.
+
 	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
-	unsigned int m_ColorActive;
-	unsigned int m_ColorInActive;
+	unsigned int m_ColorActive = 0;
+	unsigned int m_ColorInactive = 0;
+	bool m_FirstEnter = true;
 
 	static const constexpr float LINEGAP = 10.0f;
 
@@ -905,7 +932,8 @@ public:
 	CLineInputNumber m_InputH;
 	CLineInputBuffered<1024> m_InputCommand;
 	CLineInputBuffered<1024> m_InputLabel;
-	std::array<int, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aCachedVisibilities; // 0:-, 1:+, 2:No existing.
+	std::string m_ParsedString;
+	std::array<int, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aCachedVisibilities; // 0:-, 1:+, 2:Ignored.
 	int m_CachedNumber = 0;
 
 	void CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButton);
@@ -915,16 +943,16 @@ private:
 	void InputPosFunction(CLineInputNumber *Input); // Used for input button's X,Y,W,H.
 	void RenderTouchButtonEditor(CUIRect MainView);
 	void RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView);
-	void RenderVirtualVisibilityEditor(CUIRect MainView);
 	void RenderTinyButtonTab(CUIRect MainView);
 	void RenderSelectingTab(CUIRect SelectingTab);
 	void RenderButtonSettings(CUIRect MainView);
+	void RenderVirtualVisibilityEditor(CUIRect MainView);
 	void RenderColorSettings(CUIRect MainView);
+	void RenderDirectTouchEditor(CUIRect MainView);
 	// Return true if Changed.
 	bool RenderPosSettingBlock(CUIRect Block);
 	bool RenderVisibilitySettingBlock(CUIRect Block);
 	bool RenderBehaviorSettingBlock(CUIRect Block);
-	void DoRedLabel(const char *pLabel, CUIRect Block);
 	bool CheckCachedSettings();
 	void ResetCachedSettings(); // You can use CacheAllSettingsFromTarget(nullptr) to call this.
 	void ResetButtonPointers();
@@ -959,5 +987,7 @@ private:
 	// Convenient functions.
 	void UpdateTmpButton();
 	void ResolveIssues();
+	void DoRedLabel(const char *pLabel, CUIRect Block, const int &Size);
+	void ParseLabel(const char *pLabel);
 };
 #endif

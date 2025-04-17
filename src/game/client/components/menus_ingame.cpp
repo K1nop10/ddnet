@@ -26,6 +26,7 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include "base/color.h"
 #include "menus.h"
 #include "motd.h"
 #include "voting.h"
@@ -293,23 +294,30 @@ void CMenus::RenderGame(CUIRect MainView)
 				// No need for continue rendering.
 				return;
 			}
+			if(m_FirstEnter)
+			{
+				m_aCachedVisibilities[(int)CTouchControls::EButtonVisibility::DEMO_PLAYER] = 0;
+				m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+				m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
+				m_FirstEnter = false;
+			}
 			// Their width is all 505.0f, height is adjustable, you can directly change its h value, so no need for changing where tab is.
 			CUIRect SelectingTab;
 			MainView.HSplitTop(10.0f, nullptr, &MainView);
 			MainView.HMargin((MainView.h - 275.0f) / 2.0f, &MainView);
 			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &MainView);
 			MainView.y -= 60.0f;
-			MainView.HSplitTop(35.0f, &SelectingTab, &MainView);
+			MainView.HSplitTop(25.0f, &SelectingTab, &MainView);
 
 			// Select tab.
 			RenderSelectingTab(SelectingTab);
 
-			switch(m_CurrentSelect)
+			switch(m_CurrentMenu)
 			{
-			case 0: RenderTouchControlsEditor(MainView); break;
-			case 1: RenderTouchButtonEditor(MainView); break;
-			case 2: RenderButtonSettings(MainView); break;
-			default: dbg_assert(false, "Unknown Selected tab value.");
+			case EMenuType::FILE: RenderTouchControlsEditor(MainView); break;
+			case EMenuType::BUTTONS: RenderTouchButtonEditor(MainView); break;
+			case EMenuType::SETTINGS: RenderButtonSettings(MainView); break;
+			default: dbg_assert(false, "Unknown selected tab value.");
 			}
 		}
 	}
@@ -318,7 +326,8 @@ void CMenus::RenderGame(CUIRect MainView)
 void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 {
 	CUIRect Label, Button, Row;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+	MainView.h -= 95.0f;
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B | IGraphics::CORNER_TR, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 	MainView.HSplitTop(25.0f, &Row, &MainView);
@@ -405,48 +414,6 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	if(DoButton_Menu(&s_ClipboardExportButton, Localize("Export to clipboard"), 0, &Button))
 	{
 		GameClient()->m_TouchControls.SaveConfigurationToClipboard();
-	}
-
-	MainView.HSplitTop(25.0f, &Label, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-	Ui()->DoLabel(&Label, Localize("Settings"), 20.0f, TEXTALIGN_MC);
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while ingame"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apIngameTouchModes[(int)CTouchControls::EDirectTouchIngameMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Active action", "Direct touch input"), Localize("Aim", "Direct touch input"), Localize("Fire", "Direct touch input"), Localize("Hook", "Direct touch input")};
-	const CTouchControls::EDirectTouchIngameMode OldDirectTouchIngame = GameClient()->m_TouchControls.DirectTouchIngame();
-	static CUi::SDropDownState s_DirectTouchIngameDropDownState;
-	static CScrollRegion s_DirectTouchIngameDropDownScrollRegion;
-	s_DirectTouchIngameDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchIngameDropDownScrollRegion;
-	const CTouchControls::EDirectTouchIngameMode NewDirectTouchIngame = (CTouchControls::EDirectTouchIngameMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchIngame, apIngameTouchModes, std::size(apIngameTouchModes), s_DirectTouchIngameDropDownState);
-	if(OldDirectTouchIngame != NewDirectTouchIngame)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchIngame(NewDirectTouchIngame);
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while spectating"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apSpectateTouchModes[(int)CTouchControls::EDirectTouchSpectateMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Aim", "Direct touch input")};
-	const CTouchControls::EDirectTouchSpectateMode OldDirectTouchSpectate = GameClient()->m_TouchControls.DirectTouchSpectate();
-	static CUi::SDropDownState s_DirectTouchSpectateDropDownState;
-	static CScrollRegion s_DirectTouchSpectateDropDownScrollRegion;
-	s_DirectTouchSpectateDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchSpectateDropDownScrollRegion;
-	const CTouchControls::EDirectTouchSpectateMode NewDirectTouchSpectate = (CTouchControls::EDirectTouchSpectateMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchSpectate, apSpectateTouchModes, std::size(apSpectateTouchModes), s_DirectTouchSpectateDropDownState);
-	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
 	}
 }
 

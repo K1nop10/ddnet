@@ -1,9 +1,14 @@
+#include "menus.h"
+
 #include <base/color.h>
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/graphics.h>
 #include <engine/textrender.h>
+
+#include <engine/external/json-parser/json.h>
+#include <engine/shared/jsonwriter.h>
 
 #include <game/client/components/touch_controls.h>
 #include <game/client/gameclient.h>
@@ -12,11 +17,6 @@
 #include <game/client/ui_rect.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
-
-#include <array>
-#include <memory>
-
-#include "menus.h"
 
 static const char *BEHAVIORS[] = {"Bind", "Bind Toggle", "Predefined"};
 static const char *PREDEFINEDS[] = {"Extra Menu", "Joystick Hook", "Joystick Fire", "Joystick Aim", "Joystick Action", "Use Action", "Swap Action", "Spectate", "Emoticon", "Ingame Menu"};
@@ -56,7 +56,8 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 			m_vCachedCommands[0].m_LabelType = CastedBehavior->GetLabel().m_Type;
 			m_vCachedCommands[0].m_Command = CastedBehavior->GetCommand();
 			m_InputCommand.Set(CastedBehavior->GetCommand().c_str());
-			m_InputLabel.Set(CastedBehavior->GetLabel().m_pLabel);
+			ParseLabel(CastedBehavior->GetLabel().m_pLabel);
+			m_InputLabel.Set(m_ParsedString.c_str());
 		}
 		else if(BehaviorType == "bind-toggle")
 		{
@@ -67,7 +68,8 @@ void CMenus::CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButt
 			if(!m_vCachedCommands.empty())
 			{
 				m_InputCommand.Set(m_vCachedCommands[0].m_Command.c_str());
-				m_InputLabel.Set(m_vCachedCommands[0].m_Label.c_str());
+				ParseLabel(m_vCachedCommands[0].m_Label.c_str());
+				m_InputLabel.Set(m_ParsedString.c_str());
 			}
 		}
 		else if(BehaviorType == "predefined")
@@ -107,6 +109,7 @@ void CMenus::ResetCachedSettings()
 	m_vCachedCommands.reserve(5);
 	m_vCachedCommands.emplace_back("", CTouchControls::CButtonLabel::EType::PLAIN, "");
 	m_aCachedVisibilities.fill(2); // 2 means don't have the visibility, true:1,false:0
+	m_aCachedVisibilities[(int)CTouchControls::EButtonVisibility::DEMO_PLAYER] = 0;
 	// These things can't be empty. std::stoi can't cast empty string.
 	SetPosInputs({0, 0, CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MINIMUM});
 	m_InputLabel.Set("");
@@ -131,56 +134,51 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 		return;
 	}
 	MainView.h = 11 * (LINEGAP + 25.0f);
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B | IGraphics::CORNER_TR, 10.0f);
 	// Used to decide if need to update the tmpbutton.
 	bool Changed = false;
 	CUIRect Left, A, B, C, EditBox, Block;
-	MainView.HSplitTop(6 * (LINEGAP + 25.0f), &Block, &Left);
+	MainView.HSplitTop(6 * (LINEGAP + 25.0f) + 6 * LINEGAP, &Block, &Left);
 
 	// Choosing which to edit.
-	Left.HSplitTop(6 * LINEGAP, &EditBox, &Left);
-	EditBox.HMargin((EditBox.h - 30.0f) / 2.0f, &EditBox);
+	Block.HSplitTop(4 * LINEGAP, &EditBox, &Block);
+	EditBox.HMargin((EditBox.h - 25.0f) / 2.0f, &EditBox);
 	EditBox.VMargin(20.0f, &EditBox);
 	EditBox.VSplitLeft(EditBox.w / 3.0f, &C, &EditBox);
 	EditBox.VSplitMid(&A, &B);
 
-	if(Ui()->DoButtonLogic(m_aEditElementIds.data(), 0, &C, BUTTONFLAG_LEFT))
+	if(DoButton_MenuTab(m_aEditElementIds.data(), "Position", m_EditElement == 0, &C, IGraphics::CORNER_L))
 	{
 		m_EditElement = 0;
 	}
-
-	if(Ui()->DoButtonLogic(&m_aEditElementIds[1], 0, &A, BUTTONFLAG_LEFT))
+	if(DoButton_MenuTab(&m_aEditElementIds[1], "Visibility", m_EditElement == 1, &A, IGraphics::CORNER_NONE))
 	{
 		m_EditElement = 1;
 	}
-
-	if(Ui()->DoButtonLogic(&m_aEditElementIds[2], 0, &B, BUTTONFLAG_LEFT))
+	if(DoButton_MenuTab(&m_aEditElementIds[2], "Behavior", m_EditElement == 2, &B, IGraphics::CORNER_R))
 	{
 		m_EditElement = 2;
 	}
-	C.Draw(m_EditElement != 0 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_L, 5.0f);
-	A.Draw(m_EditElement != 1 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_NONE, 5.0f);
-	B.Draw(m_EditElement != 2 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_R, 5.0f);
-	Ui()->DoLabel(&C, "Position", 20.0f, TEXTALIGN_MC);
-	Ui()->DoLabel(&A, "Visibility", 20.0f, TEXTALIGN_MC);
-	Ui()->DoLabel(&B, "Behavior", 20.0f, TEXTALIGN_MC);
-	// Edit blocks.
 
+	// Edit blocks.
 	switch(m_EditElement)
 	{
-	case 0: RenderPosSettingBlock(Block); break;
-	case 1: RenderVisibilitySettingBlock(Block); break;
-	case 2: RenderBehaviorSettingBlock(Block); break;
+	case 0: Changed = RenderPosSettingBlock(Block) || Changed; break;
+	case 1: Changed = RenderVisibilitySettingBlock(Block) || Changed; break;
+	case 2: Changed = RenderBehaviorSettingBlock(Block) || Changed; break;
 	default: dbg_assert(false, "Unknown m_EditElement = %d.", m_EditElement);
 	}
 
 	// Save & Cancel & Hint.
-	Left.VMargin(10.0f, &Left);
+	Left.VMargin(20.0f, &Left);
 	Left.HSplitTop(25.0f, &EditBox, &Left);
-	EditBox.VSplitLeft(EditBox.w / 3.0f - 5.0f, &A, &EditBox);
+	const float ButtonWidth = (EditBox.w - 10) / 3.0f;
+	EditBox.VSplitLeft(ButtonWidth, &A, &EditBox);
 	EditBox.VSplitLeft(5.0f, nullptr, &EditBox);
 	static CButtonContainer s_ConfirmButton;
-	if(DoButton_Menu(&s_ConfirmButton, "Save", UnsavedChanges() ? 0 : 1, &A))
+	// After touching this button, the button is then added into the button vector. Or it is still virtual.
+	const char *ConfirmText = GameClient()->m_TouchControls.NoRealButtonSelected() ? "Finish Creating" : "Save";
+	if(DoButton_Menu(&s_ConfirmButton, ConfirmText, UnsavedChanges() ? 0 : 1, &A))
 	{
 		if(UnsavedChanges())
 		{
@@ -193,27 +191,28 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 			}
 		}
 	}
-	EditBox.VSplitLeft(EditBox.w / 3.0f - 5.0f, &A, &EditBox);
+	EditBox.VSplitLeft(ButtonWidth, &A, &EditBox);
 	EditBox.VSplitLeft(5.0f, nullptr, &B);
 	if(UnsavedChanges())
 	{
-		DoRedLabel("Unsaved Changes", A);
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		Ui()->DoLabel(&A, "Unsaved Changes", 10.0f, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
+
 	static CButtonContainer s_CancelButton;
-	if(DoButton_Menu(&s_CancelButton, "Cancel", UnsavedChanges() ? 0 : 1, &B))
+	if(DoButton_Menu(&s_CancelButton, "Reset Changes", UnsavedChanges() ? 0 : 1, &B))
 	{
 		// Since the settings are cancelled, reset the cached settings to m_pSelectedButton though selected button didn't change.
+		// Cancel will reset changes to default if the button is still virtual.
 		if(UnsavedChanges())
 		{
 			CacheAllSettingsFromTarget(GameClient()->m_TouchControls.SelectedButton());
-			UpdateTmpButton();
-			// If no real button selected, meaning currently new button is created and is not saved. Cancel will kill this unsaved virtual button.
-			if(GameClient()->m_TouchControls.NoRealButtonSelected())
+			Changed = true;
+			if(!GameClient()->m_TouchControls.NoRealButtonSelected())
 			{
-				ResetButtonPointers();
+				SetUnsavedChanges(false);
 			}
-			SetUnsavedChanges(false);
-			Changed = false;
 		}
 		// Cancel does nothing if nothing is unsaved.
 	}
@@ -221,7 +220,6 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 	// Functional Buttons.
 	Left.HSplitTop(LINEGAP, nullptr, &Left);
 	Left.HSplitTop(25.0f, &EditBox, &Left);
-	EditBox.VMargin(10.0f, &EditBox);
 	EditBox.VSplitMid(&A, &B);
 	A.VSplitRight(5.0f, &A, nullptr);
 	static CButtonContainer s_AddNewButton;
@@ -252,13 +250,12 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 	static CButtonContainer s_RemoveButton;
 	if(DoButton_Menu(&s_RemoveButton, "Delete Button", 0, &B))
 	{
-		PopupConfirm("Delete Button", "Are you sure to delete the button? This can't be undone.", "Delete", "Cancel", &CMenus::PopupConfirm_DeleteButton);
+		PopupConfirm("Delete Button", "Are you sure to delete this button? This can't be undone.", "Delete", "Cancel", &CMenus::PopupConfirm_DeleteButton);
 	}
 
 	// Create a new button with current cached settings. Auto moving to nearest empty space.
 	Left.HSplitTop(LINEGAP, nullptr, &Left);
 	Left.HSplitTop(25.0f, &EditBox, &Left);
-	EditBox.VMargin(10.0f, &EditBox);
 	EditBox.VSplitMid(&A, &B);
 	A.VSplitRight(5.0f, &A, nullptr);
 	static CButtonContainer s_CopyPasteButton;
@@ -270,7 +267,7 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 		}
 		else if(UnsavedChanges())
 		{
-			PopupMessage("Unsaved Changes", "Save changes before copy paste a button.", "OK");
+			PopupMessage("Unsaved Changes", "Save changes before duplicate a button.", "OK");
 		}
 		else
 		{
@@ -293,7 +290,6 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 			{
 				ResetButtonPointers();
 				SetPosInputs(FreeRect);
-				UpdateTmpButton();
 				Changed = true;
 				SetUnsavedChanges(true);
 			}
@@ -303,13 +299,13 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 	// Deselect a button.
 	B.VSplitLeft(5.0f, nullptr, &B);
 	static CButtonContainer s_DeselectButton;
-	if(DoButton_Menu(&s_DeselectButton, "De-Select", 0, &B))
+	if(DoButton_Menu(&s_DeselectButton, "Deselect", 0, &B))
 	{
 		m_OldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
 		m_NewSelectedButton = nullptr;
 		if(UnsavedChanges())
 		{
-			PopupConfirm("Unsaved Changes", "Do you want to save all changes before de-select?", "Save", "Discard", &CMenus::PopupConfirm_DeselectButton, POPUP_NONE, &CMenus::PopupCancel_DeselectButton);
+			PopupConfirm("Unsaved Changes", "You'll lose unsaved changes after deselecting.", "Deselect", "Cancel", &CMenus::PopupCancel_DeselectButton);
 		}
 		else
 		{
@@ -328,7 +324,7 @@ void CMenus::RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView)
 {
 	CUIRect A, B, C;
 	MainView.h = 200.0f;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B | IGraphics::CORNER_TR, 10.0f);
 	MainView.HSplitTop(MainView.h / 3.0f, &A, &MainView);
 	MainView.HSplitMid(&C, &B);
 	Ui()->DoLabel(&A, "No Button Selected.", 20.0f, TEXTALIGN_MC);
@@ -341,26 +337,26 @@ void CMenus::RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView)
 		PopupCancel_NewButton();
 	B.VMargin(15.0f, &B);
 	static CButtonContainer s_SelecteButton;
-	if(DoButton_Menu(&s_SelecteButton, "Select A Button", 0, &B))
+	if(DoButton_Menu(&s_SelecteButton, "Select a Button", 0, &B))
 		SetActive(false);
 }
 
 void CMenus::RenderVirtualVisibilityEditor(CUIRect MainView)
 {
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
 	CUIRect EditBox;
-	const std::array<const ColorRGBA, 2> LabelColor = {ColorRGBA(0.3f, 0.3f, 0.3f, 1.0f), ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f)};
-	CUIRect Label;
-	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitTop(25.0f, &Label, &MainView);
+	MainView.HMargin(10.0f, &MainView);
 	MainView.HSplitBottom(20.0f, &MainView, &EditBox);
+	EditBox.VMargin(10.0f, &EditBox);
 	Ui()->DoLabel(&EditBox, "This visibility only works in editor.", 15.0f, TEXTALIGN_MC);
+	MainView.VMargin(10.0f, &MainView);
+	MainView.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 10.0f);
+	MainView.VMargin(10.0f, &MainView);
 	MainView.HMargin(5.0f, &MainView);
-	Ui()->DoLabel(&Label, Localize("Edit Visibilities"), 20.0f, TEXTALIGN_MC);
 	static CScrollRegion s_VirtualVisibilityScrollRegion;
+	CScrollRegionParams ScrollParam;
+	ScrollParam.m_ScrollUnit = 90.0f;
 	vec2 ScrollOffset(0.0f, 0.0f);
-	MainView.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-	s_VirtualVisibilityScrollRegion.Begin(&MainView, &ScrollOffset);
+	s_VirtualVisibilityScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParam);
 	MainView.y += ScrollOffset.y;
 	std::array<bool, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> aVirtualVisibilities = GameClient()->m_TouchControls.VirtualVisibilities();
 	for(unsigned Current = 0; Current < (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES; ++Current)
@@ -369,13 +365,8 @@ void CMenus::RenderVirtualVisibilityEditor(CUIRect MainView)
 		if(s_VirtualVisibilityScrollRegion.AddRect(EditBox))
 		{
 			EditBox.HSplitTop(5.0f, nullptr, &EditBox);
-			if(Ui()->DoButtonLogic(&m_aVisibilityIds[Current], 0, &EditBox, BUTTONFLAG_LEFT))
-			{
+			if(DoButton_CheckBox(&m_aVisibilityIds[Current], GameClient()->m_TouchControls.VisibilityStrings()[Current], aVirtualVisibilities[Current] == 1, &EditBox))
 				GameClient()->m_TouchControls.ReverseVirtualVisibilities(Current);
-			}
-			TextRender()->TextColor(LabelColor[aVirtualVisibilities[Current] ? 1 : 0]);
-			Ui()->DoLabel(&EditBox, GameClient()->m_TouchControls.VisibilityStrings()[Current], 16.0f, TEXTALIGN_MC);
-			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 	s_VirtualVisibilityScrollRegion.End();
@@ -547,7 +538,13 @@ bool CMenus::CheckCachedSettings()
 		Errors.emplace_back("\" has no corresponding button to get activated or deactivated.\n");
 	}
 	// Demo Player is used with other visibilities except Extra Menu. This is meaningless.
-	if(m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DEMO_PLAYER)] == 1 && (m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::RCON_AUTHED)] != 2 || m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::INGAME)] != 2 || m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::VOTE_ACTIVE)] != 2 || m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DUMMY_CONNECTED)] != 2 || m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DUMMY_ALLOWED)] != 2 || m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::ZOOM_ALLOWED)] != 2))
+	if(m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DEMO_PLAYER)] == 1 &&
+		(m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::RCON_AUTHED)] != 2 ||
+			m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::INGAME)] != 2 ||
+			m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::VOTE_ACTIVE)] != 2 ||
+			m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DUMMY_CONNECTED)] != 2 ||
+			m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::DUMMY_ALLOWED)] != 2 ||
+			m_aCachedVisibilities[(int)(CTouchControls::EButtonVisibility::ZOOM_ALLOWED)] != 2))
 	{
 		Errors.emplace_back("When visibility \"Demo Player\" is on, visibilities except Extra Menu is meaningless.\n");
 	}
@@ -600,16 +597,6 @@ void CMenus::PopupConfirm_SelectedNotVisible()
 	{
 		ResetButtonPointers();
 		SetActive(false);
-	}
-}
-
-void CMenus::PopupConfirm_DeselectButton()
-{
-	if(CheckCachedSettings())
-	{
-		SaveCachedSettingsToTarget(m_OldSelectedButton);
-		GameClient()->m_TouchControls.SetEditingChanges(true);
-		PopupCancel_DeselectButton();
 	}
 }
 
@@ -679,7 +666,7 @@ bool CMenus::RenderPosSettingBlock(CUIRect Block)
 	CUIRect EditBox, A, B, PosX, PosY, PosW, PosH;
 	Block.VMargin((Block.w - 270.0f) / 2.0f, &Block);
 	Block.Margin(LINEGAP, &Block);
-	Block.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f), IGraphics::CORNER_ALL, 5.0f);
+	Block.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 5.0f);
 	Block.HMargin((Block.h - 5 * (LINEGAP + 25.0f)) / 2.0f, &Block);
 	Block.VMargin(LINEGAP, &Block);
 	Block.HSplitTop(25.0f, &EditBox, &Block);
@@ -723,28 +710,26 @@ bool CMenus::RenderPosSettingBlock(CUIRect Block)
 	int W = m_InputW.GetInteger();
 	int H = m_InputH.GetInteger();
 	if(X < 0 || X + W > CTouchControls::BUTTON_SIZE_SCALE)
-		DoRedLabel("X:", PosX);
+		DoRedLabel("X:", PosX, 16.0f);
 	else
 		Ui()->DoLabel(&PosX, "X:", 16.0f, TEXTALIGN_ML);
 	if(Y < 0 || Y + H > CTouchControls::BUTTON_SIZE_SCALE)
-		DoRedLabel("Y:", PosY);
+		DoRedLabel("Y:", PosY, 16.0f);
 	else
 		Ui()->DoLabel(&PosY, "Y:", 16.0f, TEXTALIGN_ML);
 	if(W < CTouchControls::BUTTON_SIZE_MINIMUM || W > CTouchControls::BUTTON_SIZE_MAXIMUM)
-		DoRedLabel("W:", PosW);
+		DoRedLabel("W:", PosW, 16.0f);
 	else
 		Ui()->DoLabel(&PosW, "W:", 16.0f, TEXTALIGN_ML);
 	if(H < CTouchControls::BUTTON_SIZE_MINIMUM || H > CTouchControls::BUTTON_SIZE_MAXIMUM)
-		DoRedLabel("H:", PosH);
+		DoRedLabel("H:", PosH, 16.0f);
 	else
 		Ui()->DoLabel(&PosH, "H:", 16.0f, TEXTALIGN_ML);
 
 	// Drop down menu for shapes
 	Block.HSplitTop(25.0f, &EditBox, &Block);
 	Block.HSplitTop(LINEGAP, nullptr, &Block);
-	EditBox.VSplitLeft(EditBox.w / 2.0f, &A, &B);
-	A.VMargin(5.0f, &A);
-	B.VMargin(5.0f, &B);
+	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &B);
 	Ui()->DoLabel(&A, "Shape:", 16.0f, TEXTALIGN_ML);
 	static CUi::SDropDownState s_ButtonShapeDropDownState;
 	static CScrollRegion s_ButtonShapeDropDownScrollRegion;
@@ -755,7 +740,7 @@ bool CMenus::RenderPosSettingBlock(CUIRect Block)
 	{
 		Shapes[Shape] = aShapes[Shape];
 	}
-	B.VSplitRight(100.0f, nullptr, &B);
+	B.VSplitRight(150.0f, nullptr, &B);
 	const CTouchControls::EButtonShape NewButtonShape = (CTouchControls::EButtonShape)Ui()->DoDropDown(&B, (int)m_CachedShape, Shapes, (int)CTouchControls::EButtonShape::NUM_SHAPES, s_ButtonShapeDropDownState);
 	if(NewButtonShape != m_CachedShape)
 	{
@@ -769,10 +754,10 @@ bool CMenus::RenderPosSettingBlock(CUIRect Block)
 bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 {
 	bool Changed = false;
-	CUIRect EditBox, A, B;
+	CUIRect EditBox, A, B, C;
 	Block.VMargin((Block.w - 400.0f) / 2.0f, &Block);
 	Block.Margin(LINEGAP, &Block);
-	Block.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f), IGraphics::CORNER_ALL, 5.0f);
+	Block.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 5.0f);
 	Block.HMargin((Block.h - 5 * (LINEGAP + 25.0f)) / 2.0f, &Block);
 	Block.VMargin(LINEGAP, &Block);
 	Block.HSplitTop(25.0f, &EditBox, &Block);
@@ -790,7 +775,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 		m_EditBehaviorType = NewButtonBehavior;
 		if(m_EditBehaviorType == (int)EBehaviorType::BIND)
 		{
-			m_InputLabel.Set(m_vCachedCommands[0].m_Label.c_str());
+			ParseLabel(m_vCachedCommands[0].m_Label.c_str());
+			m_InputLabel.Set(m_ParsedString.c_str());
 			m_InputCommand.Set(m_vCachedCommands[0].m_Command.c_str());
 		}
 		if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
@@ -799,7 +785,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 				m_EditCommandNumber = 0;
 			while(m_vCachedCommands.size() < 2)
 				m_vCachedCommands.emplace_back("", CTouchControls::CButtonLabel::EType::PLAIN, "");
-			m_InputLabel.Set(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			ParseLabel(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			m_InputLabel.Set(m_ParsedString.c_str());
 			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
 		}
 		SetUnsavedChanges(true);
@@ -823,44 +810,54 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	}
 	else if(m_EditBehaviorType == (int)EBehaviorType::BIND_TOGGLE)
 	{
-		Ui()->DoLabel(&A, "Number:", 16.0f, TEXTALIGN_ML);
-		// Decrease Button, increase button and delete button share 1/2 width of B, the rest is for number. 1/6, 1/2, 1/6, 1/6.
-		B.VSplitLeft(B.w / 6, &A, &B);
-		static CButtonContainer s_DecreaseButton;
-		if(DoButton_Menu(&s_DecreaseButton, "-", 0, &A))
+		EditBox.VSplitLeft(25.0f, &A, &EditBox);
+		EditBox.VSplitRight(25.0f, &B, &C);
+		B.VMargin(5.0f, &B);
+		static CUi::SDropDownState s_BehaviorToggleDropDownState;
+		static CScrollRegion s_BehaviorToggleDropDownScrollRegion;
+		s_BehaviorToggleDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_BehaviorToggleDropDownScrollRegion;
+		static std::vector<std::string> s_vCachedStrings;
+		s_vCachedStrings.clear();
+		std::vector<const char *> vToggleStrings;
+		vToggleStrings.reserve(m_vCachedCommands.size());
+		for(unsigned CurrentCommand = 0; CurrentCommand < m_vCachedCommands.size(); CurrentCommand++)
 		{
-			if(m_EditCommandNumber > 0)
+			char Buf[32];
+			if(m_vCachedCommands[CurrentCommand].m_Label.empty())
 			{
-				m_EditCommandNumber--;
+				str_format(Buf, sizeof(Buf), "%d", CurrentCommand + 1);
+				s_vCachedStrings.emplace_back(Buf);
+				vToggleStrings.emplace_back(s_vCachedStrings.back().data());
+				continue;
 			}
-			if(m_vCachedCommands.size() <= static_cast<size_t>(m_EditCommandNumber))
-			{
-				dbg_assert(false, "commands.size < number at do decrease button");
-			}
-			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
-			m_InputLabel.Set(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			// The 12 there isn't really changable, or it will render some characters that are not showable. 12 suits all characters.
+			if(m_vCachedCommands[CurrentCommand].m_Label.size() <= 12)
+				str_format(Buf, sizeof(Buf), "%d: %s", CurrentCommand + 1, m_vCachedCommands[CurrentCommand].m_Label.c_str());
+			else
+				str_format(Buf, sizeof(Buf), "%d: %s...", CurrentCommand + 1, m_vCachedCommands[CurrentCommand].m_Label.substr(0, 12).c_str());
+			s_vCachedStrings.emplace_back(Buf);
+			vToggleStrings.emplace_back(s_vCachedStrings.back().data());
 		}
-		B.VSplitLeft(B.w * 0.6f, &A, &B);
-		// m_EditCommandNumber counts from 0. But shown from 1.
-		Ui()->DoLabel(&A, std::to_string(m_EditCommandNumber + 1).c_str(), 16.0f, TEXTALIGN_MC);
-		B.VSplitLeft(B.w / 2.0f, &A, &B);
-		static CButtonContainer s_IncreaseButton;
-		if(DoButton_Menu(&s_IncreaseButton, "+", 0, &A))
+		const int NewCommandNumber = Ui()->DoDropDown(&B, m_EditCommandNumber, vToggleStrings.data(), m_vCachedCommands.size(), s_BehaviorToggleDropDownState);
+		if(NewCommandNumber != m_EditCommandNumber)
 		{
-			m_EditCommandNumber++;
-			if((int)m_vCachedCommands.size() < m_EditCommandNumber + 1)
-			{
-				m_vCachedCommands.emplace_back("", CTouchControls::CButtonLabel::EType::PLAIN, "");
-				SetUnsavedChanges(true);
-				Changed = true;
-			}
-			if(m_vCachedCommands.size() <= static_cast<size_t>(m_EditCommandNumber))
-				dbg_assert(false, "commands.size < number at do increase button");
+			m_EditCommandNumber = NewCommandNumber;
 			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
-			m_InputLabel.Set(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			ParseLabel(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			m_InputLabel.Set(m_ParsedString.c_str());
+		}
+
+		static CButtonContainer s_IncreaseButton;
+		if(DoButton_FontIcon(&s_IncreaseButton, "+", 0, &A, BUTTONFLAG_LEFT))
+		{
+			m_EditCommandNumber ++;
+			m_vCachedCommands.emplace(m_vCachedCommands.begin() + m_EditCommandNumber, "", CTouchControls::CButtonLabel::EType::PLAIN, "");
+			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
+			ParseLabel(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			m_InputLabel.Set(m_ParsedString.c_str());
 		}
 		static CButtonContainer s_DeleteButton;
-		if(DoButton_Menu(&s_DeleteButton, "X", 0, &B))
+		if(DoButton_FontIcon(&s_DeleteButton, FontIcons::FONT_ICON_TRASH, 0, &C, BUTTONFLAG_LEFT))
 		{
 			const auto DeleteIt = m_vCachedCommands.begin() + m_EditCommandNumber;
 			m_vCachedCommands.erase(DeleteIt);
@@ -873,7 +870,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			while(m_vCachedCommands.size() < 2)
 				m_vCachedCommands.emplace_back("", CTouchControls::CButtonLabel::EType::PLAIN, "");
 			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
-			m_InputLabel.Set(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			ParseLabel(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
+			m_InputLabel.Set(m_ParsedString.c_str());
 			SetUnsavedChanges(true);
 			Changed = true;
 		}
@@ -902,7 +900,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 		Ui()->DoLabel(&A, "Label:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputLabel, &B, 10.0f))
 		{
-			m_vCachedCommands[0].m_Label = m_InputLabel.GetString();
+			ParseLabel(m_InputLabel.GetString());
+			m_vCachedCommands[0].m_Label = m_ParsedString;
 			SetUnsavedChanges(true);
 			Changed = true;
 		}
@@ -921,10 +920,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	{
 		// Increase & Decrease button share 1/2 width, the rest is for label.
 		EditBox.VSplitLeft(EditBox.w / 4, &A, &B);
-		SMenuButtonProperties Props;
-		Props.m_UseIconFont = true;
 		static CButtonContainer s_ExtraMenuDecreaseButton;
-		if(DoButton_Menu(&s_ExtraMenuDecreaseButton, "-", 0, &A))
+		if(DoButton_FontIcon(&s_ExtraMenuDecreaseButton, "-", 0, &A, BUTTONFLAG_LEFT))
 		{
 			if(m_CachedNumber > 0)
 			{
@@ -938,7 +935,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 		B.VSplitLeft(B.w * 2 / 3.0f, &A, &B);
 		Ui()->DoLabel(&A, std::to_string(m_CachedNumber + 1).c_str(), 16.0f, TEXTALIGN_MC);
 		static CButtonContainer s_ExtraMenuIncreaseButton;
-		if(DoButton_Menu(&s_ExtraMenuIncreaseButton, "+", 0, &B))
+		if(DoButton_FontIcon(&s_ExtraMenuIncreaseButton, "+", 0, &B, BUTTONFLAG_LEFT))
 		{
 			if(m_CachedNumber < 4)
 			{
@@ -972,7 +969,8 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 		Ui()->DoLabel(&A, "Label:", 16.0f, TEXTALIGN_ML);
 		if(Ui()->DoClearableEditBox(&m_InputLabel, &B, 10.0f))
 		{
-			m_vCachedCommands[m_EditCommandNumber].m_Label = m_InputLabel.GetString();
+			ParseLabel(m_InputLabel.GetString());
+			m_vCachedCommands[m_EditCommandNumber].m_Label = m_ParsedString;
 			SetUnsavedChanges(true);
 			Changed = true;
 		}
@@ -1007,42 +1005,46 @@ bool CMenus::RenderVisibilitySettingBlock(CUIRect Block)
 	Block.VMargin((Block.w - 400.0f) / 2.0f, &Block);
 	Block.Margin(LINEGAP, &Block);
 	Block.HMargin((Block.h - 5 * (LINEGAP + 25.0f)) / 2.0f, &Block);
+	Block.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 10.0f);
 	Block.VMargin(LINEGAP, &Block);
+
 	static CScrollRegion s_VisibilityScrollRegion;
+	CScrollRegionParams ScrollParam;
+	ScrollParam.m_ScrollUnit = 90.0f;
 	vec2 ScrollOffset(0.0f, 0.0f);
-	Block.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-	s_VisibilityScrollRegion.Begin(&Block, &ScrollOffset);
+	s_VisibilityScrollRegion.Begin(&Block, &ScrollOffset, &ScrollParam);
 	Block.y += ScrollOffset.y;
+
+	static std::vector<CButtonContainer> s_vVisibilitySelector[(int)CTouchControls::EButtonVisibility::NUM_VISIBILITIES];
+	std::for_each_n(s_vVisibilitySelector, (int)CTouchControls::EButtonVisibility::NUM_VISIBILITIES, [](auto &Element) {
+		Element.resize(3);
+	});
+	const std::vector<const char *> &vLabels = {"Include", "Exclude", "Ignored"};
+	const std::array<const char *, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings = GameClient()->m_TouchControls.VisibilityStrings();
 	for(unsigned Current = 0; Current < (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES; ++Current)
 	{
 		Block.HSplitTop(30.0f, &EditBox, &Block);
 		if(s_VisibilityScrollRegion.AddRect(EditBox))
 		{
 			EditBox.HSplitTop(5.0f, nullptr, &EditBox);
-			if(Ui()->DoButtonLogic(&m_aButtonVisibilityIds[Current], 0, &EditBox, BUTTONFLAG_LEFT))
+			if(DoLine_RadioMenu(EditBox, VisibilityStrings[Current],
+				   s_vVisibilitySelector[Current], vLabels, {1, 0, 2}, m_aCachedVisibilities[Current]))
 			{
-				m_aCachedVisibilities[Current] += 2;
-				m_aCachedVisibilities[Current] %= 3;
 				SetUnsavedChanges(true);
 				Changed = true;
 			}
-			TextRender()->TextColor(LABELCOLORS[m_aCachedVisibilities[Current] == 2 ? 0 : 1]);
-			char aBuf[20];
-			str_format(aBuf, sizeof(aBuf), "%s%s", m_aCachedVisibilities[Current] == 0 ? "-" : "+", GameClient()->m_TouchControls.VisibilityStrings()[Current]);
-			Ui()->DoLabel(&EditBox, aBuf, 16.0f, TEXTALIGN_MC);
-			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 	s_VisibilityScrollRegion.End();
 	return Changed;
 }
 
-void CMenus::DoRedLabel(const char *pLabel, CUIRect Block)
+void CMenus::DoRedLabel(const char *pLabel, CUIRect Block, const int &Size)
 {
 	if(pLabel == nullptr)
 		return;
 	TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-	Ui()->DoLabel(&Block, pLabel, 16.0f, TEXTALIGN_ML);
+	Ui()->DoLabel(&Block, pLabel, Size, TEXTALIGN_ML);
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
@@ -1093,18 +1095,19 @@ void CMenus::UpdateTmpButton()
 void CMenus::RenderSelectingTab(CUIRect SelectingTab)
 {
 	CUIRect A;
-	const char *TabText[3] = {"File", "Button", "Setting"};
-	for(int CurrentTab = 0; CurrentTab < 3; CurrentTab++)
-	{
-		SelectingTab.VSplitLeft(40.0f, nullptr, &SelectingTab);
-		SelectingTab.VSplitLeft(115.0f, &A, &SelectingTab);
-		if(Ui()->DoButtonLogic(&m_aSelectingTabIds[CurrentTab], 0, &A, BUTTONFLAG_LEFT))
-		{
-			m_CurrentSelect = CurrentTab;
-		}
-		A.Draw(m_CurrentSelect == CurrentTab ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_T, 15.0f);
-		Ui()->DoLabel(&A, TabText[CurrentTab], 22.0f, TEXTALIGN_MC);
-	}
+	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
+	static CButtonContainer s_FileTab;
+	if(DoButton_MenuTab(&s_FileTab, "File", m_CurrentMenu == EMenuType::FILE, &A, IGraphics::CORNER_TL))
+		m_CurrentMenu = EMenuType::FILE;
+	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
+	static CButtonContainer s_ButtonTab;
+	if(DoButton_MenuTab(&s_ButtonTab, "Buttons", m_CurrentMenu == EMenuType::BUTTONS, &A, IGraphics::CORNER_NONE))
+		m_CurrentMenu = EMenuType::BUTTONS;
+
+	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
+	static CButtonContainer s_SettingsMenuTab;
+	if(DoButton_MenuTab(&s_SettingsMenuTab, "Settings", m_CurrentMenu == EMenuType::SETTINGS, &A, IGraphics::CORNER_TR))
+		m_CurrentMenu = EMenuType::SETTINGS;
 }
 
 void CMenus::ResolveIssues()
@@ -1128,33 +1131,28 @@ void CMenus::ResolveIssues()
 
 void CMenus::RenderButtonSettings(CUIRect MainView)
 {
-	CUIRect SelectingTab = MainView;
-	CUIRect EditBox;
-	SelectingTab.x = MainView.x + MainView.w;
-	SelectingTab.w = 100.0f;
-	float SelectGap = (MainView.h - 100.0f) / 3;
-	SelectingTab.HSplitTop(SelectGap, nullptr, &SelectingTab);
-	SelectingTab.HSplitTop(50.0f, &EditBox, &SelectingTab);
-	if(Ui()->DoButtonLogic(m_aSettingTabIds.data(), 0, &EditBox, BUTTONFLAG_LEFT))
-	{
-		m_CurrentSetting = 0;
-	}
-	EditBox.Draw(m_CurrentSetting == 0 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_R, 5.0f);
-	Ui()->DoLabel(&EditBox, "Visibility", 20.0f, TEXTALIGN_MC);
-	SelectingTab.HSplitTop(SelectGap, nullptr, &SelectingTab);
-	SelectingTab.HSplitTop(50.0f, &EditBox, &SelectingTab);
-	if(Ui()->DoButtonLogic(&m_aSettingTabIds[1], 0, &EditBox, BUTTONFLAG_LEFT))
-	{
-		m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
-		m_ColorInActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
-		m_CurrentSetting = 1;
-	}
-	EditBox.Draw(m_CurrentSetting == 1 ? ms_ColorTabbarActive : ms_ColorTabbarInactive, IGraphics::CORNER_R, 5.0f);
-	Ui()->DoLabel(&EditBox, "Color", 20.0f, TEXTALIGN_MC);
+	CUIRect EditBox, A;
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B | IGraphics::CORNER_TR, 10.0f);
+	MainView.HSplitTop(25.0f, nullptr, &MainView);
+	MainView.HSplitTop(25.0f, &EditBox, &MainView);
+	EditBox.VMargin(15.0f, &EditBox);
+	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &EditBox);
+	static CButtonContainer s_PreviewVisibilityTab;
+	if(DoButton_MenuTab(&s_PreviewVisibilityTab, "Preview Visibility", m_CurrentSetting == ESettingType::PREVIEW_VISIBILITY, &A, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 5.0f))
+		m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
+	EditBox.VSplitMid(&A, &EditBox);
+	static CButtonContainer s_ColorTab;
+	if(DoButton_MenuTab(&s_ColorTab, "Button Color", m_CurrentSetting == ESettingType::COLOR, &A, IGraphics::CORNER_NONE, nullptr, nullptr, nullptr, nullptr, 5.0f))
+		m_CurrentSetting = ESettingType::COLOR;
+	static CButtonContainer s_DirectTouchTab;
+	if(DoButton_MenuTab(&s_DirectTouchTab, "Direct Input", m_CurrentSetting == ESettingType::DIRECT_INPUT, &EditBox, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 5.0f))
+		m_CurrentSetting = ESettingType::DIRECT_INPUT;
+
 	switch(m_CurrentSetting)
 	{
-	case 0: RenderVirtualVisibilityEditor(MainView); break;
-	case 1: RenderColorSettings(MainView); break;
+	case ESettingType::PREVIEW_VISIBILITY: RenderVirtualVisibilityEditor(MainView); break;
+	case ESettingType::COLOR: RenderColorSettings(MainView); break;
+	case ESettingType::DIRECT_INPUT: RenderDirectTouchEditor(MainView); break;
 	default: dbg_assert(false, "Unknown Setting Detected in button editor.");
 	}
 }
@@ -1162,22 +1160,84 @@ void CMenus::RenderButtonSettings(CUIRect MainView)
 void CMenus::RenderColorSettings(CUIRect MainView)
 {
 	CUIRect EditBox;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
 	MainView.Margin(20.0f, &MainView);
-	MainView.HSplitTop(40.0f, &EditBox, &MainView);
-	Ui()->DoLabel(&EditBox, "Edit Color Settings", 20.0f, TEXTALIGN_MC);
 
 	MainView.HSplitTop(20.0f, nullptr, &MainView);
 	MainView.HSplitTop(40.0f, &EditBox, &MainView);
 	static CButtonContainer s_ActiveColorPicker;
-	DoLine_ColorPicker(&s_ActiveColorPicker, 40.0f, 20.0f, 5.0f, &EditBox, "Active Color", &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
+	ColorHSLA ColorTest = DoLine_ColorPicker(&s_ActiveColorPicker, 25.0f, 15.0f, 5.0f, &EditBox, "Active Color", &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
 	GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorActive, true)));
+	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorActive())
+		GameClient()->m_TouchControls.SetEditingChanges(true);
 
 	MainView.HSplitTop(20.0f, nullptr, &MainView);
 	MainView.HSplitTop(40.0f, &EditBox, &MainView);
-	static CButtonContainer s_InActiveColorPicker;
-	DoLine_ColorPicker(&s_InActiveColorPicker, 40.0f, 20.0f, 5.0f, &EditBox, "InActive Color", &m_ColorInActive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
-	GameClient()->m_TouchControls.SetBackgroundColorInActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInActive, true)));
+	static CButtonContainer s_InactiveColorPicker;
+	ColorTest = DoLine_ColorPicker(&s_InactiveColorPicker, 25.0f, 15.0f, 5.0f, &EditBox, "Inactive Color", &m_ColorInactive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
+	GameClient()->m_TouchControls.SetBackgroundColorInactive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInactive, true)));
+	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorInactive())
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+}
+
+void CMenus::RenderDirectTouchEditor(CUIRect MainView)
+{
+	CUIRect Row, Label, Button;
+	MainView.Margin(20.0f, &MainView);
+	const float Gap = 20.0f;
+	MainView.HSplitTop(Gap, nullptr, &MainView);
+	MainView.HSplitTop(40.0f, &Row, &MainView);
+	MainView.HSplitTop(Gap, nullptr, &MainView);
+	Row.HMargin((Row.h - 20.0f) / 2.0f, &Row);
+	Row.VSplitLeft(300.0f, &Label, &Row);
+	Ui()->DoLabel(&Label, Localize("Direct touch input while ingame"), 16.0f, TEXTALIGN_ML);
+
+	Row.VSplitLeft(5.0f, nullptr, &Row);
+	Row.VSplitLeft(150.0f, &Button, &Row);
+	const char *apIngameTouchModes[(int)CTouchControls::EDirectTouchIngameMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Active action", "Direct touch input"), Localize("Aim", "Direct touch input"), Localize("Fire", "Direct touch input"), Localize("Hook", "Direct touch input")};
+	const CTouchControls::EDirectTouchIngameMode OldDirectTouchIngame = GameClient()->m_TouchControls.DirectTouchIngame();
+	static CUi::SDropDownState s_DirectTouchIngameDropDownState;
+	static CScrollRegion s_DirectTouchIngameDropDownScrollRegion;
+	s_DirectTouchIngameDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchIngameDropDownScrollRegion;
+	const CTouchControls::EDirectTouchIngameMode NewDirectTouchIngame = (CTouchControls::EDirectTouchIngameMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchIngame, apIngameTouchModes, std::size(apIngameTouchModes), s_DirectTouchIngameDropDownState);
+	if(OldDirectTouchIngame != NewDirectTouchIngame)
+	{
+		GameClient()->m_TouchControls.SetDirectTouchIngame(NewDirectTouchIngame);
+	}
+
+	MainView.HSplitTop(40.0f, &Row, &MainView);
+	Row.HMargin((Row.h - 20.0f) / 2.0f, &Row);
+	Row.VSplitLeft(300.0f, &Label, &Row);
+	Ui()->DoLabel(&Label, Localize("Direct touch input while spectating"), 16.0f, TEXTALIGN_ML);
+
+	Row.VSplitLeft(5.0f, nullptr, &Row);
+	Row.VSplitLeft(150.0f, &Button, &Row);
+	const char *apSpectateTouchModes[(int)CTouchControls::EDirectTouchSpectateMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Aim", "Direct touch input")};
+	const CTouchControls::EDirectTouchSpectateMode OldDirectTouchSpectate = GameClient()->m_TouchControls.DirectTouchSpectate();
+	static CUi::SDropDownState s_DirectTouchSpectateDropDownState;
+	static CScrollRegion s_DirectTouchSpectateDropDownScrollRegion;
+	s_DirectTouchSpectateDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchSpectateDropDownScrollRegion;
+	const CTouchControls::EDirectTouchSpectateMode NewDirectTouchSpectate = (CTouchControls::EDirectTouchSpectateMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchSpectate, apSpectateTouchModes, std::size(apSpectateTouchModes), s_DirectTouchSpectateDropDownState);
+	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
+	{
+		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
+	}
+}
+
+void CMenus::ParseLabel(const char *pLabel)
+{
+	json_settings JsonSettings{};
+	char aError[256];
+	char Buf[1048];
+	str_format(Buf, sizeof(Buf), "{\"Label\":\"%s\"}", pLabel);
+	json_value *pJsonLabel = json_parse_ex(&JsonSettings, Buf, str_length(Buf), aError);
+	if(pJsonLabel == nullptr)
+	{
+		m_ParsedString = pLabel;
+		return;
+	}
+	const json_value &Label = (*pJsonLabel)["Label"];
+	m_ParsedString = Label.u.string.ptr;
+	json_value_free(pJsonLabel);
 }
 /*
 	Note: FindPositionXY is used for finding a position of the current moving rect not overlapping with other visible rects.
