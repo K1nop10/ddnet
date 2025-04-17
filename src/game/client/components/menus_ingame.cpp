@@ -314,9 +314,9 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			switch(m_CurrentMenu)
 			{
-			case EMenuType::FILE: RenderTouchControlsEditor(MainView); break;
-			case EMenuType::BUTTONS: RenderTouchButtonEditor(MainView); break;
-			case EMenuType::SETTINGS: RenderButtonSettings(MainView); break;
+			case EMenuType::MENU_FILE: RenderTouchControlsEditor(MainView); break;
+			case EMenuType::MENU_BUTTONS: RenderTouchButtonEditor(MainView); break;
+			case EMenuType::MENU_SETTINGS: RenderButtonSettings(MainView); break;
 			default: dbg_assert(false, "Unknown selected tab value.");
 			}
 		}

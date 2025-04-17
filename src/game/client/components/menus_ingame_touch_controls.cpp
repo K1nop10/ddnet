@@ -850,7 +850,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 		static CButtonContainer s_IncreaseButton;
 		if(DoButton_FontIcon(&s_IncreaseButton, "+", 0, &A, BUTTONFLAG_LEFT))
 		{
-			m_EditCommandNumber ++;
+			m_EditCommandNumber++;
 			m_vCachedCommands.emplace(m_vCachedCommands.begin() + m_EditCommandNumber, "", CTouchControls::CButtonLabel::EType::PLAIN, "");
 			m_InputCommand.Set(m_vCachedCommands[m_EditCommandNumber].m_Command.c_str());
 			ParseLabel(m_vCachedCommands[m_EditCommandNumber].m_Label.c_str());
@@ -1097,17 +1097,17 @@ void CMenus::RenderSelectingTab(CUIRect SelectingTab)
 	CUIRect A;
 	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
 	static CButtonContainer s_FileTab;
-	if(DoButton_MenuTab(&s_FileTab, "File", m_CurrentMenu == EMenuType::FILE, &A, IGraphics::CORNER_TL))
-		m_CurrentMenu = EMenuType::FILE;
+	if(DoButton_MenuTab(&s_FileTab, "File", m_CurrentMenu == EMenuType::MENU_FILE, &A, IGraphics::CORNER_TL))
+		m_CurrentMenu = EMenuType::MENU_FILE;
 	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
 	static CButtonContainer s_ButtonTab;
-	if(DoButton_MenuTab(&s_ButtonTab, "Buttons", m_CurrentMenu == EMenuType::BUTTONS, &A, IGraphics::CORNER_NONE))
-		m_CurrentMenu = EMenuType::BUTTONS;
+	if(DoButton_MenuTab(&s_ButtonTab, "Buttons", m_CurrentMenu == EMenuType::MENU_BUTTONS, &A, IGraphics::CORNER_NONE))
+		m_CurrentMenu = EMenuType::MENU_BUTTONS;
 
 	SelectingTab.VSplitLeft(150.0f, &A, &SelectingTab);
 	static CButtonContainer s_SettingsMenuTab;
-	if(DoButton_MenuTab(&s_SettingsMenuTab, "Settings", m_CurrentMenu == EMenuType::SETTINGS, &A, IGraphics::CORNER_TR))
-		m_CurrentMenu = EMenuType::SETTINGS;
+	if(DoButton_MenuTab(&s_SettingsMenuTab, "Settings", m_CurrentMenu == EMenuType::MENU_SETTINGS, &A, IGraphics::CORNER_TR))
+		m_CurrentMenu = EMenuType::MENU_SETTINGS;
 }
 
 void CMenus::ResolveIssues()

@@ -879,12 +879,12 @@ private:
 	// Which menu is selected.
 	enum class EMenuType
 	{
-		FILE = 0,
-		BUTTONS,
-		SETTINGS,
+		MENU_FILE = 0,
+		MENU_BUTTONS,
+		MENU_SETTINGS,
 		NUM_MENUS
 	};
-	EMenuType m_CurrentMenu = EMenuType::FILE;
+	EMenuType m_CurrentMenu = EMenuType::MENU_FILE;
 
 	// In setting menu.
 	enum class ESettingType
