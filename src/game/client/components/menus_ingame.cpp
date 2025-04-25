@@ -241,7 +241,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				m_OldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
 				m_NewSelectedButton = nullptr;
-				PopupConfirm("Unsaved Changes", "Save all changes before turning off the editor?", "Save", "Discard", &CMenus::PopupConfirm_TurnOffEditor, POPUP_NONE, &CMenus::PopupCancel_TurnOffEditor);
+				PopupConfirm("Unsaved Changes", "Save all changes before turning off the editor?", "Save", "Cancel", &CMenus::PopupConfirm_TurnOffEditor);
 			}
 			else
 			{
@@ -283,6 +283,9 @@ void CMenus::RenderGame(CUIRect MainView)
 		// Only when these are all false, the preview page is rendered. Once the page is not rendered, update is needed upon next rendering.
 		if(!GameClient()->m_TouchControls.IsEditingActive() || !m_PreviewButton || m_CurrentMenu != EMenuType::MENU_BUTTONS || GameClient()->m_TouchControls.IsButtonEditing())
 			m_NeedUpdatePreview = true;
+		// Quit preview all buttons automatically.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || m_CurrentMenu != EMenuType::MENU_SETTINGS || m_CurrentSetting != ESettingType::BUTTON_CONFIG)
+			GameClient()->m_TouchControls.SetPreviewAllButtons(false);
 		if(GameClient()->m_TouchControls.IsEditingActive())
 		{
 			// Resolve issues if needed before rendering, so the elements could have a correct value on this frame.
@@ -307,7 +310,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			MainView.HSplitTop(10.0f, nullptr, &MainView);
 			MainView.HMargin((MainView.h - 275.0f) / 2.0f, &MainView);
 			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &MainView);
-			MainView.y -= 60.0f;
+			MainView.y -= 70.0f;
 			MainView.HSplitTop(25.0f, &SelectingTab, &MainView);
 
 			// Select tab.
@@ -327,7 +330,8 @@ void CMenus::RenderGame(CUIRect MainView)
 void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 {
 	CUIRect Label, Button, Row;
-	MainView.h -= 95.0f;
+	// 2 MAINMARGIN, 4 ROWSIZE, 3ROWGAP, 10.0f extra size so it doesn't look creepy.
+	MainView.h = 2 * 10.0f + 4 * 25.0f + 3 * 5.0f + 10.0f;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 

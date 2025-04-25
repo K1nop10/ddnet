@@ -930,13 +930,14 @@ private:
 	std::vector<CButtonContainer> m_vSelectPreviewButtons;
 	std::vector<CButtonContainer> m_vBindToggleAddButtons;
 	std::vector<CButtonContainer> m_vBindToggleDeleteButtons;
-	std::vector<std::vector<CButtonContainer>> m_vLabelTypeRadios;
+	std::vector<std::array<CButtonContainer, 3>> m_vLabelTypeRadios;
 
 	// Functional variables.
 	bool m_FirstEnter = true; // Execute something when first opening the editor.
 	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
 	bool m_PreviewButton = false;
 	bool m_NeedUpdatePreview = true; // Update previews only upon entering this page, because the update is kinda slow.
+	bool m_BindTogglePreviewExtension = false;
 	int m_CurrentPreview = 1; // 1 for visible buttons, 0 for not visible.
 	int m_PreviewDetail = 0; // 0 for label, 1 for command.
 	std::vector<CTouchControls::CTouchButton *> m_VisibleButtons;

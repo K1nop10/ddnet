@@ -670,6 +670,7 @@ private:
 	CTouchButton *m_pSelectedButton = nullptr;
 	// This is for render, when directly slide to move buttons on screen.
 	std::unique_ptr<CTouchButton> m_pTmpButton = nullptr;
+	bool m_PreviewAllButtons = false;
 
 public:
 	bool UnsavedChanges() const { return m_UnsavedChanges; }
@@ -705,6 +706,8 @@ public:
 	std::array<const char *, (int)EButtonShape::NUM_SHAPES> Shapes() const { return m_Shapes; }
 	std::vector<CTouchButton *> VisibleButtons();
 	std::vector<CTouchButton *> InvisibleButtons();
+	bool PreviewAllButtons() const { return m_PreviewAllButtons; }
+	void SetPreviewAllButtons(bool Preview) { m_PreviewAllButtons = Preview; }
 
 	// The extra menu behavior will use m_CachedNumber in CMenus.
 	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {

@@ -783,7 +783,8 @@ bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &
 		GameClient()->m_GameConsole.IsActive() ||
 		GameClient()->m_Menus.IsActive() ||
 		GameClient()->m_Emoticon.IsActive() ||
-		GameClient()->m_Spectator.IsActive())
+		GameClient()->m_Spectator.IsActive() ||
+		m_PreviewAllButtons)
 	{
 		ResetButtons();
 		return false;
@@ -2024,7 +2025,7 @@ void CTouchControls::RenderButtonsWhileInEditor()
 		bool IsVisible = std::all_of(TouchButton.m_vVisibilities.begin(), TouchButton.m_vVisibilities.end(), [&](const auto &Visibility) {
 			return Visibility.m_Parity == m_aVirtualVisibilities[(int)Visibility.m_Type];
 		});
-		if(IsVisible)
+		if(IsVisible || m_PreviewAllButtons)
 		{
 			TouchButton.UpdateScreenFromUnitRect();
 			TouchButton.Render(false);
