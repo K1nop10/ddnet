@@ -335,7 +335,7 @@ bool CMenus::RenderLayoutSettingBlock(CUIRect Block)
 
 bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 {
-	if(m_vBindToggleAddButtons.size() < maximum(m_vCachedCommands.size() + 1, 4ull))
+	if(m_vBindToggleAddButtons.size() < (unsigned)maximum((int)(m_vCachedCommands.size() + 1), 4))
 	{
 		m_vBindToggleAddButtons.resize(m_vCachedCommands.size() + 1);
 		m_vBindToggleDeleteButtons.resize(m_vCachedCommands.size() + 1);
