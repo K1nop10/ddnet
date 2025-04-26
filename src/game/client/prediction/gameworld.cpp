@@ -3,6 +3,7 @@
 
 #include "gameworld.h"
 #include "entities/character.h"
+#include "entities/door.h"
 #include "entities/dragger.h"
 #include "entities/laser.h"
 #include "entities/pickup.h"
@@ -245,37 +246,40 @@ void CGameWorld::Tick()
 	OnModified();
 }
 
-// TODO: should be more general
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
-	// Find other players
+	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = nullptr;
+	CEntity *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntity *pEntity = FindFirst(Type);
+	for(; pEntity; pEntity = pEntity->TypeNext())
 	{
-		if(p == pNotThis)
+		if(pEntity == pNotThis)
 			continue;
 
-		if(pThisOnly && p != pThisOnly)
+		if(pThisOnly && pEntity != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 		{
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius + Radius)
+			float Len = distance(pEntity->m_Pos, IntersectPos);
+			if(Len < pEntity->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = p;
+					pClosest = pEntity;
 				}
 			}
 		}
@@ -543,6 +547,20 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 				InsertEntity(pEnt);
 			}
 		}
+		else if(Data.m_Type == LASERTYPE_DOOR)
+		{
+			CDoor NetDoor = CDoor(this, ObjId, &Data);
+			auto *pDoor = dynamic_cast<CDoor *>(GetEntity(ObjId, ENTTYPE_DOOR));
+			if(pDoor && NetDoor.Match(pDoor))
+			{
+				pDoor->Keep();
+				pDoor->Read(&Data);
+				return;
+			}
+			CDoor *pEnt = new CDoor(NetDoor);
+			pEnt->ResetCollision();
+			InsertEntity(pEnt);
+		}
 	}
 }
 
@@ -677,6 +695,14 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			CDragger *pEnt = (CDragger *)GetEntity(ObjId, ENTTYPE_DRAGGER);
 			if(pEnt && CDragger(this, ObjId, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
+		}
+		else if(Data.m_Type == LASERTYPE_DOOR)
+		{
+			CDoor *pEnt = (CDoor *)GetEntity(ObjId, ENTTYPE_DOOR);
+			if(pEnt && CDoor(this, ObjId, &Data).Match(pEnt))
 			{
 				return pEnt;
 			}

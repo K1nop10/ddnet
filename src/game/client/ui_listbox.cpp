@@ -164,7 +164,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, float CornerRa
 	}
 
 	CListboxItem Item = DoNextRow();
-	const int ItemClicked = Item.m_Visible ? Ui()->DoButtonLogic(pId, 0, &Item.m_Rect) : 0;
+	const int ItemClicked = Item.m_Visible ? Ui()->DoButtonLogic(pId, 0, &Item.m_Rect, BUTTONFLAG_LEFT) : 0;
 	if(ItemClicked)
 	{
 		m_ListBoxNewSelected = ThisItemIndex;
@@ -209,7 +209,10 @@ int CListBox::DoEnd()
 	m_ScrollbarShown = m_ScrollRegion.ScrollbarShown();
 	if(m_ListBoxNewSelOffset != 0 && m_ListBoxNumItems > 0 && m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 	{
-		m_ListBoxNewSelected = clamp((m_ListBoxNewSelected == -1 ? 0 : m_ListBoxNewSelected) + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
+		if(m_ListBoxNewSelected == -1)
+			m_ListBoxNewSelected = 0;
+		else
+			m_ListBoxNewSelected = clamp(m_ListBoxNewSelected + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
 		ScrollToSelected();
 	}
 	return m_ListBoxNewSelected;

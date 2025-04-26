@@ -84,8 +84,7 @@ void CCharacter::HandleJetpack()
 	{
 		if(m_Core.m_Jetpack)
 		{
-			int TuneZone = GetOverriddenTuneZone();
-			float Strength = TuneZone ? GetTuning(TuneZone)->m_JetpackStrength : m_LastJetpackStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -461,7 +460,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 
 		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 	}
@@ -644,7 +643,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		int Force, Type, MaxSpeed = 0;
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
 
-		if(Type == TILE_SPEED_BOOST_OLD) // old buggy shitty spaghetti behavior
+		if(Type == TILE_SPEED_BOOST_OLD)
 		{
 			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 			if(Force == 255 && MaxSpeed)
@@ -700,20 +699,20 @@ void CCharacter::HandleSkippableTiles(int Index)
 		}
 		else if(Type == TILE_SPEED_BOOST)
 		{
+			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				TempVel += Direction * Force;
+				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
 			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
-			{
-				// hardest to understand
-				float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
-				float TempMaxSpeed = MaxSpeed / 5.0f;
-				if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
-					TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
-				else
-					TempVel += Direction * Force;
-			}
+				TempVel += Direction * Force;
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
@@ -1198,7 +1197,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
-	m_LastJetpackStrength = 400.0f;
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
@@ -1316,10 +1314,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(pChar->m_Weapon != WEAPON_NINJA)
 			m_Core.m_aWeapons[pChar->m_Weapon].m_Got = true;
 
-		// jetpack
-		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength > 0)
+		// without ddnetcharacter we don't know if we have jetpack, so try to predict jetpack if strength isn't 0, on vanilla it's always 0
+		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength != 0)
 		{
-			m_LastJetpackStrength = Tuning()->m_JetpackStrength;
 			m_Core.m_Jetpack = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Got = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = -1;
@@ -1419,7 +1416,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
 		{
 			float FireDelay;
-			GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
 		}

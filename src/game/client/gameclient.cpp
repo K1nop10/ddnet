@@ -7,6 +7,7 @@
 #include <engine/client/checksum.h>
 #include <engine/client/enums.h>
 #include <engine/demo.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/favorites.h>
@@ -105,6 +106,7 @@ void CGameClient::OnConsoleInit()
 	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
+	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -485,6 +487,11 @@ void CGameClient::OnUpdate()
 		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		m_Binds.m_MouseOnAction = false;
 	}
+
+	for(auto &pComponent : m_vpAll)
+	{
+		pComponent->OnUpdate();
+	}
 }
 
 void CGameClient::OnDummySwap()
@@ -585,8 +592,14 @@ void CGameClient::OnConnected()
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
-		Client()->DemoRecorder_HandleAutoStart();
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(g_Config.m_ClAutoDemoOnConnect)
+			Client()->DemoRecorder_HandleAutoStart();
+
+		if(m_Menus.IsServerRunning() && m_aSavedLocalRconPassword[0] != '\0' && net_addr_is_local(&Client()->ServerAddress()))
+			Client()->RconAuth(DEFAULT_SAVED_RCON_USER, m_aSavedLocalRconPassword, g_Config.m_ClDummy);
+	}
 }
 
 void CGameClient::OnReset()
@@ -760,6 +773,9 @@ void CGameClient::UpdatePositions()
 
 void CGameClient::OnRender()
 {
+	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
+	Graphics()->Clear(ClearColor.r, ClearColor.g, ClearColor.b);
+
 	// check if multi view got activated
 	if(!m_MultiView.m_IsInit && m_MultiViewActivated)
 	{
@@ -980,6 +996,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// unpack the new tuning
 		CTuningParams NewTuning;
 		int *pParams = (int *)&NewTuning;
+
+		// No jetpack on DDNet incompatible servers,
+		// jetpack strength will be received by tune params
+		NewTuning.m_JetpackStrength = 0;
+
 		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
 		{
 			// 31 is the magic number index of laser_damage
@@ -1388,6 +1409,9 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool FDDrace;
 	if(Version < 1)
 	{
+		// The game type is intentionally only available inside this
+		// `if`. Game type sniffing should be avoided and ideally not
+		// extended. Mods should set the relevant game flags instead.
 		const char *pGameType = pFallbackServerInfo->m_aGameType;
 		Race = str_find_nocase(pGameType, "race") || str_find_nocase(pGameType, "fastcap");
 		FastCap = str_find_nocase(pGameType, "fastcap");
@@ -1609,7 +1633,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_Country = pInfo->m_Country;
 
 					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
-					if(pClient->m_aSkinName[0] == '\0' ||
+					if(!CSkin::IsValidName(pClient->m_aSkinName) ||
 						(!m_GameInfo.m_AllowXSkins && CSkins::IsSpecialSkin(pClient->m_aSkinName)))
 					{
 						str_copy(pClient->m_aSkinName, "default");
@@ -1951,6 +1975,11 @@ void CGameClient::OnNewSnapshot()
 			m_aClients[i].Reset();
 			m_aStats[i].Reset();
 		}
+	}
+
+	if(Client()->State() == IClient::STATE_ONLINE)
+	{
+		m_pDiscord->UpdatePlayerCount(m_Snap.m_NumPlayers);
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -2658,7 +2687,6 @@ void CGameClient::CClientData::Reset()
 	m_aClan[0] = '\0';
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
-	m_SkinColor = 0;
 
 	m_Team = 0;
 	m_Emoticon = 0;
@@ -2687,7 +2715,12 @@ void CGameClient::CClientData::Reset()
 	m_Predicted.Reset();
 	m_PrevPredicted.Reset();
 
-	m_pSkinInfo = nullptr;
+	if(m_pSkinInfo != nullptr)
+	{
+		// Make sure other `shared_ptr`s to this skin info will not use the refresh callback that refers to this reset client data
+		m_pSkinInfo->SetRefreshCallback(nullptr);
+		m_pSkinInfo = nullptr;
+	}
 	m_RenderInfo.Reset();
 
 	m_Angle = 0.0f;
@@ -4063,6 +4096,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	{
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSnowflake);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpritePulley);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -4098,9 +4132,11 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	{
 		m_ExtrasSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
 		m_ExtrasSkin.m_SpriteParticleSparkle = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SPARKLE]);
+		m_ExtrasSkin.m_SpritePulley = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_PULLEY]);
 
 		m_ExtrasSkin.m_aSpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
 		m_ExtrasSkin.m_aSpriteParticles[1] = m_ExtrasSkin.m_SpriteParticleSparkle;
+		m_ExtrasSkin.m_aSpriteParticles[2] = m_ExtrasSkin.m_SpritePulley;
 
 		m_ExtrasSkinLoaded = true;
 	}
@@ -4188,7 +4224,7 @@ void CGameClient::OnSkinUpdate(const char *pSkinName)
 	for(std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
 	{
 		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & CSkinDescriptor::FLAG_SIX) ||
-			str_comp(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName, pSkinName) != 0)
+			str_utf8_comp_nocase(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName, pSkinName) != 0)
 		{
 			continue;
 		}
@@ -4224,6 +4260,14 @@ void CGameClient::UpdateManagedTeeRenderInfos()
 	}
 }
 
+void CGameClient::CollectManagedTeeRenderInfos(const std::function<void(const char *pSkinName)> &ActiveSkinAcceptor)
+{
+	for(const std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
+	{
+		ActiveSkinAcceptor(pManagedTeeRenderInfo->m_SkinDescriptor.m_aSkinName);
+	}
+}
+
 void CGameClient::ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CGameClient *pThis = static_cast<CGameClient *>(pUserData);
@@ -4250,13 +4294,6 @@ void CGameClient::LoadMapSettings()
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
-
-		// only hardcode ddrace tuning for the tune zones
-		// and not the base tuning
-		// that one will be sent by the server if needed
-		if(!i)
-			continue;
-
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);

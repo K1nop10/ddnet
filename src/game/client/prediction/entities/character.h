@@ -10,14 +10,13 @@
 
 enum
 {
-	FAKETUNE_FREEZE = 1,
-	FAKETUNE_SOLO = 2,
-	FAKETUNE_NOJUMP = 4,
-	FAKETUNE_NOCOLL = 8,
-	FAKETUNE_NOHOOK = 16,
-	FAKETUNE_JETPACK = 32,
-	FAKETUNE_NOHAMMER = 64,
-
+	FAKETUNE_FREEZE = 1 << 0,
+	FAKETUNE_SOLO = 1 << 1,
+	FAKETUNE_NOJUMP = 1 << 2,
+	FAKETUNE_NOCOLL = 1 << 3,
+	FAKETUNE_NOHOOK = 1 << 4,
+	FAKETUNE_JETPACK = 1 << 5,
+	FAKETUNE_NOHAMMER = 1 << 6,
 };
 
 class CCharacter : public CEntity
@@ -70,7 +69,7 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	int Team();
-	bool CanCollide(int ClientId);
+	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
@@ -118,7 +117,6 @@ public:
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
-	int m_LastJetpackStrength;
 	bool m_KeepHooked;
 	int m_GameTeam;
 	bool m_CanMoveInFreeze;

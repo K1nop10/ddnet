@@ -243,12 +243,6 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 {
 	int Type = clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
-
-	ColorRGBA RGB;
-	vec2 Pos = pCurrent->m_To;
-	vec2 From = pCurrent->m_From;
-	float Len = distance(Pos, From);
-
 	int ColorIn, ColorOut;
 	switch(Type)
 	{
@@ -260,7 +254,6 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		ColorOut = g_Config.m_ClLaserShotgunOutlineColor;
 		ColorIn = g_Config.m_ClLaserShotgunInnerColor;
 		break;
-	case LASERTYPE_DRAGGER:
 	case LASERTYPE_DOOR:
 		ColorOut = g_Config.m_ClLaserDoorOutlineColor;
 		ColorIn = g_Config.m_ClLaserDoorInnerColor;
@@ -268,6 +261,10 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	case LASERTYPE_FREEZE:
 		ColorOut = g_Config.m_ClLaserFreezeOutlineColor;
 		ColorIn = g_Config.m_ClLaserFreezeInnerColor;
+		break;
+	case LASERTYPE_DRAGGER:
+		ColorOut = g_Config.m_ClLaserGrabberOutlineColor;
+		ColorIn = g_Config.m_ClLaserGrabberInnerColor;
 		break;
 	case LASERTYPE_GUN:
 	case LASERTYPE_PLASMA:
@@ -287,45 +284,61 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		ColorIn = g_Config.m_ClLaserRifleInnerColor;
 	}
 
-	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorOut));
-	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorIn));
-	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
-
-	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	bool IsOtherTeam = (pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner));
 
-	float Alpha = 1.f;
-	if(IsOtherTeam)
-	{
-		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-	}
+	float Alpha = IsOtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.f;
 
-	vec2 Dir;
+	const ColorRGBA OuterColor = color_cast<ColorRGBA>(ColorHSLA(ColorOut).WithAlpha(Alpha));
+	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(ColorIn).WithAlpha(Alpha));
+
+	float Ticks;
+	if(Type == LASERTYPE_DOOR)
+	{
+		Ticks = 1.0f;
+	}
+	else if(IsPredicted)
+	{
+		int PredictionTick = Client()->GetPredictionTick();
+		Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
+	}
+	else
+		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
+
+	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
+	if(Type == LASERTYPE_DRAGGER)
+	{
+		TicksHead *= (((pCurrent->m_Subtype >> 1) % 3) * 4.0f) + 1;
+		TicksHead *= (pCurrent->m_Subtype & 1) ? -1 : 1;
+	}
+	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, TicksHead, Type);
+}
+
+void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
+{
+	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+	float Len = distance(Pos, From);
+
 	if(Len > 0)
 	{
-		Dir = normalize_pre_length(Pos - From, Len);
+		if(Type == LASERTYPE_DRAGGER)
+		{
+			// rubber band effect
+			float Thickness = std::sqrt(Len) / 5.f;
+			TicksBody = clamp(Thickness, 1.0f, 5.0f);
+		}
+		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
-		int PredictionTick = Client()->GetPredictionTick();
-
-		float Ticks;
-		if(IsPredicted)
-			Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
-		else
-			Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
-		float Ms = (Ticks / Client()->GameTickSpeed()) * 1000.0f;
+		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
 		float a = Ms / m_pClient->GetTuning(TuneZone)->m_LaserBounceDelay;
 		a = clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
-
-		vec2 Out;
 
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 
 		// do outline
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
-		Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
+		Graphics()->SetColor(OuterColor);
+		vec2 Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
 
 		IGraphics::CFreeformItem Freeform(
 			From.x - Out.x, From.y - Out.y,
@@ -336,7 +349,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 		// do inner
 		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha); // center
+		Graphics()->SetColor(InnerColor); // center
 
 		Freeform = IGraphics::CFreeformItem(
 			From.x - Out.x, From.y - Out.y,
@@ -349,13 +362,50 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	}
 
 	// render head
+	if(Type == LASERTYPE_DOOR)
 	{
-		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
+		Graphics()->TextureClear();
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->SetColor(OuterColor);
+		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 8.0f, Pos.y - 8.0f);
+		Graphics()->SetColor(InnerColor);
+		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 6.0f, Pos.y - 6.0f, 6.f / 8.f, 6.f / 8.f);
+	}
+	else if(Type == LASERTYPE_DRAGGER)
+	{
+		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpritePulley);
+		for(int Inner = 0; Inner < 2; ++Inner)
+		{
+			Graphics()->SetColor(Inner ? InnerColor : OuterColor);
+
+			float Size = Inner ? 4.f / 5.f : 1.f;
+
+			// circle at laser end
+			if(Len > 0)
+			{
+				Graphics()->QuadsSetRotation(0);
+				Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_PulleyHeadOffset, From.x, From.y, Size, Size);
+			}
+
+			//rotating orbs
+			Size = Inner ? 0.75f - 1.f / 5.f : 0.75f;
+			for(int Orb = 0; Orb < 3; ++Orb)
+			{
+				vec2 Offset(10.f, 0);
+				Offset = rotate(Offset, Orb * 120 + TicksHead);
+				Graphics()->QuadsSetRotation(TicksHead + Orb * pi * 2.f / 3.f); // rotate the sprite as well, as it might be customized
+				Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_PulleyHeadOffset, From.x + Offset.x, From.y + Offset.y, Size, Size);
+			}
+		}
+	}
+	else
+	{
+		int CurParticle = (int)TicksHead % 3;
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
-		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
+		Graphics()->QuadsSetRotation((int)TicksHead);
+		Graphics()->SetColor(OuterColor);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha);
+		Graphics()->SetColor(InnerColor);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
 	}
 }
@@ -594,6 +644,13 @@ void CItems::OnInit()
 		ParticleSplatOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 	}
 
+	RenderTools()->GetSpriteScale(SPRITE_PART_PULLEY, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_PulleyHeadOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 20.f * ScaleX);
+
+	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
+	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);
+
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }
 
@@ -649,7 +706,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed());
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);
-	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
+	float Step = maximum(Client()->FrameTimeAverage(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * random_float(-0.5f, 0.5f);

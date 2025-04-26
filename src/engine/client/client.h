@@ -3,11 +3,8 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
-#include <deque>
-#include <memory>
-#include <mutex>
-
 #include <base/hash.h>
+#include <base/types.h>
 
 #include <engine/client.h>
 #include <engine/client/checksum.h>
@@ -28,6 +25,11 @@
 #include "graph.h"
 #include "smooth_time.h"
 
+#include <chrono>
+#include <deque>
+#include <memory>
+#include <mutex>
+
 class CDemoEdit;
 class IDemoRecorder;
 class CMsgPacker;
@@ -44,9 +46,6 @@ class ISteam;
 class INotifications;
 class IStorage;
 class IUpdater;
-
-#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
-#define CONNECTLINK_NO_SLASH "ddnet:"
 
 class CServerCapabilities
 {
@@ -116,7 +115,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aAckGameTick[NUM_DUMMIES] = {-1, -1};
 	int m_aCurrentRecvTick[NUM_DUMMIES] = {0, 0};
 	int m_aRconAuthed[NUM_DUMMIES] = {0, 0};
-	char m_aRconUsername[32] = "";
+	char m_aRconUsername[64] = "";
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 	int m_UseTempRconCommands = 0;
 	int m_ExpectedRconCommands = -1;
@@ -265,6 +264,11 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
+	// For RenderDebug function
+	NETSTATS m_NetstatsPrev = {};
+	NETSTATS m_NetstatsCurrent = {};
+	std::chrono::nanoseconds m_NetstatsLastUpdate = std::chrono::nanoseconds(0);
+
 	// For DummyName function
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
 
@@ -351,7 +355,8 @@ public:
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 
 	void Render();
-	void DebugRender();
+	void RenderDebug();
+	void RenderGraphs();
 
 	void Restart() override;
 	void Quit() override;
@@ -446,6 +451,7 @@ public:
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 

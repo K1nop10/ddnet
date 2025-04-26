@@ -313,7 +313,7 @@ class CEditor : public IEditor
 	};
 
 	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
-	static const ColorRGBA ms_DefaultPropColor;
+	static inline constexpr ColorRGBA ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
 
 public:
 	class IInput *Input() const { return m_pInput; }
@@ -455,8 +455,10 @@ public:
 		m_TeleCheckpointNumber = 1;
 		m_ViewTeleNumber = 0;
 
-		m_SwitchNum = 1;
 		m_TuningNum = 1;
+		m_ViewTuning = 0;
+
+		m_SwitchNum = 1;
 		m_SwitchDelay = 0;
 		m_SpeedupForce = 50;
 		m_SpeedupMaxSpeed = 0;
@@ -537,6 +539,7 @@ public:
 	void UpdateColorPipette();
 	void RenderMousePointer();
 	void RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles);
+	void RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles);
 
 	std::vector<CQuad *> GetSelectedQuads();
 	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;
@@ -718,7 +721,7 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(pLhs->m_IsLink || pRhs->m_IsLink)
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
 			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
@@ -731,7 +734,7 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(pLhs->m_IsLink || pRhs->m_IsLink)
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
 			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
@@ -873,7 +876,7 @@ public:
 
 	int DoButton_Ex(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = EditorFontSizes::MENU, int Align = TEXTALIGN_MC);
 	int DoButton_FontIcon(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
-	int DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
+	int DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags = BUTTONFLAG_LEFT, const char *pToolTip = nullptr);
 
 	int DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
@@ -1179,6 +1182,7 @@ public:
 	unsigned char m_ViewTeleNumber;
 
 	unsigned char m_TuningNum;
+	unsigned char m_ViewTuning;
 
 	unsigned char m_SpeedupForce;
 	unsigned char m_SpeedupMaxSpeed;
@@ -1191,6 +1195,7 @@ public:
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 	int FindNextFreeSwitchNumber();
 	int FindNextFreeTeleNumber(bool Checkpoint = false);
+	int FindNextFreeTuneNumber();
 
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;

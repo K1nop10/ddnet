@@ -196,6 +196,7 @@ private:
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
+	class IDiscord *m_pDiscord;
 #if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
 #endif
@@ -304,6 +305,8 @@ public:
 	};
 	int m_ServerMode;
 	CGameInfo m_GameInfo;
+
+	char m_aSavedLocalRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 
 	int m_DemoSpecId;
 
@@ -426,7 +429,6 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		char m_aSkinName[MAX_SKIN_LENGTH];
-		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
 		float m_EmoticonStartFraction;
@@ -454,7 +456,7 @@ public:
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
-		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo; // this is what the server reports
+		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo = nullptr; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 
 		float m_Angle;
@@ -600,6 +602,7 @@ public:
 	void OnSkinUpdate(const char *pSkinName);
 	std::shared_ptr<CManagedTeeRenderInfo> CreateManagedTeeRenderInfo(const CTeeRenderInfo &TeeRenderInfo, const CSkinDescriptor &SkinDescriptor);
 	std::shared_ptr<CManagedTeeRenderInfo> CreateManagedTeeRenderInfo(const CClientData &Client);
+	void CollectManagedTeeRenderInfos(const std::function<void(const char *pSkinName)> &ActiveSkinAcceptor);
 
 	void RenderShutdownMessage() override;
 
@@ -831,7 +834,8 @@ public:
 	{
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
-		IGraphics::CTextureHandle m_aSpriteParticles[2];
+		IGraphics::CTextureHandle m_SpritePulley;
+		IGraphics::CTextureHandle m_aSpriteParticles[3];
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;

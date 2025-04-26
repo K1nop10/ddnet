@@ -80,8 +80,8 @@
 
 using namespace std::chrono_literals;
 
-static const ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
-static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
+static constexpr ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
+static constexpr ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); }),
@@ -131,16 +131,12 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = protocol7::NETMSG_INPUT;
 			else if(MsgId == NETMSG_RCON_AUTH)
 				MsgId = protocol7::NETMSG_RCON_AUTH;
-			else if(MsgId == NETMSGTYPE_CL_SETTEAM)
-				MsgId = protocol7::NETMSGTYPE_CL_SETTEAM;
-			else if(MsgId == NETMSGTYPE_CL_VOTE)
-				MsgId = protocol7::NETMSGTYPE_CL_VOTE;
 			else if(MsgId == NETMSG_PING)
 				MsgId = protocol7::NETMSG_PING;
 			else
 			{
-				dbg_msg("net", "0.7 DROP send sys %d", MsgId);
-				return true;
+				log_error("net", "0.7 DROP send sys %d", MsgId);
+				return false;
 			}
 		}
 		else
@@ -149,7 +145,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = Msg_SixToSeven(MsgId);
 
 			if(MsgId < 0)
-				return true;
+				return false;
 		}
 	}
 
@@ -164,7 +160,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
 
-	return false;
+	return true;
 }
 
 int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
@@ -176,7 +172,7 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 
 	// repack message (inefficient)
 	CPacker Pack;
-	if(RepackMsg(pMsg, Pack, IsSixup()))
+	if(!RepackMsg(pMsg, Pack, IsSixup()))
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
@@ -430,9 +426,12 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_ONLINE)
 	{
-		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		const bool Registered = m_ServerBrowser.IsRegistered(ServerAddress());
+		CServerInfo CurrentServerInfo;
+		GetServerInfo(&CurrentServerInfo);
+
+		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -854,67 +853,77 @@ void CClient::SnapSetStaticsize7(int ItemType, int Size)
 	m_SnapshotDelta.SetStaticsize7(ItemType, Size);
 }
 
-void CClient::DebugRender()
+void CClient::RenderDebug()
 {
 	if(!g_Config.m_Debug)
+	{
 		return;
+	}
 
-	static NETSTATS s_Prev, s_Current;
-	static int64_t s_LastSnapTime = 0;
-	static float s_FrameTimeAvg = 0;
+	const std::chrono::nanoseconds Now = time_get_nanoseconds();
+	if(Now - m_NetstatsLastUpdate > 1s)
+	{
+		m_NetstatsLastUpdate = Now;
+		m_NetstatsPrev = m_NetstatsCurrent;
+		net_stats(&m_NetstatsCurrent);
+	}
+
 	char aBuffer[512];
+	const float FontSize = 16.0f;
 
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - s_LastSnapTime > time_freq())
+	str_format(aBuffer, sizeof(aBuffer), "Game/predicted tick: %d/%d", m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy]);
+	Graphics()->QuadsText(2, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Prediction time: %d ms", GetPredictionTime());
+	Graphics()->QuadsText(2, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "FPS: %3d", round_to_int(1.0f / m_FrameTimeAverage));
+	Graphics()->QuadsText(20.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Frametime: %4d us", round_to_int(m_FrameTimeAverage * 1000000.0f));
+	Graphics()->QuadsText(20.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Texture memory", Graphics()->TextureMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Buffer memory", Graphics()->BufferMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Streamed memory", Graphics()->StreamedMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 2 * FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Staging memory", Graphics()->StagingMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 3 * FontSize, FontSize, aBuffer);
+
+	// Network
 	{
-		s_LastSnapTime = time_get();
-		s_Prev = s_Current;
-		net_stats(&s_Current);
+		const uint64_t OverheadSize = 14 + 20 + 8; // ETH + IP + UDP
+		const uint64_t SendPackets = m_NetstatsCurrent.sent_packets - m_NetstatsPrev.sent_packets;
+		const uint64_t SendBytes = m_NetstatsCurrent.sent_bytes - m_NetstatsPrev.sent_bytes;
+		const uint64_t SendTotal = SendBytes + SendPackets * OverheadSize;
+		const uint64_t RecvPackets = m_NetstatsCurrent.recv_packets - m_NetstatsPrev.recv_packets;
+		const uint64_t RecvBytes = m_NetstatsCurrent.recv_bytes - m_NetstatsPrev.recv_bytes;
+		const uint64_t RecvTotal = RecvBytes + RecvPackets * OverheadSize;
+
+		str_format(aBuffer, sizeof(aBuffer), "Send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			SendPackets, SendBytes, SendPackets * OverheadSize, SendTotal, (SendTotal * 8) / 1024, SendPackets == 0 ? 0 : SendBytes / SendPackets);
+		Graphics()->QuadsText(2, 2 + 3 * FontSize, FontSize, aBuffer);
+		str_format(aBuffer, sizeof(aBuffer), "Recv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			RecvPackets, RecvBytes, RecvPackets * OverheadSize, RecvTotal, (RecvTotal * 8) / 1024, RecvPackets == 0 ? 0 : RecvBytes / RecvPackets);
+		Graphics()->QuadsText(2, 2 + 4 * FontSize, FontSize, aBuffer);
 	}
 
-	/*
-		eth = 14
-		ip = 20
-		udp = 8
-		total = 42
-	*/
-	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
-		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
-		(Graphics()->TextureMemoryUsage() / 1024),
-		(Graphics()->BufferMemoryUsage() / 1024),
-		(Graphics()->StreamedMemoryUsage() / 1024),
-		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / s_FrameTimeAvg + 0.5f));
-	Graphics()->QuadsText(2, 2, 16, aBuffer);
-
+	// Snapshots
 	{
-		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
-		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
-		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
-		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
-		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
-
-		if(!SendPackets)
-			SendPackets++;
-		if(!RecvPackets)
-			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
-			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
-			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
-		Graphics()->QuadsText(2, 14, 16, aBuffer);
-	}
-
-	// render rates
-	{
-		int y = 0;
+		const float OffsetY = 2 + 6 * FontSize;
+		int Row = 0;
 		str_format(aBuffer, sizeof(aBuffer), "%5s %20s: %8s %8s %8s", "ID", "Name", "Rate", "Updates", "R/U");
-		Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-		y++;
+		Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+		Row++;
 		for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		{
 			if(m_SnapshotDelta.GetDataRate(i))
@@ -927,15 +936,15 @@ void CClient::DebugRender()
 					GameClient()->GetItemName(i),
 					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
 					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-				Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-				y++;
+				Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+				Row++;
 			}
 		}
 		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
 		{
 			if(m_SnapshotDelta.GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
-				int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
+				const int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
 				{
 					str_format(
@@ -947,8 +956,8 @@ void CClient::DebugRender()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 				else if(Type != i)
 				{
@@ -961,32 +970,33 @@ void CClient::DebugRender()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 			}
 		}
 	}
 
-	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms", GetPredictionTime());
-	Graphics()->QuadsText(2, 70, 16, aBuffer);
 	Graphics()->QuadsEnd();
+}
 
-	// render graphs
-	if(g_Config.m_DbgGraphs)
-	{
-		float w = Graphics()->ScreenWidth() / 4.0f;
-		float h = Graphics()->ScreenHeight() / 6.0f;
-		float sp = Graphics()->ScreenWidth() / 100.0f;
-		float x = Graphics()->ScreenWidth() - w - sp;
+void CClient::RenderGraphs()
+{
+	if(!g_Config.m_DbgGraphs)
+		return;
 
-		m_FpsGraph.Scale(time_freq());
-		m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
-		m_InputtimeMarginGraph.Scale(5 * time_freq());
-		m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
-		m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
-		m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
-	}
+	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	float w = Graphics()->ScreenWidth() / 4.0f;
+	float h = Graphics()->ScreenHeight() / 6.0f;
+	float sp = Graphics()->ScreenWidth() / 100.0f;
+	float x = Graphics()->ScreenWidth() - w - sp;
+
+	m_FpsGraph.Scale(time_freq());
+	m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
+	m_InputtimeMarginGraph.Scale(5 * time_freq());
+	m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
+	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
+	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
 }
 
 void CClient::Restart()
@@ -1042,19 +1052,17 @@ const char *CClient::ErrorString() const
 
 void CClient::Render()
 {
-	if(g_Config.m_ClOverlayEntities)
+	if(m_EditorActive)
 	{
-		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor));
-		Graphics()->Clear(bg.r, bg.g, bg.b);
+		m_pEditor->OnRender();
 	}
 	else
 	{
-		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor));
-		Graphics()->Clear(bg.r, bg.g, bg.b);
+		GameClient()->OnRender();
 	}
 
-	GameClient()->OnRender();
-	DebugRender();
+	RenderDebug();
+	RenderGraphs();
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
@@ -1379,6 +1387,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
+				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
 			}
 
 			bool ValidPong = false;
@@ -1548,13 +1557,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 
-			for(int i = 0; pMap[i]; i++) // protect the player from nasty map names
+			if(!str_valid_filename(pMap))
 			{
-				if(pMap[i] == '/' || pMap[i] == '\\')
-				{
-					DisconnectWithReason("strange character in map name");
-					return;
-				}
+				DisconnectWithReason("map name is not a valid filename");
+				return;
 			}
 
 			if(m_DummyConnected && !m_DummyReconnectOnReload)
@@ -3028,7 +3034,7 @@ void CClient::Run()
 		g_UuidManager.DebugDump();
 	}
 
-#ifndef CONF_WEBASM
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	char aNetworkError[256];
 	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
@@ -3097,6 +3103,8 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
+	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
 	if(GIT_SHORTREV_HASH)
 	{
@@ -3113,8 +3121,6 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
-	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 
 	InitChecksum();
 	m_pConsole->InitChecksum(ChecksumData());
@@ -3278,7 +3284,7 @@ void CClient::Run()
 					}
 				}
 
-				m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+				m_FrameTimeAverage = m_FrameTimeAverage * 0.9f + m_RenderFrameTime * 0.1f;
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
@@ -3288,13 +3294,7 @@ void CClient::Run()
 				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
-				if(!m_EditorActive)
-					Render();
-				else
-				{
-					m_pEditor->OnRender();
-					DebugRender();
-				}
+				Render();
 				m_pGraphics->Swap();
 			}
 			else if(!IsRenderActive)
@@ -3859,7 +3859,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	// Don't disconnect unless the file exists (only for play command)
 	if(!Storage()->FileExists(pFilename, StorageType))
-		return "No demo with this filename exists";
+		return Localize("No demo with this filename exists");
 
 	Disconnect();
 	m_aNetClient[CONN_MAIN].ResetErrorString();
@@ -3907,6 +3907,9 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
 
+	// enter demo playback state
+	SetState(IClient::STATE_DEMOPLAYBACK);
+
 	GameClient()->OnConnected();
 
 	// setup buffers
@@ -3921,9 +3924,6 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
 		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;
 	}
-
-	// enter demo playback state
-	SetState(IClient::STATE_DEMOPLAYBACK);
 
 	m_DemoPlayer.Play();
 	GameClient()->OnEnterGame();
@@ -4389,6 +4389,17 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	}
 }
 
+void CClient::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pSelf->m_Fifo.IsInit())
+	{
+		pSelf->m_Fifo.Shutdown();
+		pSelf->m_Fifo.Init(pSelf->m_pConsole, pSelf->Config()->m_ClInputFifo, CFGFLAG_CLIENT);
+	}
+}
+
 void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4454,6 +4465,7 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
+	m_pConsole->Chain("cl_input_fifo", ConchainInputFifo, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 
@@ -4613,10 +4625,6 @@ int main(int argc, const char **argv)
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	init_exception_handler();
-#endif
-
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4735,7 +4743,7 @@ int main(int argc, const char **argv)
 	});
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger);
 	pKernel->RegisterInterface(pEngine, false);
 	CleanerFunctions.emplace([pEngine]() {
 		// Engine has to be destroyed before the graphics so that skin download thread can finish
@@ -4763,15 +4771,15 @@ int main(int argc, const char **argv)
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	char aBufPath[IO_MAX_PATH_LENGTH];
-	char aBufName[IO_MAX_PATH_LENGTH];
-	char aDate[64];
-	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
-	set_exception_handler_log_file(aBufPath);
-#endif
+	{
+		char aBufPath[IO_MAX_PATH_LENGTH];
+		char aBufName[IO_MAX_PATH_LENGTH];
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+		crashdump_init_if_available(aBufPath);
+	}
 
 	if(RandInitFailed)
 	{

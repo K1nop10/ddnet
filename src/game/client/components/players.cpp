@@ -93,7 +93,7 @@ void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	HandPos += DirX * PostRotOffset.x;
 	HandPos += DirY * PostRotOffset.y;
 
-	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
+	const CSkin::CSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
 	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 
@@ -107,23 +107,18 @@ void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	}
 }
 
-inline float AngularMixDirection(float Src, float Dst) { return std::sin(Dst - Src) > 0 ? 1 : -1; }
-
-inline float AngularApproach(float Src, float Dst, float Amount)
-{
-	float d = AngularMixDirection(Src, Dst);
-	float n = Src + Amount * d;
-	if(AngularMixDirection(n, Dst) != d)
-		return Dst;
-	return n;
-}
-
 float CPlayers::GetPlayerTargetAngle(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
 	int ClientId,
 	float Intra)
 {
+	if(m_pClient->m_Snap.m_LocalClientId == ClientId && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		// just use the direct input if it's the local player we are rendering
+		return angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+	}
+
 	float AngleIntraTick = Intra;
 	// using unpredicted angle when rendering other players in-game
 	if(ClientId >= 0)
@@ -185,16 +180,7 @@ void CPlayers::RenderHookCollLine(
 	if(ClientId >= 0)
 		IntraTick = m_pClient->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	float Angle;
-	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
-	}
-	else
-	{
-		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
-	}
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
@@ -481,16 +467,7 @@ void CPlayers::RenderPlayer(
 	}
 	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
 
-	float Angle;
-	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
-	}
-	else
-	{
-		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
-	}
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
@@ -921,13 +898,20 @@ void CPlayers::OnRender()
 	}
 
 	// render spectating players
-	for(auto &Client : m_pClient->m_aClients)
+	for(const auto &Client : m_pClient->m_aClients)
 	{
 		if(!Client.m_SpecCharPresent)
 		{
 			continue;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar);
+
+		const int ClientId = Client.ClientId();
+		float Alpha = (m_pClient->IsOtherTeam(ClientId) || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.f : 1.f;
+		if(ClientId == -2) // ghost
+		{
+			Alpha = g_Config.m_ClRaceGhostAlpha / 100.f;
+		}
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar, Alpha);
 	}
 
 	// render everyone else's tee, then either our own or the tee we are spectating.
@@ -942,9 +926,7 @@ void CPlayers::OnRender()
 
 		RenderHookCollLine(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, ClientId);
 
-		// don't render offscreen
-		vec2 *pRenderPos = &m_pClient->m_aClients[ClientId].m_RenderPos;
-		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
+		if(!in_range(m_pClient->m_aClients[ClientId].m_RenderPos.x, ScreenX0, ScreenX1) || !in_range(m_pClient->m_aClients[ClientId].m_RenderPos.y, ScreenY0, ScreenY1))
 		{
 			continue;
 		}
