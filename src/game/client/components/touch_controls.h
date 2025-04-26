@@ -16,8 +16,9 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 class CJsonWriter;
 typedef struct _json_value json_value;
@@ -83,7 +84,7 @@ private:
 		NUM_SHAPES
 	};
 
-	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle", "star","sstar"};
+	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle", "star", "sstar"};
 
 	enum class EButtonVisibility
 	{
@@ -96,9 +97,8 @@ private:
 		DEMO_PLAYER,
 		NUM_VISIBILITIES
 	};
-	
+
 	std::unordered_map<std::string, bool> m_vMenuMap;
-	
 
 	class CButtonVisibility
 	{
@@ -182,7 +182,6 @@ private:
 		CTouchButton &operator=(const CTouchButton &Other) = delete;
 		CTouchButton &operator=(CTouchButton &&Other) noexcept;
 
-
 		CTouchControls *m_pTouchControls;
 
 		CUnitRect m_UnitRect;
@@ -207,7 +206,7 @@ private:
 		void UpdateVisibility();
 		bool IsVisible() const;
 		bool m_ExtraRender = false;
-		void Render();
+		void Render() const;
 		void WriteToConfiguration(CJsonWriter *pWriter);
 	};
 
@@ -237,8 +236,9 @@ private:
 		virtual void OnDeactivate() {}
 		virtual void OnUpdate() {}
 		virtual void WriteToConfiguration(CJsonWriter *pWriter) = 0;
-		
-		virtual std::string GetType() {
+
+		virtual std::string GetType()
+		{
 			return "main";
 		}
 	};
@@ -261,9 +261,11 @@ private:
 		 * may override this, but they should call the parent function first.
 		 */
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
+
 	private:
 		const char *m_pId;
 	};
@@ -298,10 +300,10 @@ private:
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_ID = "close-extra-menu";
-		
+
 		CCloseAllExtraMenuTouchButtonBehavior() :
 			CPredefinedTouchButtonBehavior(BEHAVIOR_ID) {}
-		
+
 		CButtonLabel GetLabel() const override;
 		void OnDeactivate() override;
 	};
@@ -442,7 +444,8 @@ private:
 		void OnDeactivate() override;
 		void OnUpdate() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 
@@ -483,7 +486,8 @@ private:
 		CButtonLabel GetLabel() const override;
 		void OnActivate() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 
@@ -491,7 +495,7 @@ private:
 		std::vector<CCommand> m_vCommands;
 		size_t m_ActiveCommandIndex = 0;
 	};
-	
+
 	/**
  	 * Similar to bind toggle, this behavior also has multiple commands.
    	 *
@@ -530,7 +534,8 @@ private:
 				m_Direction(Direction),
 				m_Command(pCommand) {}
 
-			CDirCommand() : m_Label(""), m_LabelType(CButtonLabel::EType::PLAIN), m_Direction(EDirection::CENTER), m_Command(""), m_IsInit(false) {}
+			CDirCommand() :
+				m_LabelType(CButtonLabel::EType::PLAIN), m_Direction(EDirection::CENTER), m_IsInit(false) {}
 		};
 		CBindSlideTouchButtonBehavior(std::vector<CDirCommand> &&vDirCommands) :
 			m_vDirCommands(std::move(vDirCommands)) {}
@@ -544,60 +549,38 @@ private:
 		std::vector<CDirCommand> m_vDirCommands;
 		bool m_IsOpen = false;
 		bool m_IsSliding = false;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 	};
 	static constexpr const char *const DIRECTION_NAMES[(int)CBindSlideTouchButtonBehavior::EDirection::NUM_DIRECTIONS] = {"left", "right", "up", "down", "upleft", "upright", "downleft", "downright", "center"};
 
-	class CBarTouchButtonBehavior : public CTouchButtonBehavior
-	{
-	public:
-		static constexpr const char *const BEHAVIOR_TYPE = "bar";
-		CBarTouchButtonBehavior(const char *pLabel, int Min, int Max, int *pTarget, std::string StrTarget) :
-			m_Label(pLabel),
-			m_Min(Min),
-			m_Max(Max),
-			m_Target(pTarget),
-			m_StrTarget(StrTarget) {}
-
-		CButtonLabel GetLabel() const override;
-		void WriteToConfiguration(CJsonWriter *pWriter) override;
-
-		std::string m_Label;
-		int m_Min;
-		int m_Max;
-		int *m_Target;
-		std::string m_StrTarget;
-		std::string GetType() override {
-			return BEHAVIOR_TYPE;
-		}
-	};
-	
 	class CStackActTouchButtonBehavior : public CTouchButtonBehavior
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "stack-act";
 		CStackActTouchButtonBehavior(std::string Number) :
-			m_Number(Number) {}
-		
+			m_Number(std::move(Number)) {}
+
 		void OnActivate() override;
 		void OnDeactivate() override;
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		
+
 		std::string m_Number;
 		mutable int m_Current = 0;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 	};
-	
+
 	class CStackAddTouchButtonBehavior : public CTouchButtonBehavior
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "stack-add";
-		
+
 		class CCommand
 		{
 		public:
@@ -611,70 +594,72 @@ private:
 				m_Command(pCommand) {}
 		};
 		CStackAddTouchButtonBehavior(std::string Number, char *Label, CButtonLabel::EType LabelType, std::vector<CCommand> &&vCommands) :
-			m_Number(Number),
+			m_Number(std::move(Number)),
 			m_Label(Label),
 			m_LabelType(LabelType),
 			m_vCommands(std::move(vCommands)) {}
-		
+
 		void OnActivate() override;
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		
+
 		std::string m_Number;
 		char *m_Label;
 		CButtonLabel::EType m_LabelType;
 		std::vector<CCommand> m_vCommands;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 	};
 	std::unordered_map<std::string, std::vector<CStackAddTouchButtonBehavior::CCommand>> m_vCommandStack;
-	
+
 	class CStackRemoveTouchButtonBehavior : public CTouchButtonBehavior
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "stack-remove";
 		CStackRemoveTouchButtonBehavior(std::string Number, std::vector<int> &&vOrders, std::string Label) :
-			m_Number(Number),
+			m_Number(std::move(Number)),
 			m_vOrders(std::move(vOrders)),
-			m_Label(Label) {}
-		
+			m_Label(std::move(Label)) {}
+
 		void OnActivate() override;
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		
+
 		std::string m_Number;
 		std::vector<int> m_vOrders;
 		std::string m_Label;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 	};
-	
+
 	class CStackShowTouchButtonBehavior : public CTouchButtonBehavior
 	{
 	public:
 		static constexpr const char *const BEHAVIOR_TYPE = "stack-show";
 		CStackShowTouchButtonBehavior(std::string Number, int Order, std::optional<std::string> Prefix, std::optional<std::string> Suffix) :
-			m_Number(Number),
+			m_Number(std::move(Number)),
 			m_Order(Order),
-			m_Prefix(Prefix),
-			m_Suffix(Suffix) {}
-		
+			m_Prefix(std::move(Prefix)),
+			m_Suffix(std::move(Suffix)) {}
+
 		void OnActivate() override;
 		CButtonLabel GetLabel() const override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
-		
+
 		std::string m_Number;
 		int m_Order;
 		std::optional<std::string> m_Prefix;
 		std::optional<std::string> m_Suffix;
 		mutable std::string m_Tmp;
-		std::string GetType() override {
+		std::string GetType() override
+		{
 			return BEHAVIOR_TYPE;
 		}
 	};
-
 
 	/**
 	 * Mode of direct touch input while ingame.
@@ -714,11 +699,11 @@ private:
 	/**
 	 * The activation states of the different extra menus which are toggle by the extra menu button behavior.
 	 */
-	public: 
-	float m_Rainbow=0.0f;
+public:
+	float m_Rainbow = 0.0f;
 	float m_Rainbows = 0.0f;
-	int fknano = 0;
-	int fknanos = 0;
+	int m_Nano = 0;
+	int m_Nanos = 0;
 	std::chrono::nanoseconds m_RainbowTimer;
 	std::chrono::nanoseconds m_RainbowTimers;
 	std::chrono::milliseconds m_LabelRainbowSpeed;
@@ -783,20 +768,11 @@ private:
 	std::unique_ptr<CBindTouchButtonBehavior> ParseBindBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindToggleTouchButtonBehavior> ParseBindToggleBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindSlideTouchButtonBehavior> ParseBindSlideBehavior(const json_value *pBehaviorObject);
-	std::unique_ptr<CBarTouchButtonBehavior> ParseBarBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CStackActTouchButtonBehavior> ParseStackActBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CStackAddTouchButtonBehavior> ParseStackAddBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CStackRemoveTouchButtonBehavior> ParseStackRemoveBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CStackShowTouchButtonBehavior> ParseStackShowBehavior(const json_value *pBehaviorObject);
 	void WriteConfiguration(CJsonWriter *pWriter);
-};
-
-class SuperMap
-{
-public:
-	static std::unordered_map<std::string, int*> Map;
-	static void Init();
-	static int* Get(std::string a);
 };
 
 #endif

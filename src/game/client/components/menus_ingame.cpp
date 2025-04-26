@@ -294,33 +294,33 @@ void CMenus::RenderGame(CUIRect MainView)
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
 			a.VSplitLeft(a.w / 2.0f, &a, &b);
-			char *bBuf;
+			char BBuf[32];
 			switch(g_Config.m_ClButtonColorType)
 			{
-				case 0: bBuf = "Default";break;
-				case 1: bBuf = "One Color";break;
-				case 2: bBuf = "Rainbow";break;
+			case 0: str_format(aBuf, sizeof(aBuf), "Button's Type: Default"); break;
+			case 1: str_format(aBuf, sizeof(aBuf), "Button's Type: Single Color"); break;
+			case 2: str_format(aBuf, sizeof(aBuf), "Button's Type: Rainbow"); break;
 			}
-			str_format(aBuf, sizeof(aBuf), "Button's Type: %s", bBuf);
-			int cur = g_Config.m_ClButtonColorType;
+			str_format(aBuf, sizeof(aBuf), "Button's Type: %s", BBuf);
+			int Cur = g_Config.m_ClButtonColorType;
 			int BType = DoButton_CheckBox_Number(&g_Config.m_ClButtonColorType, aBuf, g_Config.m_ClButtonColorType, &a);
 			if(BType == 1)
-				g_Config.m_ClButtonColorType = (cur == 2)?0:cur+1;
+				g_Config.m_ClButtonColorType = (Cur == 2) ? 0 : Cur + 1;
 			else if(BType == 2)
-				g_Config.m_ClButtonColorType = (cur == 0)?2:cur-1;
+				g_Config.m_ClButtonColorType = (Cur == 0) ? 2 : Cur - 1;
 			switch(g_Config.m_ClLabelColorType)
 			{
-				case 0: bBuf = "Default";break;
-				case 1: bBuf = "One Color";break;
-				case 2: bBuf = "Rainbow";break;
+			case 0: str_format(aBuf, sizeof(aBuf), "Label's Type: Default"); break;
+			case 1: str_format(aBuf, sizeof(aBuf), "Label's Type: Single Color"); break;
+			case 2: str_format(aBuf, sizeof(aBuf), "Label's Type: Rainbow"); break;
 			}
-			str_format(aBuf, sizeof(aBuf), "Label's Type: %s", bBuf);
-			cur = g_Config.m_ClLabelColorType;
+			str_format(aBuf, sizeof(aBuf), "Label's Type: %s", BBuf);
+			Cur = g_Config.m_ClLabelColorType;
 			int LType = DoButton_CheckBox_Number(&g_Config.m_ClLabelColorType, aBuf, g_Config.m_ClLabelColorType, &b);
 			if(LType == 1)
-				g_Config.m_ClLabelColorType = (cur == 2)?0:cur+1;
+				g_Config.m_ClLabelColorType = (Cur == 2) ? 0 : Cur + 1;
 			else if(LType == 2)
-				g_Config.m_ClLabelColorType = (cur == 0)?2:cur-1;
+				g_Config.m_ClLabelColorType = (Cur == 0) ? 2 : Cur - 1;
 
 			MainView.HSplitTop(25.0f, &a, &MainView);
 			MainView.HSplitTop(5.0f, nullptr, &MainView);
@@ -360,7 +360,6 @@ void CMenus::RenderGame(CUIRect MainView)
 			a.VSplitLeft(a.w / 2.0f, &a, &b);
 			Ui()->DoScrollbarOption(&g_Config.m_ClButtonAlphaActive, &g_Config.m_ClButtonAlphaActive, &a, Localize("Button's Alpha2."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
 			Ui()->DoScrollbarOption(&g_Config.m_ClLabelAlphaActive, &g_Config.m_ClLabelAlphaActive, &b, Localize("Label's Alpha2."), 0, 255, &CUi::ms_LinearScrollbarScale, 0, "");
-
 		}
 	}
 }
