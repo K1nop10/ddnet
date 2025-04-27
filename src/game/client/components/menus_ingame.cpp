@@ -237,7 +237,25 @@ void CMenus::RenderGame(CUIRect MainView)
 		static char s_TouchControlsEditCheckbox;
 		if(DoButton_CheckBox(&s_TouchControlsEditCheckbox, Localize("Edit touch controls"), GameClient()->m_TouchControls.IsEditingActive(), &Button))
 		{
-			GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+			if(GameClient()->m_TouchControls.IsEditingActive() && UnsavedChanges())
+			{
+				m_OldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
+				m_NewSelectedButton = nullptr;
+				PopupConfirm("Unsaved Changes", "Save all changes before turning off the editor?", "Save", "Cancel", &CMenus::PopupConfirm_TurnOffEditor);
+			}
+			else
+			{
+				GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+				if(GameClient()->m_TouchControls.IsEditingActive())
+				{
+					GameClient()->m_TouchControls.ResetVirtualVisibilities();
+					m_EditElement = 0;
+				}
+				else
+				{
+					ResetButtonPointers();
+				}
+			}
 		}
 
 		ButtonBar2.VSplitRight(80.0f, &ButtonBar2, &Button);
@@ -262,13 +280,49 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			Console()->ExecuteLine("toggle_local_console");
 		}
-
+		// Only when these are all false, the preview page is rendered. Once the page is not rendered, update is needed upon next rendering.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || !m_PreviewButton || m_CurrentMenu != EMenuType::MENU_BUTTONS || GameClient()->m_TouchControls.IsButtonEditing())
+			m_NeedUpdatePreview = true;
+		// Quit preview all buttons automatically.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || m_CurrentMenu != EMenuType::MENU_SETTINGS || m_CurrentSetting != ESettingType::BUTTON_CONFIG)
+			GameClient()->m_TouchControls.SetPreviewAllButtons(false);
 		if(GameClient()->m_TouchControls.IsEditingActive())
 		{
-			CUIRect TouchControlsEditor;
-			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &TouchControlsEditor);
-			TouchControlsEditor.HMargin((TouchControlsEditor.h - 230.0f) / 2.0f, &TouchControlsEditor);
-			RenderTouchControlsEditor(TouchControlsEditor);
+			// Resolve issues if needed before rendering, so the elements could have a correct value on this frame.
+			// Issues need to be resolved before popup. So CheckCachedSettings could not be bad.
+			ResolveIssues();
+			// Do Popups if needed.
+			CTouchControls::CPopupParam PopupParam = GameClient()->m_TouchControls.RequiredPopup();
+			if(PopupParam.m_PopupType != CTouchControls::EPopupType::NUM_POPUPS)
+			{
+				DoPopupType(PopupParam);
+				return;
+			}
+			if(m_FirstEnter)
+			{
+				m_aCachedVisibilities[(int)CTouchControls::EButtonVisibility::DEMO_PLAYER] = 0;
+				m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+				m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
+				m_FirstEnter = false;
+			}
+			// Their width is all 505.0f, height is adjustable, you can directly change its h value, so no need for changing where tab is.
+			CUIRect SelectingTab;
+			MainView.HSplitTop(10.0f, nullptr, &MainView);
+			MainView.HMargin((MainView.h - 275.0f) / 2.0f, &MainView);
+			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &MainView);
+			MainView.y -= 70.0f;
+			MainView.HSplitTop(25.0f, &SelectingTab, &MainView);
+
+			// Select tab.
+			RenderSelectingTab(SelectingTab);
+
+			switch(m_CurrentMenu)
+			{
+			case EMenuType::MENU_FILE: RenderTouchControlsEditor(MainView); break;
+			case EMenuType::MENU_BUTTONS: RenderTouchButtonEditor(MainView); break;
+			case EMenuType::MENU_SETTINGS: RenderButtonSettings(MainView); break;
+			default: dbg_assert(false, "Unknown selected tab value.");
+			}
 		}
 	}
 }
@@ -276,7 +330,9 @@ void CMenus::RenderGame(CUIRect MainView)
 void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 {
 	CUIRect Label, Button, Row;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
+	// 2 MAINMARGIN, 4 ROWSIZE, 3ROWGAP, 10.0f extra size so it doesn't look creepy.
+	MainView.h = 2 * 10.0f + 4 * 25.0f + 3 * 5.0f + 10.0f;
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 	MainView.HSplitTop(25.0f, &Row, &MainView);
@@ -363,48 +419,6 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	if(DoButton_Menu(&s_ClipboardExportButton, Localize("Export to clipboard"), 0, &Button))
 	{
 		GameClient()->m_TouchControls.SaveConfigurationToClipboard();
-	}
-
-	MainView.HSplitTop(25.0f, &Label, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-	Ui()->DoLabel(&Label, Localize("Settings"), 20.0f, TEXTALIGN_MC);
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while ingame"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apIngameTouchModes[(int)CTouchControls::EDirectTouchIngameMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Active action", "Direct touch input"), Localize("Aim", "Direct touch input"), Localize("Fire", "Direct touch input"), Localize("Hook", "Direct touch input")};
-	const CTouchControls::EDirectTouchIngameMode OldDirectTouchIngame = GameClient()->m_TouchControls.DirectTouchIngame();
-	static CUi::SDropDownState s_DirectTouchIngameDropDownState;
-	static CScrollRegion s_DirectTouchIngameDropDownScrollRegion;
-	s_DirectTouchIngameDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchIngameDropDownScrollRegion;
-	const CTouchControls::EDirectTouchIngameMode NewDirectTouchIngame = (CTouchControls::EDirectTouchIngameMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchIngame, apIngameTouchModes, std::size(apIngameTouchModes), s_DirectTouchIngameDropDownState);
-	if(OldDirectTouchIngame != NewDirectTouchIngame)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchIngame(NewDirectTouchIngame);
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while spectating"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apSpectateTouchModes[(int)CTouchControls::EDirectTouchSpectateMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Aim", "Direct touch input")};
-	const CTouchControls::EDirectTouchSpectateMode OldDirectTouchSpectate = GameClient()->m_TouchControls.DirectTouchSpectate();
-	static CUi::SDropDownState s_DirectTouchSpectateDropDownState;
-	static CScrollRegion s_DirectTouchSpectateDropDownScrollRegion;
-	s_DirectTouchSpectateDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchSpectateDropDownScrollRegion;
-	const CTouchControls::EDirectTouchSpectateMode NewDirectTouchSpectate = (CTouchControls::EDirectTouchSpectateMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchSpectate, apSpectateTouchModes, std::size(apSpectateTouchModes), s_DirectTouchSpectateDropDownState);
-	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
 	}
 }
 
