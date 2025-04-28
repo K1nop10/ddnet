@@ -1876,7 +1876,7 @@ int CUi::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 	}
 
 	const auto LabelFunc = [CurSelection, pStrs]() {
-		return CurSelection > -1 ? pStrs[CurSelection] : "";
+		return CurSelection > -1 ? Localize(pStrs[CurSelection]) : "";
 	};
 
 	SMenuButtonProperties Props;
@@ -1891,7 +1891,7 @@ int CUi::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 		State.m_SelectionPopupContext.m_Props.m_BorderColor = ColorRGBA(0.7f, 0.7f, 0.7f, 0.9f);
 		State.m_SelectionPopupContext.m_Props.m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 		for(int i = 0; i < Num; ++i)
-			State.m_SelectionPopupContext.m_vEntries.emplace_back(pStrs[i]);
+			State.m_SelectionPopupContext.m_vEntries.emplace_back(Localize(pStrs[i]));
 		State.m_SelectionPopupContext.m_EntryHeight = pRect->h;
 		State.m_SelectionPopupContext.m_EntryPadding = pRect->h >= 20.0f ? 2.0f : 1.0f;
 		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUi::ms_FontmodHeight;

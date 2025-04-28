@@ -6,6 +6,7 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
+#include <bitset>
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -859,6 +860,7 @@ private:
 		BIND = 0,
 		BIND_TOGGLE,
 		PREDEFINED,
+		MIXED,
 		NUM_BEHAVIORS
 	};
 
@@ -896,6 +898,9 @@ private:
 	};
 	ESettingType m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
 	const char *m_apSettings[(int)ESettingType::NUM_SETTING_TYPES] = {"Preview Visibility", "Button Configs"};
+	const char *m_apBehaviors[(int)EBehaviorType::NUM_BEHAVIORS] = {"Bind", "Bind Toggle", "Predefined", "Mixed"};
+	const char *m_apPredefineds[(int)EPredefinedType::NUM_PREDEFINEDS] = {"Extra Menu", "Joystick Hook", "Joystick Fire", "Joystick Aim", "Joystick Action", "Use Action", "Swap Action", "Spectate", "Emoticon", "Ingame Menu"};
+	const char *m_apLabelTypes[(int)CTouchControls::CButtonLabel::EType::NUM_TYPES] = {"Plain", "Localized", "Icon"};
 
 	// Mainly for passing values in popups.
 	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
@@ -912,7 +917,7 @@ private:
 	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
 	int m_EditCommandNumber = 0;
 	int m_EditElement = 0; // 0 for shape&size, 1 for visibility, 2 for behavior.
-	int m_CachedNumber = 0;
+	int m_CachedNumber = 0; // Number for extra menu.
 	std::vector<std::unique_ptr<CLineInputBuffered<1024>>> m_vInputCommands;
 	std::vector<std::unique_ptr<CLineInputBuffered<1024>>> m_vInputLabels;
 	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
@@ -924,6 +929,7 @@ private:
 	// Used for creating ui elements.
 	std::array<CButtonContainer, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
 	std::array<CButtonContainer, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
+	std::array<CButtonContainer, (unsigned)EPredefinedType::NUM_PREDEFINEDS> m_aPredefinedCheckboxes = {};
 	std::array<CButtonContainer, 3> m_aEditElementIds = {};
 	std::array<CButtonContainer, 3> m_aSelectingTabIds = {};
 	std::array<CButtonContainer, 2> m_aSettingTabIds = {};
@@ -937,12 +943,17 @@ private:
 	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
 	bool m_PreviewButton = false;
 	bool m_NeedUpdatePreview = true; // Update previews only upon entering this page, because the update is kinda slow.
-	bool m_BindTogglePreviewExtension = false;
+	bool m_BehaviorPreviewExtension = false;
 	int m_CurrentPreview = 1; // 1 for visible buttons, 0 for not visible.
 	int m_PreviewDetail = 0; // 0 for label, 1 for command.
 	std::vector<CTouchControls::CTouchButton *> m_VisibleButtons;
 	std::vector<CTouchControls::CTouchButton *> m_InvisibleButtons;
 	std::string m_ParsedString;
+
+	// Used for mixed behavior. Label and labeltype uses m_vInputLabels and m_vCachedCommands, number(for extra menu) used m_CachedNumber.
+	std::bitset<(int)EPredefinedType::NUM_PREDEFINEDS> m_ExistingId;
+	int m_BindOrToggle = -1;
+	int m_JoystickType = -1;
 
 	void RenderTouchButtonEditor(CUIRect MainView);
 	bool RenderLayoutSettingBlock(CUIRect Block);

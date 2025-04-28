@@ -2118,10 +2118,242 @@ English translation by the DDNet Team
 Show spectator cursor
 == Показувати вказівник глядача
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
+This name cannot be used for files and folders
+== 
+
 Map size
+== 
+
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Unsaved Changes
+== 
+
+New button
+== 
+
+Already Created New Button
+== 
+
+A new button is already created, please save or delete it before creating a new one
+== 
+
+No Space
+== 
+
+No enough space for another button.
+== 
+
+Save all changes before creating another button?
+== 
+
+Delete Button
+== 
+
+Are you sure to delete this button? This can't be undone.
+== 
+
+Duplicate
+== 
+
+Save changes before duplicate a button.
+== 
+
+Not Enough Space
+== 
+
+Space is not enough for another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width:
+== 
+
+Height:
+== 
+
+Shape:
+== 
+
+Behavior type:
+== 
+
+Command:
+== 
+
+Type:
+== 
+
+Label:
+== 
+
+Label type:
+== 
+
+Fold list
+== 
+
+Unfold list
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+Bind Type:
+== 
+
+None
+== 
+
+Bind
+== 
+
+Bind Toggle
+== 
+
+Bind Command:
+== 
+
+Included
+== 
+
+Excluded
+== 
+
+Ignored
+== 
+
+No button selected.
+== 
+
+Long press on a touch button to select it.
+== 
+
+Select button
+== 
+
+Preview buttons
+== 
+
+Visible Buttons
+== 
+
+Invisible Buttons
+== 
+
+Exit preview
+== 
+
+Preview label
+== 
+
+Preview command
+== 
+
+Width
+== 
+
+Height
+== 
+
+Predefined type:
+== 
+
+Select this
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Active Color
+== 
+
+Inactive Color
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+No space left for the button. Make sure you didn't choose wrong visibilities, or edit its size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible, do you want to de-select it or edit it's visibility?
+== 
+
+Edit
+== 
+
+Width and Height are required to be within the range of [50,000, 500,000].
+== 
+
+Out of bound position value.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Commands in Bind Toggle has less than two command. Add more commands or use Bind behavior.
+== 
+
+Mixed behavior must have more than two behaviors selected
+== 
+
+Illegal settings
+== 
+
+Redundant settings
+== 
+
+Continue Saving
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show number of spectators
@@ -2174,8 +2406,23 @@ Others
 All
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
+Grabber Outline Color
+== 
+
+Grabber Inner Color
+== 
+
 AntiPing: prediction margin
+== 
+
+Rectangle
+== 
+
+Circle
 == 

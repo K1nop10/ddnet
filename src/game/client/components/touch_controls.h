@@ -5,11 +5,13 @@
 #include <base/vmath.h>
 
 #include <engine/input.h>
+#include <engine/shared/localization.h>
 
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
+#include <game/localization.h>
 
 #include <array>
 #include <chrono>
@@ -18,8 +20,11 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
+using namespace std::chrono_literals;
 class CJsonWriter;
 typedef struct _json_value json_value;
 
@@ -29,6 +34,13 @@ public:
 	static constexpr const int BUTTON_SIZE_SCALE = 1000000;
 	static constexpr const int BUTTON_SIZE_MINIMUM = 50000;
 	static constexpr const int BUTTON_SIZE_MAXIMUM = 500000;
+	static constexpr std::chrono::milliseconds BIND_REPEAT_INITIAL_DELAY = 250ms;
+	static constexpr std::chrono::nanoseconds BIND_REPEAT_RATE = std::chrono::nanoseconds(1s) / 15;
+	static constexpr std::chrono::milliseconds LONG_TOUCH_DURATION = 500ms;
+	static constexpr const char *const ACTION_COMMANDS[] = {/* unused */ "", "+fire", "+hook"};
+	static constexpr const char *const ACTION_NAMES[] = {Localizable("Aim"), Localizable("Fire"), Localizable("Hook")};
+	static constexpr const char *const ACTION_SWAP_NAMES[] = {/* unused */ "", Localizable("Active: Fire"), Localizable("Active: Hook")};
+
 	enum class EDirectTouchIngameMode
 	{
 		DISABLED,
@@ -164,7 +176,7 @@ private:
 	static constexpr const char *const DIRECT_TOUCH_SPECTATE_MODE_NAMES[(int)EDirectTouchSpectateMode::NUM_STATES] = {"disabled", "aim"};
 
 	static constexpr const char *const SHAPE_NAMES[(int)EButtonShape::NUM_SHAPES] = {"rect", "circle"};
-	std::array<const char *, (int)EButtonShape::NUM_SHAPES> m_Shapes = {"Rectangle", "Circle"};
+	std::array<const char *, (int)EButtonShape::NUM_SHAPES> m_Shapes = {Localize("Rectangle"), Localize("Circle")};
 
 	class CButtonVisibility
 	{
@@ -510,6 +522,46 @@ public:
 		size_t m_ActiveCommandIndex = 0;
 	};
 
+	/**
+	 * The Mixed behavior.
+	 *
+	 * This button could have many different behaviors.
+	 */
+	class CMixedTouchButtonBehavior : public CTouchButtonBehavior
+	{
+	public:
+		static constexpr const char *const BEHAVIOR_TYPE = "mixed";
+
+		CMixedTouchButtonBehavior(std::string Label, CButtonLabel::EType LabelType, std::vector<std::unique_ptr<CTouchButtonBehavior>> &&vAllBehaviors) :
+			m_Label(std::move(Label)),
+			m_LabelType(LabelType)
+		{
+			for(auto &Behavior : vAllBehaviors)
+			{
+				m_vAllBehaviors.emplace_back(std::move(Behavior));
+			}
+		}
+
+		void Init(CTouchButton *pTouchButton) override;
+
+		CButtonLabel GetLabel() const override;
+		void SetLabel(CButtonLabel Label);
+		std::vector<CTouchButtonBehavior *> GetBehaviors() const;
+		void SetBehaviors(std::vector<std::unique_ptr<CTouchButtonBehavior>> AllBehaviors);
+		void OnActivate() override;
+		void OnDeactivate() override;
+		void OnUpdate() override;
+		void WriteToConfiguration(CJsonWriter *pWriter) override;
+		const char *GetBehaviorType() const override { return BEHAVIOR_TYPE; };
+
+		void UpdateBehavior();
+
+	private:
+		std::string m_Label;
+		CButtonLabel::EType m_LabelType;
+		std::vector<std::unique_ptr<CTouchButtonBehavior>> m_vAllBehaviors;
+	};
+
 private:
 	/**
 	 * Mode of direct touch input while ingame.
@@ -620,6 +672,7 @@ private:
 	std::unique_ptr<CExtraMenuTouchButtonBehavior> ParseExtraMenuBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindTouchButtonBehavior> ParseBindBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindToggleTouchButtonBehavior> ParseBindToggleBehavior(const json_value *pBehaviorObject);
+	std::unique_ptr<CMixedTouchButtonBehavior> ParseMixedBehavior(const json_value *pBehaviorObject);
 	void WriteConfiguration(CJsonWriter *pWriter);
 
 	class CQuadtreeNode
@@ -709,19 +762,6 @@ public:
 	bool PreviewAllButtons() const { return m_PreviewAllButtons; }
 	void SetPreviewAllButtons(bool Preview) { m_PreviewAllButtons = Preview; }
 
-	// The extra menu behavior will use m_CachedNumber in CMenus.
-	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {
-		{CExtraMenuTouchButtonBehavior::BEHAVIOR_ID, [&]() { return std::make_unique<CExtraMenuTouchButtonBehavior>(0); }},
-		{CJoystickHookTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickHookTouchButtonBehavior>(); }},
-		{CJoystickFireTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickFireTouchButtonBehavior>(); }},
-		{CJoystickAimTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickAimTouchButtonBehavior>(); }},
-		{CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickActionTouchButtonBehavior>(); }},
-		{CUseActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CUseActionTouchButtonBehavior>(); }},
-		{CSwapActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CSwapActionTouchButtonBehavior>(); }},
-		{CSpectateTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CSpectateTouchButtonBehavior>(); }},
-		{CEmoticonTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CEmoticonTouchButtonBehavior>(); }},
-		{CIngameMenuTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CIngameMenuTouchButtonBehavior>(); }}};
-
 	// Set the EPopupType and call
 	enum class EPopupType
 	{
@@ -751,10 +791,11 @@ public:
 	// This is usually for update cached settings in button editor.
 	enum class EIssueType
 	{
-		// Update Cached settings from m_TargetButton.
+		// Update Cached settings from m_pTargetButton.
 		CACHE_SETTINGS = 0,
-		// Save Cached settings to m_TargetButton.
+		// Save Cached settings to m_pTargetButton.
 		SAVE_SETTINGS,
+		CACHE_POS,
 		NUM_ISSUES
 	};
 
@@ -763,17 +804,55 @@ public:
 	public:
 		// Whether the issue is finished.
 		bool m_Finished = true;
-		CTouchButton *m_TargetButton = nullptr;
+		CTouchButton *m_pTargetButton = nullptr;
 	};
 
 	bool IsIssueNotFinished();
-	std::array<CTouchControls::CIssueParam, (unsigned)CTouchControls::EIssueType::NUM_ISSUES> Issues();
+	std::array<CTouchControls::CIssueParam, (unsigned)EIssueType::NUM_ISSUES> Issues();
 
 private:
 	CPopupParam m_PopupParam;
 	bool m_UnsavedChanges = false;
 
-	std::array<CIssueParam, (int)EIssueType::NUM_ISSUES> m_IssueParam;
+	std::array<CIssueParam, (unsigned)EIssueType::NUM_ISSUES> m_IssueParam;
+
+public:
+	// Factories.
+	const std::unordered_map<std::string, std::function<std::unique_ptr<CPredefinedTouchButtonBehavior>(const json_value *pBehaviorObject)>> m_ParseFactory = {
+		{CExtraMenuTouchButtonBehavior::BEHAVIOR_ID, [&](const json_value *pBehavior) { return ParseExtraMenuBehavior(pBehavior); }},
+		{CJoystickHookTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickHookTouchButtonBehavior>(); }},
+		{CJoystickFireTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickFireTouchButtonBehavior>(); }},
+		{CJoystickAimTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickAimTouchButtonBehavior>(); }},
+		{CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickActionTouchButtonBehavior>(); }},
+		{CUseActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CUseActionTouchButtonBehavior>(); }},
+		{CSwapActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CSwapActionTouchButtonBehavior>(); }},
+		{CSpectateTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CSpectateTouchButtonBehavior>(); }},
+		{CEmoticonTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CEmoticonTouchButtonBehavior>(); }},
+		{CIngameMenuTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CIngameMenuTouchButtonBehavior>(); }}};
+
+	// The extra menu behavior will use m_CachedNumber in CMenus.
+	const CBehaviorFactoryEditor m_BehaviorFactoriesEditor[10] = {
+		{CExtraMenuTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CExtraMenuTouchButtonBehavior>(0); }},
+		{CJoystickHookTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickHookTouchButtonBehavior>(); }},
+		{CJoystickFireTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickFireTouchButtonBehavior>(); }},
+		{CJoystickAimTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickAimTouchButtonBehavior>(); }},
+		{CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CJoystickActionTouchButtonBehavior>(); }},
+		{CUseActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CUseActionTouchButtonBehavior>(); }},
+		{CSwapActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CSwapActionTouchButtonBehavior>(); }},
+		{CSpectateTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CSpectateTouchButtonBehavior>(); }},
+		{CEmoticonTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CEmoticonTouchButtonBehavior>(); }},
+		{CIngameMenuTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CIngameMenuTouchButtonBehavior>(); }}};
+
+	const std::unordered_map<std::string, std::function<std::unique_ptr<CTouchButtonBehavior>(const json_value *pBehaviorObject)>> m_StandardFactory = {
+		{CBindTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseBindBehavior(pBehaviorObject); }},
+		{CBindToggleTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseBindToggleBehavior(pBehaviorObject); }},
+		{CPredefinedTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParsePredefinedBehavior(pBehaviorObject); }},
+		{CMixedTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseMixedBehavior(pBehaviorObject); }}};
+
+	const std::unordered_map<std::string, CButtonLabel::EType> m_LabelTypeFactory = {
+		{LABEL_TYPE_NAMES[(int)CButtonLabel::EType::PLAIN], CButtonLabel::EType::PLAIN},
+		{LABEL_TYPE_NAMES[(int)CButtonLabel::EType::LOCALIZED], CButtonLabel::EType::LOCALIZED},
+		{LABEL_TYPE_NAMES[(int)CButtonLabel::EType::ICON], CButtonLabel::EType::ICON}};
 };
 
 #endif

@@ -1143,11 +1143,15 @@ English translation by the DDNet Team
 == Catalan translation by Ryozuki
 
 [Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
 [Graphics error]
@@ -1368,6 +1372,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 A demo with this name already exists
 == 
 
@@ -1389,10 +1396,10 @@ Videos directory
 Video was saved to '%s'
 == 
 
-Unable to save the skin
+Unable to save the skin with a reserved name
 == 
 
-Unable to save the skin with a reserved name
+Unable to save the skin
 == 
 
 Trying to determine UDP connectivity…
@@ -1642,32 +1649,6 @@ Are you sure that you want to import the touch controls from the clipboard? This
 Export to clipboard
 == 
 
-Direct touch input while ingame
-== 
-
-[Direct touch input]
-Disabled
-== 
-
-[Direct touch input]
-Active action
-== 
-
-[Direct touch input]
-Aim
-== 
-
-[Direct touch input]
-Fire
-== 
-
-[Direct touch input]
-Hook
-== 
-
-Direct touch input while spectating
-== 
-
 Error loading touch controls
 == 
 
@@ -1731,6 +1712,248 @@ Deactivate all
 Menu opened. Press Esc key again to close menu.
 == 
 
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Unsaved Changes
+== 
+
+New button
+== 
+
+Already Created New Button
+== 
+
+A new button is already created, please save or delete it before creating a new one
+== 
+
+No Space
+== 
+
+No enough space for another button.
+== 
+
+Save all changes before creating another button?
+== 
+
+Cancel
+== 
+
+Delete Button
+== 
+
+Are you sure to delete this button? This can't be undone.
+== 
+
+Duplicate
+== 
+
+Save changes before duplicate a button.
+== 
+
+Not Enough Space
+== 
+
+Space is not enough for another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width:
+== 
+
+Height:
+== 
+
+Shape:
+== 
+
+Behavior type:
+== 
+
+Command:
+== 
+
+Type:
+== 
+
+Label:
+== 
+
+Label type:
+== 
+
+Fold list
+== 
+
+Unfold list
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+Bind Type:
+== 
+
+None
+== 
+
+Bind
+== 
+
+Bind Toggle
+== 
+
+Bind Command:
+== 
+
+Included
+== 
+
+Excluded
+== 
+
+Ignored
+== 
+
+No button selected.
+== 
+
+Long press on a touch button to select it.
+== 
+
+Select button
+== 
+
+Preview buttons
+== 
+
+Visible Buttons
+== 
+
+Invisible Buttons
+== 
+
+Exit preview
+== 
+
+Preview label
+== 
+
+Preview command
+== 
+
+Width
+== 
+
+Height
+== 
+
+Predefined type:
+== 
+
+Select this
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Active Color
+== 
+
+Inactive Color
+== 
+
+Direct touch input while ingame
+== 
+
+[Direct touch input]
+Disabled
+== 
+
+[Direct touch input]
+Active action
+== 
+
+[Direct touch input]
+Aim
+== 
+
+[Direct touch input]
+Fire
+== 
+
+[Direct touch input]
+Hook
+== 
+
+Direct touch input while spectating
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+No space left for the button. Make sure you didn't choose wrong visibilities, or edit its size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible, do you want to de-select it or edit it's visibility?
+== 
+
+Edit
+== 
+
+Width and Height are required to be within the range of [50,000, 500,000].
+== 
+
+Out of bound position value.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Commands in Bind Toggle has less than two command. Add more commands or use Bind behavior.
+== 
+
+Mixed behavior must have more than two behaviors selected
+== 
+
+Illegal settings
+== 
+
+Redundant settings
+== 
+
+Continue Saving
+== 
+
 [Hertz]
 Hz
 == 
@@ -1759,10 +1982,22 @@ Player info change cooldown
 Download community skins
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
 Create a random skin
 == 
 
 Choose default eyes when joining a server
+== 
+
+No skins match your filter criteria
 == 
 
 Open the directory to add custom skins
@@ -1819,9 +2054,6 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
 == 
 
 Allows maps to render with more detail
@@ -1979,6 +2211,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2055,6 +2290,12 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Grabber Outline Color
+== 
+
+Grabber Inner Color
 == 
 
 Set all to Rifle
@@ -2171,6 +2412,12 @@ Active: Fire
 == 
 
 Active: Hook
+== 
+
+Rectangle
+== 
+
+Circle
 == 
 
 Moved ingame

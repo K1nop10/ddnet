@@ -2319,6 +2319,12 @@ if(CLIENT)
     component.h
     components/background.cpp
     components/background.h
+    components/behaviors/predefined_action.cpp
+    components/behaviors/predefined_classic.cpp
+    components/behaviors/predefined_extra_menu.cpp
+    components/behaviors/standard_bind.cpp
+    components/behaviors/standard_bind_toggle.cpp
+    components/behaviors/standard_mixed.cpp
     components/binds.cpp
     components/binds.h
     components/broadcast.cpp
@@ -2397,6 +2403,7 @@ if(CLIENT)
     components/tooltips.h
     components/touch_controls.cpp
     components/touch_controls.h
+    components/touch_editor.cpp
     components/voting.cpp
     components/voting.h
     gameclient.cpp

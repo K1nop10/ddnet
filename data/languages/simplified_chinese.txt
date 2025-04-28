@@ -1989,7 +1989,7 @@ Fire
 
 [Direct touch input]
 Hook
-== 钩索
+== 出钩
 
 Direct touch input while spectating
 == 旁观时直接触摸操作
@@ -2185,3 +2185,331 @@ All
 
 AntiPing: prediction margin
 == 延迟补偿：预测容差
+
+Bind
+== 绑定
+
+Bind Toggle
+== 绑定切换
+
+Predefined
+== 预设
+
+Mixed
+== 融合
+
+Extra Menu
+== 可见度开关
+
+Joystick Hook
+== 出钩摇杆
+
+Joystick Fire
+== 开火摇杆
+
+Joystick Aim
+== 瞄准摇杆
+
+Joystick Action
+== 执行摇杆
+
+Use Action
+== 执行
+
+Swap Action
+== 切换执行动作
+
+Ingame Menu
+== 打开菜单
+
+Plain
+== 不变
+
+Localized
+== 自动翻译
+
+Icon
+== 图标化
+
+Layout
+== 布局
+
+Visibility
+== 可见度
+
+Behavior
+== 行为
+
+Unsaved Changes
+== 更改未保存
+
+New button
+== 新按键
+
+Already Created New Button
+== 已经创建新按键
+
+A new button is already created, please save or delete it before creating a new one
+== 已经创建了新按键，请先保存或者删除它再继续创建
+
+No Space
+== 空间不足
+
+No enough space for another button.
+== 没有足够的空间用于创建按钮
+
+Save all changes before creating another button?
+== 创建新按键前先保存所有的设置？
+
+Delete Button
+== 删除按键
+
+Are you sure to delete this button? This can't be undone.
+== 你确定要删除这个按键吗？该操作无法撤销
+
+Duplicate
+== 复制按键
+
+Save changes before duplicate a button.
+== 复制按键前先保存设置
+
+Not Enough Space
+== 空间不足
+
+Space is not enough for another button with this size. The button has been resized.
+== 空间不足以创建该尺寸的按键，该按键已被自动缩小
+
+Deselect
+== 取消选择
+
+You'll lose unsaved changes after deselecting.
+== 取消选择后未保存的设置不会自动保存
+
+Width:
+== 宽:
+
+Height:
+== 高:
+
+Shape:
+== 形状:
+
+Behavior type:
+== 行为种类:
+
+Command:
+== 指令:
+
+Type:
+== 种类:
+
+Label:
+== 标签:
+
+Label type:
+== 标签种类:
+
+Fold list
+== 折叠
+
+Unfold list
+== 展开
+
+Add command
+== 添加指令
+
+Delete command
+== 删除指令
+
+Bind Type:
+== 绑定命令类型:
+
+None
+== 无
+
+Bind Command:
+== 绑定指令:
+
+Included
+== 包括
+
+Excluded
+== 移除
+
+Ignored
+== 无视
+
+No button selected.
+== 当前没有按键被选择
+
+Long press on a touch button to select it.
+== 长按即可选中按键
+
+Select button
+== 选择一个按键
+
+Preview buttons
+== 预览按键
+
+Visible Buttons
+== 可见的按键
+
+Invisible Buttons
+== 不可见的按键
+
+Exit preview
+== 退出预览
+
+Preview label
+== 预览标签
+
+Preview command
+== 预览指令
+
+Width
+== 宽
+
+Height
+== 高
+
+Predefined type:
+== 预设类型:
+
+Select this
+== 选择
+
+File
+== 文件
+
+Buttons
+== 按键
+
+Preview button visibility while the editor is active.
+== 在按键编辑器内预览按键的可见度。
+
+Active Color
+== 激活时颜色
+
+Inactive Color
+== 未激活时颜色
+
+Show all buttons
+== 显示所有按键
+
+Save all changes before switching selected button?
+== 在更换所选的按键前保存所有的更改？
+
+Discard
+== 舍弃更改
+
+No space left for the button. Make sure you didn't choose wrong visibilities, or edit its size.
+== 空间不足以放下该按键。确保你没有选择错误的可见度，或考虑更改它的大小。
+
+Selected button not visible
+== 选中的按键不可见
+
+The selected button is not visible, do you want to de-select it or edit it's visibility?
+== 该按键不可见，你想取消选择它还是更改可见度？
+
+Edit
+== 更改
+
+Width and Height are required to be within the range of [50,000, 500,000].
+== 高和宽需要不小于50000且不大于500000。
+
+Out of bound position value.
+== 坐标数据超出范围
+
+The selected button is overlapping with other buttons.
+== 选中的按钮和其他按钮有重叠部分
+
+Commands in Bind Toggle has less than two command. Add more commands or use Bind behavior.
+== 按键中绑定切换行为含有两条以下命令。添加更多命令或者使用绑定行为。
+
+Illegal settings
+== 非法设置
+
+Redundant settings
+== 冗余设置
+
+Continue Saving
+== 仍然保存
+
+Ingame
+== 游戏内
+
+Zoom Allowed
+== 允许缩放时
+
+Vote Active
+== 当前有投票
+
+Dummy Allowed
+== 允许分身时
+
+Dummy Connected
+== 分身已连接
+
+Rcon Authed
+== 有管理权限时
+
+Demo Player
+== Demo播放器中
+
+Extra Menu 1
+== 可见度开关1
+
+Extra Menu 2
+== 可见度开关2
+
+Extra Menu 3
+== 可见度开关3
+
+Extra Menu 4
+== 可见度开关4
+
+Extra Menu 5
+== 可见度开关5
+
+Rectangle
+== 矩形
+
+Circle
+== 圆形
+
+Preview Visibility
+== 编辑器内可见度
+
+Button Configs
+== 按键设置
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+This name cannot be used for files and folders
+== 
+
+Mixed behavior must have more than two behaviors selected
+== 需选择至少两个行为才能进行融合
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Preview player's name plate
+== 
+
+Grabber Outline Color
+== 
+
+Grabber Inner Color
+== 

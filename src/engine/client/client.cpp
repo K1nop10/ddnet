@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <SDL_hints.h>
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
@@ -4937,6 +4938,7 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
 #endif
 
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
