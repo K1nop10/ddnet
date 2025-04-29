@@ -1361,6 +1361,15 @@ English translation by the DDNet Team
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
+None
+== 
+
+Bind
+== 
+
+Bind Toggle
+== 
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1546,6 +1555,9 @@ There's an unsaved map in the editor, you might want to save it.
 == 
 
 Continue anyway?
+== 
+
+The editing changes to touch controls hasn't been saved to file.
 == 
 
 This name cannot be used for files and folders
@@ -1930,10 +1942,19 @@ Shape:
 Behavior type:
 == 
 
+Behavior Info
+== 
+
+Show Info
+== 
+
 Command:
 == 
 
 Type:
+== 
+
+Predefined Info
 == 
 
 Label:
@@ -1955,15 +1976,6 @@ Delete command
 == 
 
 Bind Type:
-== 
-
-None
-== 
-
-Bind
-== 
-
-Bind Toggle
 == 
 
 Bind Command:
@@ -2101,6 +2113,51 @@ Redundant settings
 == 
 
 Continue Saving
+== 
+
+Info
+== 
+
+Execute console commands like regular key binds. If you hold the button, commands will be executed repeatedly.
+== 
+
+Execute console commands like regular key binds upon deactivating.
+== 
+
+Cycle between executing one of two or more specified commands
+== 
+
+This behavior can have several behaviors at the same time.
+== 
+
+Toggles the visibilities "Extra Menu". Also opens ingame menu on long press.
+== 
+
+Virtual joysticks which will aim and hook at the same time.
+== 
+
+Virtual joysticks which will aim and fire at the same time.
+== 
+
+Virtual joysticks which will aim.
+== 
+
+Virtual joysticks which will aim and use active action at the same time. See "Swap Action".
+== 
+
+Uses the active action. See "Swap Action".
+== 
+
+Swaps the active action between "Fire" and "Hook". Will use the inactive action when its activated while a joystick is active
+== 
+
+Opens the spectator menu while spectating.
+== 
+
+Opens the emoticon selector.
+== 
+
+Opens the ingame menu.
 == 
 
 [Hertz]

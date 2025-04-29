@@ -2323,6 +2323,7 @@ if(CLIENT)
     components/behaviors/predefined_classic.cpp
     components/behaviors/predefined_extra_menu.cpp
     components/behaviors/standard_bind.cpp
+    components/behaviors/standard_bind_deactivate.cpp
     components/behaviors/standard_bind_toggle.cpp
     components/behaviors/standard_mixed.cpp
     components/binds.cpp

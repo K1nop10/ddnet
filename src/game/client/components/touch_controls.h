@@ -484,6 +484,38 @@ public:
 	};
 
 	/**
+	 * Bind, but execute command on deactivate.
+	 */
+
+	class CBindDeactivateTouchButtonBehavior : public CTouchButtonBehavior
+	{
+	public:
+		static constexpr const char *const BEHAVIOR_TYPE = "bind-deactivate";
+
+		CBindDeactivateTouchButtonBehavior(const char *pLabel, CButtonLabel::EType LabelType, const char *pCommand) :
+			m_Label(pLabel),
+			m_LabelType(LabelType),
+			m_Command(pCommand) {}
+
+		CButtonLabel GetLabel() const override;
+		void SetLabel(CButtonLabel Label);
+		std::string GetCommand() const { return m_Command; }
+		void SetCommand(std::string &&Command);
+		void OnDeactivate() override;
+		void WriteToConfiguration(CJsonWriter *pWriter) override;
+		const char *GetBehaviorType() const override { return BEHAVIOR_TYPE; }
+
+	private:
+		std::string m_Label;
+		CButtonLabel::EType m_LabelType;
+		std::string m_Command;
+
+		bool m_Repeating = false;
+		std::chrono::nanoseconds m_LastUpdateTime;
+		std::chrono::nanoseconds m_AccumulatedRepeatingTime;
+	};
+
+	/**
 	 * Generic behavior implementation that switches between executing one of two or more console commands.
 	 */
 	class CBindToggleTouchButtonBehavior : public CTouchButtonBehavior
@@ -671,6 +703,7 @@ private:
 	std::unique_ptr<CPredefinedTouchButtonBehavior> ParsePredefinedBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CExtraMenuTouchButtonBehavior> ParseExtraMenuBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindTouchButtonBehavior> ParseBindBehavior(const json_value *pBehaviorObject);
+	std::unique_ptr<CBindDeactivateTouchButtonBehavior> ParseBindDeactivateBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CBindToggleTouchButtonBehavior> ParseBindToggleBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CMixedTouchButtonBehavior> ParseMixedBehavior(const json_value *pBehaviorObject);
 	void WriteConfiguration(CJsonWriter *pWriter);
@@ -845,6 +878,7 @@ public:
 
 	const std::unordered_map<std::string, std::function<std::unique_ptr<CTouchButtonBehavior>(const json_value *pBehaviorObject)>> m_StandardFactory = {
 		{CBindTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseBindBehavior(pBehaviorObject); }},
+		{CBindDeactivateTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseBindDeactivateBehavior(pBehaviorObject); }},
 		{CBindToggleTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseBindToggleBehavior(pBehaviorObject); }},
 		{CPredefinedTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParsePredefinedBehavior(pBehaviorObject); }},
 		{CMixedTouchButtonBehavior::BEHAVIOR_TYPE, [&](const json_value *pBehaviorObject) { return ParseMixedBehavior(pBehaviorObject); }}};

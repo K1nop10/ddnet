@@ -2483,6 +2483,15 @@ Preview Visibility
 Button Configs
 == 按键设置
 
+Mixed behavior must have more than two behaviors selected
+== 需选择至少两个行为才能进行融合
+
+Bind Deactivate
+== 绑定释放
+
+The editing changes to touch controls hasn't been saved to file.
+== 键位设置尚未保存到文件内，下次进入时会丢失未保存的设置。
+
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
@@ -2490,11 +2499,62 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 This name cannot be used for files and folders
 == 
 
-Mixed behavior must have more than two behaviors selected
-== 需选择至少两个行为才能进行融合
+Behavior Info
+== 行为信息
+
+Show Info
+== 显示信息
+
+Predefined Info
+== 预定义行为信息
+
+Info
+== 帮助
+
+Execute console commands like regular key binds. If you hold the button, commands will be executed repeatedly.
+== 像普通按键绑定一样执行控制台命令。长按会重复执行命令。
+
+Execute console commands like regular key binds upon deactivating.
+== 松开按键时，像普通按键绑定一样执行控制台命令。
+
+Cycle between executing one of two or more specified commands
+== 在多条控制台命令之间循环执行。
+
+This behavior can have several behaviors at the same time.
+== 该行为可以同时执行多个其他的行为。
+
+Toggles the visibilities "Extra Menu". Also opens ingame menu on long press.
+== 开关对应的可见度。长按时打开游戏内菜单。
+
+Virtual joysticks which will aim and hook at the same time.
+== 用于同时瞄准和出钩的摇杆。
+
+Virtual joysticks which will aim and fire at the same time.
+== 用于同时瞄准和开火的摇杆。
+
+Virtual joysticks which will aim.
+== 仅用于同时瞄准的摇杆。
+
+Virtual joysticks which will aim and use active action at the same time. See "Swap Action".
+== 用于同时瞄准和执行当前活跃行为的摇杆。见“切换执行动作”。
+
+Uses the active action. See "Swap Action".
+== 直接执行当前活跃行为。见“切换执行动作”。
+
+Swaps the active action between "Fire" and "Hook". Will use the inactive action when its activated while a joystick is active
+== 循环切换当前活跃行为，可用的值有开火和出钩。若被按下时有摇杆被激活，则会执行当前不活跃的行为。
+
+Opens the spectator menu while spectating.
+== 旁观时打开旁观菜单。
+
+Opens the emoticon selector.
+== 打开表情选择器。
+
+Opens the ingame menu.
+== 打开游戏内菜单。
 
 This skin name cannot be used.
-== 
+== 该皮肤名不可用。
 
 Skin could not be loaded due to an error. Check the local console for details.
 == 

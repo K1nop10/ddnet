@@ -858,6 +858,7 @@ private:
 	enum class EBehaviorType
 	{
 		BIND = 0,
+		BIND_DEACTIVATE,
 		BIND_TOGGLE,
 		PREDEFINED,
 		MIXED,
@@ -898,7 +899,7 @@ private:
 	};
 	ESettingType m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
 	const char *m_apSettings[(int)ESettingType::NUM_SETTING_TYPES] = {"Preview Visibility", "Button Configs"};
-	const char *m_apBehaviors[(int)EBehaviorType::NUM_BEHAVIORS] = {"Bind", "Bind Toggle", "Predefined", "Mixed"};
+	const char *m_apBehaviors[(int)EBehaviorType::NUM_BEHAVIORS] = {"Bind", "Bind Deactivate", "Bind Toggle", "Predefined", "Mixed"};
 	const char *m_apPredefineds[(int)EPredefinedType::NUM_PREDEFINEDS] = {"Extra Menu", "Joystick Hook", "Joystick Fire", "Joystick Aim", "Joystick Action", "Use Action", "Swap Action", "Spectate", "Emoticon", "Ingame Menu"};
 	const char *m_apLabelTypes[(int)CTouchControls::CButtonLabel::EType::NUM_TYPES] = {"Plain", "Localized", "Icon"};
 
@@ -936,7 +937,7 @@ private:
 	std::vector<CButtonContainer> m_vSelectPreviewButtons;
 	std::vector<CButtonContainer> m_vBindToggleAddButtons;
 	std::vector<CButtonContainer> m_vBindToggleDeleteButtons;
-	std::vector<std::array<CButtonContainer, 3>> m_vLabelTypeRadios;
+	std::vector<std::pair<CUi::SDropDownState, CScrollRegion>> m_vDropDowns;
 
 	// Functional variables.
 	bool m_FirstEnter = true; // Execute something when first opening the editor.
@@ -1009,5 +1010,6 @@ private:
 	int CalculatePredefinedType(const char *Type);
 	void LimitStringLength(std::string &Target, unsigned MaxLength);
 	void InitLineInputs();
+	void ShowBehaviorsInfo();
 };
 #endif

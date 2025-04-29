@@ -1833,10 +1833,6 @@ https://wiki.ddnet.org/wiki/Mapping
 English translation by the DDNet Team
 == Перакладзена на беларускую: arionwt1997, Chill [TD] і PoKeMoN [TD]
 
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
 Could not resolve connect address '%s'. See local console for details.
 == Не атрымалася вызначыць адрас падлучэння '%s'. Для атрымання дэталей праверце лакальную кансоль.
 
@@ -1899,9 +1895,6 @@ Unable to save the skin
 
 Unable to save the skin with a reserved name
 == Немагчыма захаваць скін з зарэзерваваным імём
-
-Unable to save the skin
-== 
 
 No local servers found (ports %d-%d)
 == Лакальныя серверы не знойдзены (парты %d-%d)
@@ -2034,6 +2027,181 @@ minimum
 maximum
 == максімальны
 
+None
+== 
+
+Bind
+== 
+
+Bind Toggle
+== 
+
+[Hertz]
+Hz
+== Гц
+
+Saves file
+== Файл захаванняў
+
+Open the saves file
+== Адкрыць файл захаванняў
+
+Show FPS
+== Паказваць FPS
+
+Renders your frame rate in the top right
+== Выносіць вашу частату кадраў у верхні правы вугал
+
+Show spectator cursor
+== Паказваць курсор назіранага гульца пры назіранні
+
+Show client IDs (scoreboard, chat, spectator)
+== Паказваць ID кліентаў (табло, чат, назіральнік)
+
+Show number of spectators
+== Паказваць колькасць назіральнікаў
+
+[Show name plates]
+None
+== Ніякія
+
+[Show name plates]
+Own
+== Мае
+
+[Show name plates]
+Others
+== Іншыя
+
+[Show name plates]
+All
+== Усе
+
+Name plates offset
+== Зрушэнне таблічак з імёнамі
+
+Show friend icon in name plates
+== Паказваць іконку сябра ў таблічках з імёнамі
+
+Show client IDs in name plates
+== Паказваць ID кліента ў таблічках імёнаў
+
+Show client IDs on a seperate line
+== Паказваць ID кліента ў асобным радку
+
+Client IDs size
+== Памер ID кліента
+
+Hook Strength
+== Сіла крука
+
+Size of hook strength icon and number indicator
+== Памер іконкі сілы крука і нумара індыкатара
+
+Key Presses
+== Націсканні клавіш
+
+Show players' key presses
+== Паказваць націснутыя гульцамі клавішы
+
+[Show players' key presses]
+None
+== Ніякія
+
+[Show players' key presses]
+Own
+== Мае
+
+[Show players' key presses]
+Others
+== Іншыя
+
+[Show players' key presses]
+All
+== Усе
+
+Size of key press icons
+== Памер іконак націснутых клавіш
+
+Preview dummy's name plate
+== Прадпрагляд таблічкі з імем даммі
+
+Width of your own hook collision line
+== Шырыня вашай лініі сутыкнення крука
+
+Width of others' hook collision line
+== Шырыня лініі сутыкнення крука іншага гульца
+
+Preview 'Hook collisions' being pressed
+== Прадпрагляд пры націсканні 'Сутыкненні крука'
+
+AntiPing: prediction margin
+== АнтыПінг: мяжа прагназавання
+
+Basic
+== Асноўныя
+
+Custom
+== Карыстацкія
+
+Are you sure that you want to delete '%s'?
+== Вы ўпэўненыя, што хочаце выдаліць '%s'?
+
+Delete skin
+== Выдаліць скін
+
+Unable to delete skin
+== Немагчыма выдаліць скін
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Не атрымалася запусціць сервер. Не забудзьцеся даць дазвол на атрыманне апавяшчэнняў у наладах праграмы, каб сервер мог працаваць у фонавым рэжыме.
+
+[skins]
+Body
+== Цела
+
+[skins]
+Marking
+== Афарбоўка
+
+[skins]
+Decoration
+== Упрыгажэння
+
+[skins]
+Hands
+== Рукі
+
+[skins]
+Feet
+== Ногі
+
+[skins]
+Eyes
+== Вочы
+
+Aim
+== Прыцэл
+
+Active: Fire
+== Актыўна: Стрэл
+
+Active: Hook
+== Актыўна: Крук
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+The editing changes to touch controls hasn't been saved to file.
+== 
+
+This name cannot be used for files and folders
+== 
+
+Unable to save the skin
+== 
+
 Layout
 == 
 
@@ -2100,10 +2268,19 @@ Shape:
 Behavior type:
 == 
 
+Behavior Info
+== 
+
+Show Info
+== 
+
 Command:
 == 
 
 Type:
+== 
+
+Predefined Info
 == 
 
 Label:
@@ -2125,15 +2302,6 @@ Delete command
 == 
 
 Bind Type:
-== 
-
-None
-== 
-
-Bind
-== 
-
-Bind Toggle
 == 
 
 Bind Command:
@@ -2273,15 +2441,50 @@ Redundant settings
 Continue Saving
 == 
 
-[Hertz]
-Hz
-== Гц
+Info
+== 
 
-Saves file
-== Файл захаванняў
+Execute console commands like regular key binds. If you hold the button, commands will be executed repeatedly.
+== 
 
-Open the saves file
-== Адкрыць файл захаванняў
+Execute console commands like regular key binds upon deactivating.
+== 
+
+Cycle between executing one of two or more specified commands
+== 
+
+This behavior can have several behaviors at the same time.
+== 
+
+Toggles the visibilities "Extra Menu". Also opens ingame menu on long press.
+== 
+
+Virtual joysticks which will aim and hook at the same time.
+== 
+
+Virtual joysticks which will aim and fire at the same time.
+== 
+
+Virtual joysticks which will aim.
+== 
+
+Virtual joysticks which will aim and use active action at the same time. See "Swap Action".
+== 
+
+Uses the active action. See "Swap Action".
+== 
+
+Swaps the active action between "Fire" and "Hook". Will use the inactive action when its activated while a joystick is active
+== 
+
+Opens the spectator menu while spectating.
+== 
+
+Opens the emoticon selector.
+== 
+
+Opens the ingame menu.
+== 
 
 This skin name cannot be used.
 == 
@@ -2295,97 +2498,8 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
-Show FPS
-== Паказваць FPS
-
-Renders your frame rate in the top right
-== Выносіць вашу частату кадраў у верхні правы вугал
-
-Show spectator cursor
-== Паказваць курсор назіранага гульца пры назіранні
-
-Show client IDs (scoreboard, chat, spectator)
-== Паказваць ID кліентаў (табло, чат, назіральнік)
-
-Show number of spectators
-== Паказваць колькасць назіральнікаў
-
-[Show name plates]
-None
-== Ніякія
-
-[Show name plates]
-Own
-== Мае
-
-[Show name plates]
-Others
-== Іншыя
-
-[Show name plates]
-All
-== Усе
-
-Name plates offset
-== Зрушэнне таблічак з імёнамі
-
-Show friend icon in name plates
-== Паказваць іконку сябра ў таблічках з імёнамі
-
-Show client IDs in name plates
-== Паказваць ID кліента ў таблічках імёнаў
-
-Show client IDs on a seperate line
-== Паказваць ID кліента ў асобным радку
-
-Client IDs size
-== Памер ID кліента
-
-Hook Strength
-== Сіла крука
-
-Size of hook strength icon and number indicator
-== Памер іконкі сілы крука і нумара індыкатара
-
-Key Presses
-== Націсканні клавіш
-
-Show players' key presses
-== Паказваць націснутыя гульцамі клавішы
-
-[Show players' key presses]
-None
-== Ніякія
-
-[Show players' key presses]
-Own
-== Мае
-
-[Show players' key presses]
-Others
-== Іншыя
-
-[Show players' key presses]
-All
-== Усе
-
-Size of key press icons
-== Памер іконак націснутых клавіш
-
 Preview player's name plate
 == 
-
-Preview dummy's name plate
-== Прадпрагляд таблічкі з імем даммі
-
-Width of your own hook collision line
-== Шырыня вашай лініі сутыкнення крука
-
-Width of others' hook collision line
-== Шырыня лініі сутыкнення крука іншага гульца
-
-Preview 'Hook collisions' being pressed
-== Прадпрагляд пры націсканні 'Сутыкненні крука'
 
 Grabber Outline Color
 == 
@@ -2393,56 +2507,8 @@ Grabber Outline Color
 Grabber Inner Color
 == 
 
-AntiPing: prediction margin
-== АнтыПінг: мяжа прагназавання
+Rectangle
+== 
 
-Basic
-== Асноўныя
-
-Custom
-== Карыстацкія
-
-Are you sure that you want to delete '%s'?
-== Вы ўпэўненыя, што хочаце выдаліць '%s'?
-
-Delete skin
-== Выдаліць скін
-
-Unable to delete skin
-== Немагчыма выдаліць скін
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== Не атрымалася запусціць сервер. Не забудзьцеся даць дазвол на атрыманне апавяшчэнняў у наладах праграмы, каб сервер мог працаваць у фонавым рэжыме.
-
-[skins]
-Body
-== Цела
-
-[skins]
-Marking
-== Афарбоўка
-
-[skins]
-Decoration
-== Упрыгажэння
-
-[skins]
-Hands
-== Рукі
-
-[skins]
-Feet
-== Ногі
-
-[skins]
-Eyes
-== Вочы
-
-Aim
-== Прыцэл
-
-Active: Fire
-== Актыўна: Стрэл
-
-Active: Hook
-== Актыўна: Крук
+Circle
+== 

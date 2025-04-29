@@ -568,7 +568,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
 	if(DoButton_MenuTab(&s_QuitButton, FONT_ICON_POWER_OFF, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], nullptr, nullptr, &QuitColor, 10.0f))
 	{
-		if(m_pClient->Editor()->HasUnsavedData() || (GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
+		if(GameClient()->m_TouchControls.HasEditingChanges() || m_pClient->Editor()->HasUnsavedData() || (GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
 			m_Popup = POPUP_QUIT;
 		}
@@ -1424,6 +1424,12 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(m_pClient->Editor()->HasUnsavedData())
 		{
 			str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("There's an unsaved map in the editor, you might want to save it."), Localize("Continue anyway?"));
+			Props.m_MaxWidth = Part.w - 20.0f;
+			Ui()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_ML, Props);
+		}
+		else if(GameClient()->m_TouchControls.HasEditingChanges())
+		{
+			str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("The editing changes to touch controls hasn't been saved to file."), Localize("Continue anyway?"));
 			Props.m_MaxWidth = Part.w - 20.0f;
 			Ui()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_ML, Props);
 		}
