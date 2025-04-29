@@ -1812,10 +1812,10 @@ void CMenus::ShowBehaviorsInfo()
 {
 	switch(m_EditBehaviorType)
 	{
-	case(int)EBehaviorType::BIND: PopupMessage(Localize("Info"), Localize("Execute console commands like regular key binds. If you hold the button, commands will be executed repeatedly."), "OK");
-	case(int)EBehaviorType::BIND_DEACTIVATE: PopupMessage(Localize("Info"), Localize("Execute console commands like regular key binds upon deactivating."), "OK");
-	case(int)EBehaviorType::BIND_TOGGLE: PopupMessage(Localize("Info"), Localize("Cycle between executing one of two or more specified commands"), "OK");
-	case(int)EBehaviorType::MIXED: PopupMessage(Localize("Info"), Localize("This behavior can have several behaviors at the same time."), "OK");
+	case(int)EBehaviorType::BIND: PopupMessage(Localize("Info"), Localize("Execute console commands like regular key binds. If you hold the button, commands will be executed repeatedly."), "OK"); break;
+	case(int)EBehaviorType::BIND_DEACTIVATE: PopupMessage(Localize("Info"), Localize("Execute console commands like regular key binds upon deactivating."), "OK"); break;
+	case(int)EBehaviorType::BIND_TOGGLE: PopupMessage(Localize("Info"), Localize("Cycle between executing one of two or more specified commands"), "OK"); break;
+	case(int)EBehaviorType::MIXED: PopupMessage(Localize("Info"), Localize("This behavior can have several behaviors at the same time."), "OK"); break;
 	case(int)EBehaviorType::PREDEFINED: break;
 	default: dbg_assert(false, "Unknown standard behavior detected.");
 	}
@@ -1823,16 +1823,16 @@ void CMenus::ShowBehaviorsInfo()
 	{
 		switch(m_PredefinedBehaviorType)
 		{
-		case(int)CMenus::EPredefinedType::EXTRA_MENU: PopupMessage(Localize("Info"), Localize("Toggles the visibilities \"Extra Menu\". Also opens ingame menu on long press."), "OK");
-		case(int)CMenus::EPredefinedType::JOYSTICK_HOOK: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and hook at the same time."), "OK");
-		case(int)CMenus::EPredefinedType::JOYSTICK_FIRE: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and fire at the same time."), "OK");
-		case(int)CMenus::EPredefinedType::JOYSTICK_AIM: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim."), "OK");
-		case(int)CMenus::EPredefinedType::JOYSTICK_ACTION: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and use active action at the same time. See \"Swap Action\"."), "OK");
-		case(int)CMenus::EPredefinedType::USE_ACTION: PopupMessage(Localize("Info"), Localize("Uses the active action. See \"Swap Action\"."), "OK");
-		case(int)CMenus::EPredefinedType::SWAP_ACTION: PopupMessage(Localize("Info"), Localize("Swaps the active action between \"Fire\" and \"Hook\". Will use the inactive action when its activated while a joystick is active"), "OK");
-		case(int)CMenus::EPredefinedType::SPECTATE: PopupMessage(Localize("Info"), Localize("Opens the spectator menu while spectating."), "OK");
-		case(int)CMenus::EPredefinedType::EMOTICON: PopupMessage(Localize("Info"), Localize("Opens the emoticon selector."), "OK");
-		case(int)CMenus::EPredefinedType::INGAME_MENU: PopupMessage(Localize("Info"), Localize("Opens the ingame menu."), "OK");
+		case(int)CMenus::EPredefinedType::EXTRA_MENU: PopupMessage(Localize("Info"), Localize("Toggles the visibilities \"Extra Menu\". Also opens ingame menu on long press."), "OK"); break;
+		case(int)CMenus::EPredefinedType::JOYSTICK_HOOK: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and hook at the same time."), "OK"); break;
+		case(int)CMenus::EPredefinedType::JOYSTICK_FIRE: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and fire at the same time."), "OK"); break;
+		case(int)CMenus::EPredefinedType::JOYSTICK_AIM: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim."), "OK"); break;
+		case(int)CMenus::EPredefinedType::JOYSTICK_ACTION: PopupMessage(Localize("Info"), Localize("Virtual joysticks which will aim and use active action at the same time. See \"Swap Action\"."), "OK"); break;
+		case(int)CMenus::EPredefinedType::USE_ACTION: PopupMessage(Localize("Info"), Localize("Uses the active action. See \"Swap Action\"."), "OK"); break;
+		case(int)CMenus::EPredefinedType::SWAP_ACTION: PopupMessage(Localize("Info"), Localize("Swaps the active action between \"Fire\" and \"Hook\". Will use the inactive action when its activated while a joystick is active"), "OK"); break;
+		case(int)CMenus::EPredefinedType::SPECTATE: PopupMessage(Localize("Info"), Localize("Opens the spectator menu while spectating."), "OK"); break;
+		case(int)CMenus::EPredefinedType::EMOTICON: PopupMessage(Localize("Info"), Localize("Opens the emoticon selector."), "OK"); break;
+		case(int)CMenus::EPredefinedType::INGAME_MENU: PopupMessage(Localize("Info"), Localize("Opens the ingame menu."), "OK"); break;
 		default: dbg_assert(false, "Unknown predefined behavior detected");
 		}
 	}
