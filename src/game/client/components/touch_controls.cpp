@@ -141,7 +141,7 @@ CUIRect CTouchControls::CalculateScreenFromUnitRect(CUnitRect Unit, EButtonShape
 
 void CTouchControls::CTouchButton::UpdateBackgroundCorners()
 {
-	if(m_Shape != EButtonShape::RECT)
+	if(m_Shape != EButtonShape::RECT || m_pTouchControls->m_PreviewAllButtons)
 	{
 		m_BackgroundCorners = IGraphics::CORNER_NONE;
 		return;
@@ -167,8 +167,10 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners()
 		m_BackgroundCorners &= ~IGraphics::CORNER_B;
 	}
 
-	const auto &&PointInOrOnRect = [](ivec2 Point, CUnitRect Rect) {
-		return Point.x >= Rect.m_X && Point.x <= Rect.m_X + Rect.m_W && Point.y >= Rect.m_Y && Point.y <= Rect.m_Y + Rect.m_H;
+	int Rounding = 1500;
+	const auto &&PointInOrOnRect = [&Rounding](ivec2 Point, CUnitRect Rect) {
+		return Point.x >= Rect.m_X - Rounding && Point.x <= Rect.m_X + Rect.m_W + Rounding &&
+		       Point.y >= Rect.m_Y - Rounding && Point.y <= Rect.m_Y + Rect.m_H + Rounding;
 	};
 	for(const CTouchButton &OtherButton : m_pTouchControls->m_vTouchButtons)
 	{

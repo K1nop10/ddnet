@@ -142,7 +142,7 @@ void CTouchControls::EditButtons(const std::vector<IInput::CTouchFingerState> &v
 				// Update illegal position when Long press the button. Or later it will keep saying unsavedchanges.
 				if(IfOverlapping(TouchButton.m_UnitRect))
 				{
-					TouchButton.m_UnitRect = UpdatePosition(TouchButton.m_UnitRect);
+					TouchButton.m_UnitRect = UpdatePosition(TouchButton.m_UnitRect, false);
 					if(TouchButton.m_UnitRect.m_X == -1)
 					{
 						m_PopupParam.m_PopupType = EPopupType::NO_SPACE;
@@ -155,8 +155,6 @@ void CTouchControls::EditButtons(const std::vector<IInput::CTouchFingerState> &v
 				m_IssueParam[(int)EIssueType::CACHE_SETTINGS].m_pTargetButton = m_pSelectedButton;
 				m_IssueParam[(int)EIssueType::CACHE_SETTINGS].m_Finished = false;
 				m_pTmpButton = std::make_unique<CTouchButton>(this);
-				m_IssueParam[(int)EIssueType::SAVE_SETTINGS].m_pTargetButton = m_pTmpButton.get();
-				m_IssueParam[(int)EIssueType::SAVE_SETTINGS].m_Finished = false;
 				CopySettings(m_pTmpButton.get(), m_pSelectedButton);
 				log_error("bcd", "%s", m_IssueParam[0].m_pTargetButton->m_pBehavior->GetBehaviorType());
 				// Don't insert the long pressed button. It is selected button now.
@@ -306,8 +304,11 @@ void CTouchControls::EditButtons(const std::vector<IInput::CTouchFingerState> &v
 			m_AccumulatedDelta = {0.0f, 0.0f};
 			m_ShownRect = FindPositionXY(vVisibleButtonRects, m_pTmpButton->m_UnitRect);
 			m_pTmpButton->m_UnitRect = (*m_ShownRect);
-			m_IssueParam[(int)EIssueType::CACHE_POS].m_pTargetButton = m_pTmpButton.get();
-			m_IssueParam[(int)EIssueType::CACHE_POS].m_Finished = false;
+			if(!GameClient()->m_Menus.IsActive())
+			{
+				m_IssueParam[(int)EIssueType::CACHE_POS].m_pTargetButton = m_pTmpButton.get();
+				m_IssueParam[(int)EIssueType::CACHE_POS].m_Finished = false;
+			}
 			m_pTmpButton->UpdateScreenFromUnitRect();
 		}
 		if(m_ShownRect->m_X == -1)
@@ -518,13 +519,32 @@ CTouchControls::CUnitRect CTouchControls::UpdatePosition(CUnitRect MyRect, bool 
 	std::set<CUnitRect> vVisibleButtonRects;
 	for(auto &TouchButton : m_vTouchButtons)
 	{
+		// If Ignore, Selected Button will also be added to the set.
 		if(m_pSelectedButton == &TouchButton && !Ignore)
 			continue;
 		bool IsVisible = std::all_of(TouchButton.m_vVisibilities.begin(), TouchButton.m_vVisibilities.end(), [&](const auto &Visibility) {
 			return Visibility.m_Parity == m_aVirtualVisibilities[(int)Visibility.m_Type];
 		});
 		if(IsVisible)
-			vVisibleButtonRects.insert(TouchButton.m_UnitRect);
+		{
+			if(TouchButton.m_Shape == EButtonShape::RECT)
+				vVisibleButtonRects.insert(TouchButton.m_UnitRect);
+			else if(TouchButton.m_Shape == EButtonShape::CIRCLE)
+			{
+				CUnitRect Rect = TouchButton.m_UnitRect;
+				if(Rect.m_H > Rect.m_W)
+				{
+					Rect.m_Y += (Rect.m_H - Rect.m_W) / 2;
+					Rect.m_H = Rect.m_W;
+				}
+				else if(Rect.m_W > Rect.m_H)
+				{
+					Rect.m_X += (Rect.m_W - Rect.m_H) / 2;
+					Rect.m_W = Rect.m_H;
+				}
+				vVisibleButtonRects.insert(Rect);
+			}
+		}
 	}
 	return FindPositionXY(vVisibleButtonRects, MyRect);
 }

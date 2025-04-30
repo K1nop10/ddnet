@@ -241,7 +241,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				m_OldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
 				m_NewSelectedButton = nullptr;
-				PopupConfirm("Unsaved Changes", "Save all changes before turning off the editor?", "Save", "Cancel", &CMenus::PopupConfirm_TurnOffEditor);
+				PopupConfirm(Localize("Unsaved Changes"), Localize("Save all changes before turning off the editor?"), Localize("Save"), Localize("Cancel"), &CMenus::PopupConfirm_TurnOffEditor);
 			}
 			else
 			{

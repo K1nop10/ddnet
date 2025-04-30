@@ -117,6 +117,7 @@ void CMenus::RenderTouchButtonEditor(CUIRect MainView)
 				SaveCachedSettingsToTarget(m_OldSelectedButton);
 				GameClient()->m_TouchControls.SetEditingChanges(true);
 				SetUnsavedChanges(false);
+				Changed = true;
 			}
 		}
 	}
@@ -288,6 +289,7 @@ bool CMenus::RenderLayoutSettingBlock(CUIRect Block)
 		InputPosFunction(&m_InputH);
 		Changed = true;
 	}
+
 	int X = m_InputX.GetInteger();
 	int Y = m_InputY.GetInteger();
 	int W = m_InputW.GetInteger();
@@ -354,15 +356,17 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 	static CScrollRegion s_ButtonBehaviorDropDownScrollRegion;
 	s_ButtonBehaviorDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ButtonBehaviorDropDownScrollRegion;
 	const int NewButtonBehavior = Ui()->DoDropDown(&B, m_EditBehaviorType, m_apBehaviors, std::size(m_apBehaviors), s_ButtonBehaviorDropDownState);
-	Block.HSplitTop(ROWSIZE, &EditBox, &Block);
-	Block.HSplitTop(ROWGAP, nullptr, &Block);
-	static CButtonContainer s_InfoButton;
-	EditBox.VSplitMid(&A, &B);
-	Ui()->DoLabel(&A, Localize("Behavior Info"), FONTSIZE, TEXTALIGN_ML);
-	if(DoButton_Menu(&s_InfoButton, Localize("Show Info"), 0, &B))
+	if(m_EditBehaviorType != (int)EBehaviorType::PREDEFINED)
 	{
-		if(m_EditBehaviorType != (int)EBehaviorType::PREDEFINED)
+		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
+		Block.HSplitTop(ROWGAP, nullptr, &Block);
+		static CButtonContainer s_InfoButton;
+		EditBox.VSplitMid(&A, &B);
+		Ui()->DoLabel(&A, Localize("Behavior Info"), FONTSIZE, TEXTALIGN_ML);
+		if(DoButton_Menu(&s_InfoButton, Localize("Show Info"), 0, &B))
+		{
 			ShowBehaviorsInfo();
+		}
 	}
 	if(NewButtonBehavior != m_EditBehaviorType)
 	{
@@ -1314,6 +1318,7 @@ void CMenus::PopupConfirm_TurnOffEditor()
 	if(CheckCachedSettings())
 	{
 		SaveCachedSettingsToTarget(m_OldSelectedButton);
+		GameClient()->m_TouchControls.SetEditingChanges(true);
 		PopupCancel_TurnOffEditor();
 	}
 }
