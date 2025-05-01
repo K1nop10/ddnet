@@ -560,7 +560,7 @@ protected:
 		SHA256_DIGEST m_Sha256;
 
 		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		virtual ~CAbstractCommunityIconJob(){};
+		virtual ~CAbstractCommunityIconJob() {};
 
 	public:
 		const char *CommunityId() const { return m_aCommunityId; }
@@ -895,6 +895,7 @@ private:
 	{
 		PREVIEW_VISIBILITY = 0,
 		BUTTON_CONFIG,
+		COLOR,
 		NUM_SETTING_TYPES
 	};
 	ESettingType m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
@@ -926,6 +927,7 @@ private:
 
 	unsigned m_ColorActive = 0;
 	unsigned m_ColorInactive = 0;
+	unsigned m_LabelColor = 0;
 
 	// Used for creating ui elements.
 	std::array<CButtonContainer, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
@@ -947,6 +949,7 @@ private:
 	bool m_BehaviorPreviewExtension = false;
 	int m_CurrentPreview = 1; // 1 for visible buttons, 0 for not visible.
 	int m_PreviewDetail = 0; // 0 for label, 1 for command.
+	int m_ColorTarget = 0;
 	std::vector<CTouchControls::CTouchButton *> m_VisibleButtons;
 	std::vector<CTouchControls::CTouchButton *> m_InvisibleButtons;
 	std::string m_ParsedString;
@@ -967,7 +970,7 @@ private:
 	void RenderButtonSettings(CUIRect MainView);
 	void RenderVirtualVisibilityEditor(CUIRect MainView);
 	void RenderConfigSettings(CUIRect MainView);
-	void RenderDirectTouchEditor(CUIRect MainView);
+	void RenderColorSettings(CUIRect MainView);
 
 	// Confirm, Cancel only decide if saving cached settings.
 	void DoPopupType(CTouchControls::CPopupParam PopupParam);

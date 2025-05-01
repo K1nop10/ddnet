@@ -1,6 +1,5 @@
 #include "menus.h"
 
-#include <algorithm>
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
@@ -21,6 +20,7 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include <algorithm>
 #include <string>
 
 static const constexpr float MAINMARGIN = 10.0f;
@@ -1085,18 +1085,23 @@ void CMenus::RenderButtonSettings(CUIRect MainView)
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
 	EditBox.VMargin(MAINMARGIN, &EditBox);
-	EditBox.VSplitMid(&A, &EditBox);
+	EditBox.VSplitLeft(EditBox.w / 3.0f, &A, &EditBox);
 	static CButtonContainer s_PreviewVisibilityTab;
 	if(DoButton_MenuTab(&s_PreviewVisibilityTab, Localize(m_apSettings[(int)ESettingType::PREVIEW_VISIBILITY]), m_CurrentSetting == ESettingType::PREVIEW_VISIBILITY, &A, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 5.0f))
 		m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
+	EditBox.VSplitMid(&EditBox, &A);
 	static CButtonContainer s_ConfigTab;
-	if(DoButton_MenuTab(&s_ConfigTab, Localize(m_apSettings[(int)ESettingType::BUTTON_CONFIG]), m_CurrentSetting == ESettingType::BUTTON_CONFIG, &EditBox, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 5.0f))
+	if(DoButton_MenuTab(&s_ConfigTab, Localize(m_apSettings[(int)ESettingType::BUTTON_CONFIG]), m_CurrentSetting == ESettingType::BUTTON_CONFIG, &EditBox, IGraphics::CORNER_NONE, nullptr, nullptr, nullptr, nullptr, 5.0f))
 		m_CurrentSetting = ESettingType::BUTTON_CONFIG;
+	static CButtonContainer s_ColorTab;
+	if(DoButton_MenuTab(&s_ColorTab, Localize("Color"), m_CurrentSetting == ESettingType::COLOR, &A, IGraphics::CORNER_R))
+		m_CurrentSetting = ESettingType::COLOR;
 
 	switch(m_CurrentSetting)
 	{
 	case ESettingType::PREVIEW_VISIBILITY: RenderVirtualVisibilityEditor(MainView); break;
 	case ESettingType::BUTTON_CONFIG: RenderConfigSettings(MainView); break;
+	case ESettingType::COLOR: RenderColorSettings(MainView); break;
 	default: dbg_assert(false, "Unknown Setting Detected in button editor.");
 	}
 }
@@ -1136,21 +1141,6 @@ void CMenus::RenderConfigSettings(CUIRect MainView)
 {
 	CUIRect EditBox, Row, Label, Button;
 	MainView.Margin(MAINMARGIN, &MainView);
-	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
-	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
-	static CButtonContainer s_ActiveColorPicker;
-	ColorHSLA ColorTest = DoLine_ColorPicker(&s_ActiveColorPicker, ROWSIZE, 15.0f, 5.0f, &EditBox, Localize("Active Color"), &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
-	GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorActive, true)));
-	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorActive())
-		GameClient()->m_TouchControls.SetEditingChanges(true);
-
-	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
-	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
-	static CButtonContainer s_InactiveColorPicker;
-	ColorTest = DoLine_ColorPicker(&s_InactiveColorPicker, ROWSIZE, 15.0f, 5.0f, &EditBox, Localize("Inactive Color"), &m_ColorInactive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
-	GameClient()->m_TouchControls.SetBackgroundColorInactive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInactive, true)));
-	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorInactive())
-		GameClient()->m_TouchControls.SetEditingChanges(true);
 
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
@@ -1195,6 +1185,125 @@ void CMenus::RenderConfigSettings(CUIRect MainView)
 	if(DoButton_CheckBox(&s_PreviewAllCheckBox, Localize("Show all buttons"), Preview ? 1 : 0, &EditBox))
 	{
 		GameClient()->m_TouchControls.SetPreviewAllButtons(!Preview);
+	}
+}
+
+void CMenus::RenderColorSettings(CUIRect MainView)
+{
+	CUIRect EditBox, A, B;
+	MainView.Margin(MAINMARGIN, &MainView);
+	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+	EditBox.VSplitMid(&A, &B);
+	Ui()->DoLabel(&A, Localize("Target type:"), FONTSIZE, TEXTALIGN_ML);
+	static CUi::SDropDownState s_TargetTypeDropDown;
+	static CScrollRegion s_TargetScrollRegion;
+	s_TargetTypeDropDown.m_SelectionPopupContext.m_pScrollRegion = &s_TargetScrollRegion;
+	const char *Targets[] = {"Button", "Label"};
+	int NewColorTarget = Ui()->DoDropDown(&B, m_ColorTarget, Targets, 2, s_TargetTypeDropDown);
+	m_ColorTarget = NewColorTarget;
+	const char *Types[] = {"Single Color", "Rainbow"};
+	if(NewColorTarget == 0)
+	{
+		MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+		MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+		EditBox.VSplitMid(&A, &B);
+		Ui()->DoLabel(&A, Localize("Button color type:"), FONTSIZE, TEXTALIGN_ML);
+		static CUi::SDropDownState s_ButtonRainbowDropdown;
+		static CScrollRegion s_ButtonScrollRegion;
+		s_ButtonRainbowDropdown.m_SelectionPopupContext.m_pScrollRegion = &s_ButtonScrollRegion;
+		int NewButtonColorType = Ui()->DoDropDown(&B, g_Config.m_ClButtonRainbow, Types, 2, s_ButtonRainbowDropdown);
+		if(NewButtonColorType != g_Config.m_ClButtonRainbow)
+		{
+			g_Config.m_ClButtonRainbow = NewButtonColorType;
+			GameClient()->m_TouchControls.SetEditingChanges(true);
+		}
+		if(NewButtonColorType == 0)
+		{
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			static CButtonContainer s_ActiveColorPicker;
+			ColorHSLA ColorTest = DoLine_ColorPicker(&s_ActiveColorPicker, ROWSIZE, FONTSIZE, 5.0f, &EditBox, Localize("Active Color"), &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
+			GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorActive, true)));
+			if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorActive())
+				GameClient()->m_TouchControls.SetEditingChanges(true);
+
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			static CButtonContainer s_InactiveColorPicker;
+			ColorTest = DoLine_ColorPicker(&s_InactiveColorPicker, ROWSIZE, FONTSIZE, 5.0f, &EditBox, Localize("Inactive Color"), &m_ColorInactive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
+			GameClient()->m_TouchControls.SetBackgroundColorInactive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInactive, true)));
+			if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorInactive())
+				GameClient()->m_TouchControls.SetEditingChanges(true);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+		}
+		if(NewButtonColorType == 1)
+		{
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowLight, &g_Config.m_ClButtonRainbowLight, &EditBox, Localize("Rainbow light"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowSat, &g_Config.m_ClButtonRainbowSat, &EditBox, Localize("Rainbow saturation"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowAlpha, &g_Config.m_ClButtonRainbowAlpha, &EditBox, Localize("Rainbow alpha"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClButtonRainbowSpeed, &g_Config.m_ClButtonRainbowSpeed, &EditBox, Localize("Rainbow speed"), 0, 150);
+		}
+	}
+	else if(NewColorTarget == 1)
+	{
+		MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+		MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+		EditBox.VSplitMid(&A, &B);
+		Ui()->DoLabel(&A, Localize("Label color type:"), FONTSIZE, TEXTALIGN_ML);
+		static CUi::SDropDownState s_LabelRainbowDropdown;
+		static CScrollRegion s_LabelScrollRegion;
+		s_LabelRainbowDropdown.m_SelectionPopupContext.m_pScrollRegion = &s_LabelScrollRegion;
+		int NewLabelColorType = Ui()->DoDropDown(&B, g_Config.m_ClLabelRainbow, Types, 2, s_LabelRainbowDropdown);
+		if(NewLabelColorType != g_Config.m_ClLabelRainbow)
+		{
+			g_Config.m_ClLabelRainbow = NewLabelColorType;
+			GameClient()->m_TouchControls.SetEditingChanges(true);
+		}
+
+		if(NewLabelColorType == 0)
+		{
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			static CButtonContainer s_LabelColorPicker;
+			ColorHSLA ColorTest = DoLine_ColorPicker(&s_LabelColorPicker, ROWSIZE, FONTSIZE, 5.0f, &EditBox, Localize("Label Color"), &m_LabelColor, TextRender()->DefaultTextColor(), false, nullptr, true);
+			GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_LabelColor, true)));
+			if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorActive())
+				GameClient()->m_TouchControls.SetEditingChanges(true);
+
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+		}
+		else if(NewLabelColorType == 1)
+		{
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowLight, &g_Config.m_ClLabelRainbowLight, &EditBox, Localize("Rainbow light"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowSat, &g_Config.m_ClLabelRainbowSat, &EditBox, Localize("Rainbow saturation"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowAlpha, &g_Config.m_ClLabelRainbowAlpha, &EditBox, Localize("Rainbow alpha"), 0, 255);
+			MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+			MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClLabelRainbowSpeed, &g_Config.m_ClLabelRainbowSpeed, &EditBox, Localize("Rainbow speed"), 0, 150);
+		}
 	}
 }
 

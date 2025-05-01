@@ -629,6 +629,8 @@ private:
 	// Default Active Color.
 	const ColorRGBA m_DefaultBackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
 
+	ColorRGBA m_LabelColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+
 	/**
 	 * All touch buttons.
 	 *
@@ -786,8 +788,10 @@ public:
 	ColorRGBA DefaultBackgroundColorActive() const { return m_DefaultBackgroundColorActive; }
 	ColorRGBA BackgroundColorInactive() const { return m_BackgroundColorInactive; }
 	ColorRGBA BackgroundColorActive() const { return m_BackgroundColorActive; }
+	ColorRGBA LabelColor() const { return m_LabelColor; }
 	void SetBackgroundColorInactive(ColorRGBA Color) { m_BackgroundColorInactive = Color; }
 	void SetBackgroundColorActive(ColorRGBA Color) { m_BackgroundColorActive = Color; }
+	void SetLabelColor(ColorRGBA Color) { m_LabelColor = Color; }
 	std::array<const char *, (size_t)EButtonVisibility::NUM_VISIBILITIES> VisibilityStrings() const { return m_VisibilityStrings; }
 	std::array<const char *, (int)EButtonShape::NUM_SHAPES> Shapes() const { return m_Shapes; }
 	std::vector<CTouchButton *> VisibleButtons();

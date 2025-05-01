@@ -10,6 +10,18 @@
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
 #endif
 
+// Side
+MACRO_CONFIG_INT(ClButtonRainbow, cl_button_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Is button rainbow on")
+MACRO_CONFIG_INT(ClButtonRainbowSat, cl_button_rainbow_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow saturation")
+MACRO_CONFIG_INT(ClButtonRainbowLight, cl_button_rainbow_light, 189, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow light")
+MACRO_CONFIG_INT(ClButtonRainbowAlpha, cl_button_rainbow_alpha, 48, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow transparency")
+MACRO_CONFIG_INT(ClButtonRainbowSpeed, cl_button_rainbow_speed, 50, 0, 150, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button's rainbow speed. The higher, the faster")
+MACRO_CONFIG_INT(ClLabelRainbow, cl_label_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Is button's label rainbow on")
+MACRO_CONFIG_INT(ClLabelRainbowSat, cl_label_rainbow_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button label's rainbow saturation")
+MACRO_CONFIG_INT(ClLabelRainbowLight, cl_label_rainbow_light, 189, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button label's rainbow light")
+MACRO_CONFIG_INT(ClLabelRainbowAlpha, cl_label_rainbow_alpha, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button label's rainbow transparency")
+MACRO_CONFIG_INT(ClLabelRainbowSpeed, cl_label_rainbow_speed, 50, 0, 150, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Button label's rainbow speed. The higher, the faster")
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClPredictDummy, cl_predict_dummy, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict dummy movements")

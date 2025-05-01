@@ -303,6 +303,7 @@ void CMenus::RenderGame(CUIRect MainView)
 				m_aCachedVisibilities[(int)CTouchControls::EButtonVisibility::DEMO_PLAYER] = 0;
 				m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
 				m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
+				m_LabelColor = color_cast<ColorHSLA>(GameClient()->m_TouchControls.LabelColor()).Pack(true);
 				m_FirstEnter = false;
 			}
 			// Their width is all 505.0f, height is adjustable, you can directly change its h value, so no need for changing where tab is.

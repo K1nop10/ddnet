@@ -1,6 +1,5 @@
 #include "touch_controls.h"
 
-#include <algorithm>
 #include <base/log.h>
 #include <base/system.h>
 
@@ -23,6 +22,8 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include <algorithm>
+#include <chrono>
 #include <string>
 #include <unordered_map>
 
@@ -271,11 +272,34 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 	else
 		ScreenRect = m_ScreenRect;
 
+	if(!Selected.has_value())
+		Selected = m_pBehavior->IsActive();
+
 	ColorRGBA ButtonColor;
-	// "Selected" can decide which color to use, while not disturbing the original color check.
-	ButtonColor = m_pBehavior->IsActive() || Selected.value_or(false) ? m_pTouchControls->m_BackgroundColorActive : m_pTouchControls->m_BackgroundColorInactive;
-	if(!Selected.value_or(true))
-		ButtonColor = m_pTouchControls->m_BackgroundColorInactive;
+	// Rainbow functions
+	const vec2 Screen = m_pTouchControls->CalculateScreenSize();
+	static std::chrono::nanoseconds s_RainbowTimer = time_get_nanoseconds();
+	std::chrono::nanoseconds Speed = 100000ns * (200 - g_Config.m_ClButtonRainbowSpeed);
+	std::chrono::nanoseconds Period = time_get_nanoseconds() - s_RainbowTimer;
+	const vec2 Center = ScreenRect.Center();
+	if(Period > 255 * Speed)
+	{
+		s_RainbowTimer += 255 * Speed;
+		Period -= 255 * Speed;
+	}
+	long long int Hue = (Center.x / Screen.x + Center.y / Screen.y) / 2 * 255;
+	Hue += Period / Speed;
+	Hue %= 255;
+	float Alpha = 0.25;
+	if(g_Config.m_ClButtonRainbow == 0)
+	{
+		ButtonColor = Selected.value() ? m_pTouchControls->m_BackgroundColorActive : m_pTouchControls->m_BackgroundColorInactive;
+	}
+	else
+	{
+		ButtonColor = color_cast<ColorRGBA>(ColorHSLA(Hue / 255.0f, g_Config.m_ClButtonRainbowSat / 255.0f, g_Config.m_ClButtonRainbowLight / 255.0f,
+			(Selected.value() ? (Alpha + g_Config.m_ClButtonRainbowAlpha / 255.0f > 0.75f ? -Alpha : Alpha) : 0) + g_Config.m_ClButtonRainbowAlpha / 255.0f));
+	}
 	switch(m_Shape)
 	{
 	case EButtonShape::RECT:
@@ -285,7 +309,6 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 	}
 	case EButtonShape::CIRCLE:
 	{
-		const vec2 Center = ScreenRect.Center();
 		const float Radius = minimum(ScreenRect.w, ScreenRect.h) / 2.0f;
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
@@ -305,6 +328,25 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 	ScreenRect.Margin(10.0f, &LabelRect);
 	SLabelProperties LabelProps;
 	LabelProps.m_MaxWidth = LabelRect.w;
+	static std::chrono::nanoseconds s_LabelRainbowTimer = time_get_nanoseconds();
+	std::chrono::nanoseconds LabelSpeed = 100000ns * (200 - g_Config.m_ClLabelRainbowSpeed);
+	std::chrono::nanoseconds LabelPeriod = time_get_nanoseconds() - s_LabelRainbowTimer;
+	if(LabelPeriod > 255 * LabelSpeed)
+	{
+		s_LabelRainbowTimer += 255 * LabelSpeed;
+		LabelPeriod -= 255 * LabelSpeed;
+	}
+	Hue = (Center.x / Screen.x + Center.y / Screen.y) / 2 * 255;
+	Hue += LabelPeriod / LabelSpeed;
+	Hue %= 255;
+	if(g_Config.m_ClLabelRainbow == 0)
+	{
+		m_pTouchControls->TextRender()->TextColor(m_pTouchControls->m_LabelColor);
+	}
+	if(g_Config.m_ClLabelRainbow == 1)
+		m_pTouchControls->TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Hue / 255.0f,
+			g_Config.m_ClLabelRainbowSat / 255.0f, g_Config.m_ClLabelRainbowLight / 255.0f, g_Config.m_ClLabelRainbowAlpha / 255.0f)));
+
 	if(LabelData.m_Type == CButtonLabel::EType::ICON)
 	{
 		m_pTouchControls->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
@@ -318,6 +360,7 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 		const char *pLabel = LabelData.m_Type == CButtonLabel::EType::LOCALIZED ? Localize(LabelData.m_pLabel) : LabelData.m_pLabel;
 		m_pTouchControls->Ui()->DoLabel(&LabelRect, pLabel, FontSize, TEXTALIGN_MC, LabelProps);
 	}
+	m_pTouchControls->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void CTouchControls::CTouchButton::WriteToConfiguration(CJsonWriter *pWriter)
@@ -849,6 +892,14 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 		return false;
 	}
 
+	/*std::optional<ColorRGBA> ParsedLabelColor =
+		ParseColor(&(*pConfiguration)["label-color"], "label-color", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+	if(!ParsedLabelColor.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+*/
 	const json_value &TouchButtons = (*pConfiguration)["touch-buttons"];
 	if(TouchButtons.type != json_array)
 	{
@@ -877,6 +928,7 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	m_DirectTouchSpectate = ParsedDirectTouchSpectate.value();
 	m_BackgroundColorInactive = ParsedBackgroundColorInactive.value();
 	m_BackgroundColorActive = ParsedBackgroundColorActive.value();
+	// m_LabelColor = ParsedLabelColor.value();
 
 	m_vTouchButtons = std::move(vParsedTouchButtons);
 	for(CTouchButton &TouchButton : m_vTouchButtons)
@@ -1146,6 +1198,10 @@ void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
 
 	str_format(aColor, sizeof(aColor), "%08X", m_BackgroundColorActive.PackAlphaLast());
 	pWriter->WriteAttribute("background-color-active");
+	pWriter->WriteStrValue(aColor);
+
+	str_format(aColor, sizeof(aColor), "%08X", m_LabelColor.PackAlphaLast());
+	pWriter->WriteAttribute("label-color");
 	pWriter->WriteStrValue(aColor);
 
 	pWriter->WriteAttribute("touch-buttons");
