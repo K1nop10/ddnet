@@ -1081,6 +1081,7 @@ void CMenus::RenderSelectingTab(CUIRect SelectingTab)
 void CMenus::RenderButtonSettings(CUIRect MainView)
 {
 	CUIRect EditBox, A;
+	MainView.h += MAINMARGIN;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
