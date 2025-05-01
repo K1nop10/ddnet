@@ -234,5 +234,6 @@ void CTouchControls::CMixedTouchButtonBehavior::UpdateBehavior()
 		pBehavior->m_ActivePosition = m_ActivePosition;
 		pBehavior->m_AccumulatedDelta = m_AccumulatedDelta;
 		pBehavior->m_ActivationStartTime = m_ActivationStartTime;
+		pBehavior->m_Delta = m_Delta;
 	}
 }

@@ -415,6 +415,7 @@ void CTouchControls::CTouchButtonBehavior::SetActive(const IInput::CTouchFingerS
 	const CUIRect ButtonScreenRect = m_pTouchButton->m_ScreenRect;
 	const vec2 Position = (m_pTouchButton->ClampTouchPosition(FingerState.m_Position * ScreenSize) - ButtonScreenRect.TopLeft()) / ButtonScreenRect.Size();
 	const vec2 Delta = FingerState.m_Delta * ScreenSize / ButtonScreenRect.Size();
+	m_Delta = Delta;
 	if(!m_Active)
 	{
 		m_Active = true;

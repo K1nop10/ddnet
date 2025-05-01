@@ -256,6 +256,7 @@ public:
 		bool m_Active; // variables below must only be used when active
 		IInput::CTouchFinger m_Finger;
 		vec2 m_ActivePosition;
+		vec2 m_Delta;
 		vec2 m_AccumulatedDelta;
 		std::chrono::nanoseconds m_ActivationStartTime;
 
